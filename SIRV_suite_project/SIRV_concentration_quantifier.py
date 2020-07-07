@@ -61,44 +61,42 @@ def is_valid_file(parser, arg):
 
 parser = ap.ArgumentParser()
 parser.add_argument('-n','--normalization', nargs = '?', default = "nm1", help = "")
-parser.add_argument('-i','--sample-list', nargs = '?', required = True, type = lambda x: is_valid_file(parser, x), action = "store", metavar = "FILE")
+# parser.add_argument('-i','--sample-list', nargs = '?', required = False, type = lambda x: is_valid_file(parser, x), action = "store", metavar = "FILE")
 parser.add_argument('-a','--average-replicates', action = 'store_true', help = "")
 parser.add_argument('-o','--output-name', action = 'store', help = "", required = True)
+parser.add_argument('-f','--file-name', action = 'store', help = "", required = True)
+parser.add_argument('-s','--sample-name', action = 'store', help = "", required = True)
 
 args = parser.parse_args()
 
-with open(args.sample_list,'r') as csvfile_input:
-    reader = csv.reader(csvfile_input, delimiter = ';')
-    SIRV_abundance_dict = {}
-    conditions = np.array([])
-    
-    for row in reader:
-        
-        if len(row) == 0:
-            continue
-        
-        if row[0].startswith(('#','%',"-")) or len(row) == 0:
-            continue
-        else:
-            features = returnFeaturesFromPath(row[0])
-            conditions = np.append(conditions, row[1])
-            SIRV_abundance_data = getAbundanceFromMIX2Table(row[0], format = 'fpkm')
-            SIRV_abundance_dict[features["parent_dir"]] = SIRV_abundance_data
-            
-            # HERE GOES NORMALIZATION
-            
-            expected_quantity = np.sum(SIRV_abundance_data["quantity"]) / len(SIRV_abundance_dict[features["parent_dir"]]["tracking_ID"])
-            SIRV_abundance_dict[features["parent_dir"]]["norm_abund"] = SIRV_abundance_dict[features["parent_dir"]]["quantity"] / expected_quantity
+# with open(args.one_file_only,'r') as csvfile_input:
+#csv_file_input = open(args.one_file_only,'r')
+#reader = csv.reader(csv_file_input, delimiter = ';')
+SIRV_abundance_dict = {}
+#conditions = np.array([])
 
-cond_types = np.unique(conditions)
-for cond_type in cond_types:
-    group = np.array(list(SIRV_abundance_dict))[np.argwhere(conditions==cond_type)]
-    temp_matrix = np.matrix([])
-    for c in group:
+#for row in reader:
+    
+#    if len(row) == 0:
+#        continue
+    
+#    if row[0].startswith(('#','%',"-")) or len(row) == 0:
+#        continue
+#    else:
+#        conditions = np.append(conditions, row[1])
+# features = returnFeaturesFromPath(args.one_file_only)
+sample_name = args.sample_name
+SIRV_abundance_data = getAbundanceFromMIX2Table(args.file_name, format = 'fpkm')
+SIRV_abundance_dict[sample_name] = SIRV_abundance_data
+        
+        # HERE GOES NORMALIZATION
+        
+expected_quantity = np.sum(SIRV_abundance_data["quantity"]) / len(SIRV_abundance_dict[sample_name]["tracking_ID"])
+SIRV_abundance_dict[sample_name]["norm_abund"] = SIRV_abundance_dict[sample_name]["quantity"] / expected_quantity
 
 with open(args.output_name, 'w', newline='') as csv_file_output:
-    writer = csv.writer(csv_file_output, delimiter = "\t")
-    header_row = ["\t"]
+    writer = csv.writer(csv_file_output, delimiter = ";")
+    header_row = [""]
     header_row.extend(list(SIRV_abundance_dict))
     writer.writerow(header_row)
     
