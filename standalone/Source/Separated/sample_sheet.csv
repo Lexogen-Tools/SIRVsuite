@@ -1,0 +1,5 @@
+sample_name	alignment_path strandeness	count_file	count_type	group 
+NGS2.54_0001	/home/data/slurm_scratch/tdrozd/DAP/DEV/411/output/Aligned.sortedByCoord.out.bam	FWD	/home/tdrozd/TV_estimation/NGS2.54/NGS2.54_0001/transcripts_summary_Aligned.sortedByCoord.out.dat	transcript	c1
+NGS2.54_0002	/home/data/slurm_scratch/tdrozd/DAP/DEV/412/output/Aligned.sortedByCoord.out.bam	FWD	/home/tdrozd/TV_estimation/NGS2.54/NGS2.54_0002/transcripts_summary_Aligned.sortedByCoord.out.dat	transcript	c1
+NGS2.54_0003	/home/data/slurm_scratch/tdrozd/DAP/DEV/413/output/Aligned.sortedByCoord.out.bam	FWD	/home/tdrozd/TV_estimation/NGS2.54/NGS2.54_0003/transcripts_summary_Aligned.sortedByCoord.out.dat	transcript	c2
+NGS2.54_0004	/home/data/slurm_scratch/tdrozd/DAP/DEV/414/output/Aligned.sortedByCoord.out.bam	FWD	/home/tdrozd/TV_estimation/NGS2.54/NGS2.54_0004/transcripts_summary_Aligned.sortedByCoord.out.dat	transcript	c2

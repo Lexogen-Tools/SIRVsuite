@@ -1,0 +1,13 @@
+-s / --sample-sheet -definition of paths, groups, sample_names, library strandeness
+
+Concentration
+
+
+Correlation
+
+
+Coverage
+.bigwig/.cov --coverage-format "bw/cov"
+unique/multimapping -c / --counting unique/multimapper
+(average) -a / --average
+--transition-lengths
