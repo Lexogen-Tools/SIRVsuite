@@ -5,7 +5,8 @@ import os
 import numpy as np
 import math
 
-def read_conc():
+def read_ERCC_concentration_table():
+    # Reading of ERCC concentration table
     conc = {}
     ERCC_concentration_file = "Resources/ERCC92_Concentration.tsv"
     with open(ERCC_concentration_file, "r") as f:
@@ -15,6 +16,9 @@ def read_conc():
     return (conc, reader.fieldnames[2:])
 
 def get_data(file_list, file_type, sample_names):
+    # TODO: This function needs to be ideally generalized due to usage for ERCC correlation + SIRV concentration  
+    # The function returns a dictionary with following levels: sample_names -> gene or tracking_ID -> counts
+
     cnts_total = {}
     for index, path in enumerate(file_list):
         cnts=dict()
@@ -30,7 +34,7 @@ def get_data(file_list, file_type, sample_names):
                     if(line.strip().split("\t")[0]=="tracking_ID"):
                         continue
                     # extract all the values, for now
-                    tracking_ID,gene_ID,gene_name,locus,length,fragment_validity_coverage,abundance,frags_locus,frags_expt,FPKM_THN,comp_frags_locus,comp_frags_expt,FPKM_CHN,nr_mixture_comp,mean_1,mean_2,mean_3,beta_1,beta_2,beta_3 = line.strip().split("\t")
+                    _,_,_,_,_,_,_,_,_,FPKM_THN,_,_,_,_,_,_,_,_,_,_ = line.strip().split("\t")
                     
                     if("ERCC" in gene_ID):
                         cnts[gene_ID]=float(FPKM_THN)
@@ -43,8 +47,10 @@ def get_data(file_list, file_type, sample_names):
 
         
 def ERCC_correlation(file_list, types, sample_names, ercc_spike_in, experiment_name = "unnamed"):
+    # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
+    # and experiment name, which is optional    
 
-    ERCC_conc,_ = read_conc()
+    ERCC_conc,_ = read_ERCC_concentration_table()
 
     output_dir = "test_output/Correlation/"
 
@@ -69,11 +75,11 @@ def ERCC_correlation(file_list, types, sample_names, ercc_spike_in, experiment_n
         fig.gca().loglog(x,y, "rx")
         x = np.array(x)
         y = np.array(y)
-        ymin = 10**math.floor(math.log10(min(list(x[y>0])+list(y[y>0]))))
+        ymin = 10**math.floor(math.log10(min(list(x[y>0])+list(y[y>0])))) # calculating axis limit 
         ymax = 10**math.ceil(math.log10(max(list(x[y>0])+list(y[y>0]))))
         fig.gca().set_xlabel("Theoretical concentration")
         fig.gca().set_ylabel("Measured concentration")
-        fig.gca().set_xlim(ymin, ymax)
+        fig.gca().set_xlim(ymin, ymax) 
         fig.gca().set_ylim(ymin, ymax)
         corr = pearsonr([math.log10(x[i]) for i in range(len(x)) if x[i]!=0 and y[i]!=0],
                                 [math.log10(y[i]) for i in range(len(y)) if x[i]!=0 and y[i]!=0])[0]
@@ -89,7 +95,7 @@ def ERCC_correlation(file_list, types, sample_names, ercc_spike_in, experiment_n
         fig.savefig(plot_path)
         plt.close(fig)
     
-    # Write summary file
+    # write summary file for all given samples
     with open(data_path,"w") as summary_file:
         summary_file.write("Alias\tERCC\n")
         for sample_name in sample_names:

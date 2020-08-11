@@ -915,7 +915,32 @@ class SIRVsuite_coverage:
 
     def draw_coverage_chart(self):
         print ("")
-            
+
+    def draw_text(self, text = None, x = None, y = None, font_size = 28, rotation = 0, color_rgb = (0,0,0), h_align = "center", v_align = "center"):
+        
+        ctx = self.cr
+        ctx.set_source_rgb(color_rgb[0],color_rgb[1],color_rgb[2])
+        ctx.set_font_size(font_size)
+        
+        (_, _, width, height, _, _) = ctx.text_extents(text) 
+
+        if h_align == "center":
+            x = x + width/2 
+        elif h_align == "right":
+            x = x + width
+
+        if v_align == "center":
+            y = y + height/2
+        elif v_align == "bottom":
+            y = y + height
+        elif v_align == "top":
+            y = y
+
+        ctx.move_to(x,y)
+        cr.show_text(text)
+
+
+        
     def visualize2png(self,relative_scaling,colorSpec=[]):
     
         print ("Creating visualizations...")
@@ -945,7 +970,7 @@ class SIRVsuite_coverage:
                         [1,0.5,0.4,1],
                         [1,0,1,1]]
         else:
-                                            colorsReal = np.array([colors.to_rgba(colorSpec)])
+            colorsReal = np.array([colors.to_rgba(colorSpec)])
         
         for gene in self.genes:
             

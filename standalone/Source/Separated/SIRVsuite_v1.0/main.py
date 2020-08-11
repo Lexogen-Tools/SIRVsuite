@@ -1,5 +1,6 @@
-from Pipeline.Concentration.SIRVsuite_boxplot_heatmap import *
+from Pipeline.Concentration.SIRVsuite_concentration import *
 from Pipeline.Correlation.ERCC_correlation import *
+from Pipeline.Coverage.SIRVsuite_coverage_tool * 
 
 groups = ["c1","c1","c2","c2"]
 files = ["/home/tdrozd/TV_estimation/NGS2.54/NGS2.54_0001/transcripts_summary_Aligned.sortedByCoord.out.dat",
@@ -17,6 +18,5 @@ heatmap = create_sirvsuite_heatmap(relative_abundance, groups = groups_unique, t
 
 ## ERCC correlation
 ERCC_correlation(files, types, sample_names, "Mix1")
-
 
 ## TODO: SIRV coverage
