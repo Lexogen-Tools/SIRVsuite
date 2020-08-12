@@ -1,0 +1,11 @@
+version: "2.2"
+
+services:
+  sirvsuite:
+    image: tdrozd/sirv-suite
+    container_name: sirvsuite_standalone
+    environment:
+      TEST_VAR: "test_val_1" 
+    volumes:
+      - ${INPUT_PATH:-/Input}
+    build: .

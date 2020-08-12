@@ -10,6 +10,7 @@ from Bio import SeqIO
 import argparse
 import matplotlib.colors as colors
 import pyBigWig as bwig
+import drawer
 
 class SIRVsuite_coverage:
     
@@ -974,15 +975,17 @@ class SIRVsuite_coverage:
         
         for gene in self.genes:
             
-            surfaces = []
+            #surfaces = []
             
             #outPath = self.outPath+"coverage_plots/"+self.sampleNames[0]+"/"+gene+"/"
-            outPath = self.outPath
+            #outPath = self.outPath
 
             if ( not os.path.exists(outPath) ):
                 os.makedirs(outPath)
 
             for formatIndex in np.arange(0,len(formats)):
+                
+                """
 
                 if ( formats[formatIndex] == "svg" ):
                     surfaces.append(cairo.SVGSurface("".join([outPath,"coverage_",NAME,"_",gene,".svg"]), width_paper, height_paper))
@@ -994,6 +997,8 @@ class SIRVsuite_coverage:
                     surfaces.append(cairo.PSSurface("".join([outPath,"coverage_",NAME,"_",gene,".ps"]), width_paper, height_paper))
     
                 cr = cairo.Context(surfaces[formatIndex])
+
+                """
                 
                 cr.set_source_rgb(1, 1, 1)
                 
