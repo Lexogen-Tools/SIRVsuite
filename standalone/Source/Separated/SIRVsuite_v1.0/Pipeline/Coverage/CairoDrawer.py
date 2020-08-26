@@ -3,7 +3,7 @@ import re
 import numpy as np
 
 
-class drawer():
+class CairoDrawer():
     # The class utilizies drawing using cairo library. 
     # Here, different graphic shapes can be defined within separate methods.
 
@@ -52,40 +52,53 @@ class drawer():
                     "path": feature_match.group(1)}
         return out_dict
 
+    def get_text_size(self, text=None, fontsize=None):
+        self.ctx.save()
+        self.ctx.set_font_size(fontsize)
+        obj = self.ctx.text_extents(text)
+        self.ctx.restore()
+        return obj.width, obj.height
+
+
 
     def draw_text(self, text = None, x = None, y = None, font_size = 28, rotate = 0, color_rgb = (0,0,0), h_align = "center", v_align = "center"):
         # This function draws text according to the specifications to the cairo context
         
+        self.ctx.save()
+
         if (text == None):
             return
         
         self.ctx.set_source_rgb(color_rgb[0],color_rgb[1],color_rgb[2])
         self.ctx.set_font_size(font_size)
         
-        (_, _, width, height, _, _) = self.ctx.text_extents(text) 
+        txt_obj = self.ctx.text_extents(text) 
 
         if h_align == "center":
-            x = x - width/2 
+            x = x - txt_obj.width/2 
         elif h_align == "right":
-            x = x - width
+            x = x - txt_obj.width
         elif h_align == "left":
             x = x
 
+        # test
+        #self.ctx.move_to(x-200,y)
+        #self.ctx.line_to(x+200,y)
+        #self.ctx.stroke()
+
         if v_align == "center":
-            y = y + height/2
+            y = y + txt_obj.height/2 - (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "bottom":
-            y = y + height
+            y = y + txt_obj.height/2 + (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "top":
             y = y
 
         self.ctx.move_to(x,y)
-        self.ctx.save()
         self.ctx.rotate(rotate * np.pi/180)
         self.ctx.show_text(text)
-        self.ctx.restore()
-        #self.ctx.rotate(-rotate * np.pi/180)    
+        self.ctx.restore()    
 
-    def draw_line(self, x0 = None, y0 = None, width = None, end_shape = ("both","arrow"), color = (0,0,0), line_width = 4, rotate = 0, alpha = 1):
+    def draw_line(self, x = None, y = None, width = None, end_shape = ("",""), color = (0,0,0), line_width = 4, rotate = 0, alpha = 1):
         # Draw arrow line
         
         ctx = self.ctx
@@ -94,7 +107,7 @@ class drawer():
         ctx.set_line_cap(cairo.LINE_CAP_ROUND)
         
         ctx.save()
-        ctx.translate(x0, y0)
+        ctx.translate(x, y)
         ctx.rotate(rotate * np.pi/180.0)
         
         rel_x = 0
@@ -134,7 +147,7 @@ class drawer():
         ctx.stroke()
         ctx.restore()
         
-    def draw_rectangle(self, x = None, y = None, width = None, height = None, round_aspect = None, line_width = 4, color_line = (0,0,0), color_fill = (0,0,0), rotate = 0, alpha = 1):
+    def draw_rectangle(self, x = None, y = None, width = None, height = None, round_aspect = None, line_width = 0, color_line = (0,0,0), color_fill = (0,0,0), rotate = 0, alpha = 1):
         ctx = self.ctx
         
         ctx.set_line_width(line_width)
@@ -166,32 +179,75 @@ class drawer():
             
         ctx.set_source_rgba(color_fill[0],color_fill[1],color_fill[2],alpha)
         ctx.fill_preserve()    
-        ctx.set_source_rgba(color_line[0],color_line[1],color_line[2],alpha)
+        ctx.set_source_rgba(color_line[0],color_line[1],color_line[2],1)
+        ctx.stroke()
+        ctx.restore()
+
+    def draw_triangle(self, x = None, y = None, width = None, height = None, rotate = 0, color_fill = None, color_line = (0,0,0), alpha = 1, line_width = 4):
+        ctx = self.ctx
+        
+        ctx.save()
+        ctx.set_line_width(line_width)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.translate(x,y)
+        ctx.rotate(rotate * np.pi/180)
+
+        rel_x = 0
+        rel_y = 0
+
+        ctx.move_to(rel_x - width/2, rel_y + height/2)
+        ctx.line_to(rel_x + width/2, rel_y + height/2)
+        ctx.line_to(rel_x, rel_y - height/2)
+        ctx.close_path()
+        
+        if (color_fill != None):
+            ctx.set_source_rgba(color_fill[0],color_fill[1],color_fill[2],alpha)
+            ctx.fill_preserve()    
+        
+        ctx.set_source_rgba(color_line[0],color_line[1],color_line[2],1)
         ctx.stroke()
         ctx.restore()
         
-    def return_differences(self, vector):
+    def return_differences(self, vector, boundary_fill = False, mode = 'all'):
         ## This function gives indexes of non-zero differences
         ## input: ndarray num vector
         ## output: nddarray of position of differences
-        differences = np.argwhere((np.diff(vector)!=0).astype(int)).flatten()    
-        differences = np.append(0,differences)
-        differences = np.append(differences,len(vector))
+        
+        if (not boundary_fill):
+            vector = np.append(0,vector)
+            vector = np.append(vector,0)
+        
+        if (mode == 'all'):
+            differences = np.argwhere((np.diff(vector) != 0).astype(int)).flatten()    
+        elif (mode == 'positive'):
+            differences = np.argwhere((np.diff(vector) > 0).astype(int)).flatten()  
+        elif (mode == 'negative'):
+            differences = np.argwhere((np.diff(vector) < 0).astype(int)).flatten()  
+        
+        if (boundary_fill):
+            differences = np.append(0,differences)
+            differences = np.append(differences,len(vector))
         
         return differences
         
-    def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0):
+    def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0, alpha = 1, upside_down = False):
         ctx = self.ctx
-        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        ctx.set_line_width(line_width)
         
         ctx.save()
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.set_line_width(line_width)
         ctx.translate(x, y + height/2)
         ctx.rotate(rotate * np.pi/180)
         
+        if (upside_down):
+            ctx.scale(1,-1)
+        
         sig_length = len(signal)
         
+        signal = np.array(signal)
         steps = np.linspace(len(signal)/width, width, len(signal))
+
+        height = height/2
         
         rel_x = 0
         rel_y = 0
@@ -199,10 +255,27 @@ class drawer():
         ctx.new_path()
         ctx.move_to(rel_x, rel_y) 
         
-        if y_max == None:
-            y_max = max(signal)
-    
-        calculate_pos_y = lambda x: x / y_max * height
+        if y_max != None:
+            exceeding_part = np.array(signal>=y_max).astype(int)
+            starts = self.return_differences(exceeding_part, mode = 'positive')
+            ends = self.return_differences(exceeding_part, mode = 'negative')
+            
+            arrow_width = 15
+            arrow_height = 10
+            gap_arrow_y = arrow_height
+            """
+            for index in range(len(starts)):    
+                self.draw_triangle(x = rel_x + steps[starts[0]] + steps[ends[0] - starts[0]]/2,
+                                   y = -height - arrow_width,
+                                   width = arrow_width,
+                                   height = 10,
+                                   color_line = (1,0,0),
+                                   line_width = 1,
+                                   alpha = .4)
+            """
+            signal[signal>=y_max] = y_max
+            
+        calculate_pos_y = lambda x: x / max(signal) * height
         val_y = calculate_pos_y(signal[0])
         
         ctx.line_to(rel_x, rel_y - val_y)
@@ -213,7 +286,7 @@ class drawer():
                 ctx.line_to(rel_x + steps[index],rel_y - val_y)
         
         elif (mode == "segment"):
-            vector = self.return_differences(signal)
+            vector = self.return_differences(signal, boundary_fill = False)
             
             for index_diff, index_sig in enumerate(vector[:-1]):
                 
@@ -224,15 +297,49 @@ class drawer():
             ctx.line_to(rel_x + width, rel_y - val_y)
         
         ctx.line_to(rel_x + width, rel_y)
-        
-        ctx.set_line_width(1)
         ctx.close_path()
-        ctx.set_source_rgba(color_fill[0],color_fill[1],color_fill[2],1)
-        ctx.set_source_rgba(0.5,0,1,1)
+        ctx.set_source_rgba(color_fill[0], color_fill[1], color_fill[2], alpha)
         ctx.fill_preserve()
-        ctx.set_source_rgba(color_line[0],color_line[1],color_line[2],1)
+        ctx.set_source_rgba(color_line[0], color_line[1], color_line[2], alpha)
         ctx.stroke()
         ctx.restore()
+        
+        if (y_max != None):
+            
+            if (not upside_down):
+                triangle_y = y - gap_arrow_y
+                rotate = 0
+            else:
+                triangle_y = y + height*2 + gap_arrow_y
+                rotate = 180
+            
+            for i in range(len(starts)):
+                self.draw_line(x=x + steps[starts[i]],y=y, width=(steps[ends[i]-1]-steps[starts[i]]), color=(1,0,0), line_width=2)
+                self.draw_triangle(x = x + steps[starts[i]] + (steps[ends[i]-1]-steps[starts[i]])/2,
+                                   y = triangle_y,
+                                   width = arrow_width,
+                                   height = 10,
+                                   color_line = (1,0,0),
+                                   line_width = 2,
+                                   alpha = .4,
+                                   rotate = rotate)
+    
+    def draw_table(self, table_dict = None, x = None, y = None, width = None, height = None):
+        
+        num_lines = len(table_dict)
+        atributes = table_dict.keys()
+        values = table_dict.values()
+
+        row_height = height / num_lines
+        font_size = height / num_lines * .7    
+        text_y = y + row_height/2
+
+        text_width, text_height = self.get_text_size(text=list(atributes)[0], fontsize=font_size)
+
+        for i in range(num_lines):
+            self.draw_text(text=list(atributes)[i]+":",x=x+width/2,y=text_y,font_size=font_size,h_align="right",v_align="center")
+            self.draw_text(text=list(values)[i],x=x+width/2 + 20,y=text_y,font_size=font_size,h_align="left",v_align="center")
+            text_y += row_height
         
             
     def finish(self):

@@ -510,7 +510,6 @@ class SIRVsuite_coverage:
                         ## APPROACH USED FOR OXFORD NANOPORE EXPERIMENT
                         ## principle: 10 consecutive A's within first 50 nt define sense(+) strand, 10 consecutive T's within last 50 nt define antisense(-) strand  
 
-
                         readSeq = fragmentRead.query_sequence
                     
                         ab = re.search("T{10,}.*A{10,}",readSeq)
