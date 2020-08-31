@@ -32,6 +32,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/Pipeline/Concentration/SIRVsuite_concentration.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "test",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal"
         }
     ]
 }

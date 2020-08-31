@@ -388,7 +388,7 @@ class SIRVsuite_coverage:
                 print ("Provided path for .bam file is not correct... Please try again...")
                 return
         
-            if ( not os.path.isfile(baiPath) ):
+            if ( not os.path.isfile(baiPath)):
                 
                 if ( self.sort ):
                     a = re.search("(\/.*\/)(.*)\.(.*)",bamPath)

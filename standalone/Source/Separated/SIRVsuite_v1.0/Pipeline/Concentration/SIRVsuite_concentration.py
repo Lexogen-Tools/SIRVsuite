@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import pyranges
 from matplotlib import gridspec
+import copy
 
 ## This module relevant to full-trancriptome libraries, i.e. CORALL
 
@@ -79,28 +80,20 @@ def read_cufflinks(file_dict):
 
             filter_SIRV = data[data["gene_id"].isin(SIRV_gene_set3)]
 
-            if (len(filter_SIRV) == 0 ):
+            transcripts_num = len(np.unique(filter_SIRV["transcript_id"]))
+
+            if (transcripts_num == 0 ):
                 raise ValueError("No record of SIRVs found..")
-            elif ( (len(filter_SIRV) > 0 and len(filter_SIRV) < 68 ) or len(filter_SIRV) > 68):
+            elif ( (transcripts_num > 0 and transcripts_num < 68 ) or transcripts_num > 68):
                 raise ValueError("Unexpected number of SIRVs transcripts..")
             
-            for index, row in data.iterrows():
-                data_dict[row["transcript_id"]] = row["FPKM"]
+            for index, row in filter_SIRV.iterrows():
+                data_dict[row["transcript_id"]] = float(row["FPKM"])
 
         else:
             print ("Could not find file: "+files[idx]+". Skipping to the next file...")
             continue
-    return
-
-def path_features(filePath):
-    # function returning features of a given path
-    matching_pattern = "((?:(?:.*\\/)*(.*)\\/))*(?:(.*)\\.(.*))*"
-    feature_match = re.match(matching_pattern, filePath)
-    out_dict = {"parent_dir": feature_match.group(2),
-                "file_name": feature_match.group(3),
-                "extension": feature_match.group(4),
-                "path": feature_match.group(1)}
-    return out_dict
+    return data_dict
 
 def heatmap_generator(data, row_labels, col_labels, title = "SIRVsuite heatmap", ax=None,
             cbar_kw={}, cbarlabel="", no_x_ticks = True, **kwargs):
@@ -221,7 +214,13 @@ def get_relative_abundance(sample_sheet):
 
 def export_data(norm_abund_dict, output_path):
     groups = list(norm_abund_dict.keys())
-    with open(os.path.join(output_path+"relative_concentration.tsv"), "w") as out_file:
+
+    path = os.path.join(output_path+"data/concentration_data")
+
+    if (not os.path.exists(path)):
+        os.makedirs(path)
+
+    with open(os.path.join(path,"relative_concentration.tsv"), "w") as out_file:
         out_file.write("\t"+"\t".join(groups)+"\n")
         transcript_ids = sorted(norm_abund_dict[groups[0]].keys())
         for transcript in transcript_ids:
@@ -380,11 +379,14 @@ else:
 groups_unique = np.unique(groups)
 
 """
-
+"""
 experiment_name = "FFPE_k2"
 
 file_dict = load_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sheet_cufflinks.tsv")
 relative_abundance = get_relative_abundance(file_dict)
+
+
+"""
 #export_data(relative_abundance, "/home/tdrozd/development/sirv-suite/test/")
 #create_sirvsuite_heatmap(relative_abundance, output_path = "/home/tdrozd/development/sirv-suite/test/", experiment_name = experiment_name)
 #create_sirvsuite_boxplot(relative_abundance, output_path = "/home/tdrozd/development/sirv-suite/test/", experiment_name = experiment_name)

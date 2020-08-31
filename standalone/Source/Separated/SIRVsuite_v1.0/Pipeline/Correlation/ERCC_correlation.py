@@ -46,13 +46,11 @@ def get_data(file_list, file_type, sample_names):
     return cnts_total
 
         
-def ERCC_correlation(file_list, types, sample_names, ercc_spike_in, experiment_name = "unnamed"):
+def ERCC_correlation(file_list, types, sample_names, ercc_spike_in, experiment_name = "unnamed", output_dir = "test_output/Correlation/"):
     # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
     # and experiment name, which is optional    
 
     ERCC_conc,_ = read_ERCC_concentration_table()
-
-    output_dir = "test_output/Correlation/"
 
     cnt_data_total = get_data(file_list, types, sample_names)
 
