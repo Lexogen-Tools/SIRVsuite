@@ -1,3 +1,9 @@
+import os 
+
+path=os.path.realpath(__file__)
+
+print ()
+
 def path_features(filePath):
     # function returning features of a given path
     matching_pattern = "((?:(?:.*\\/)*(.*)\\/))*(?:(.*)\\.(.*))*"
@@ -7,3 +13,5 @@ def path_features(filePath):
                 "extension": feature_match.group(4),
                 "path": feature_match.group(1)}
     return out_dict
+
+

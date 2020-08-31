@@ -24,19 +24,27 @@ class SIRVsuiteCoverage():
     (annotation is identical to the one which can be found https://www.lexogen.com/sirvs/download/ under section SIRV-Set 4)
 
     """
-    def __init__(self, gene_list = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]):
+    def __init__(self, output_dir = None, gene_list = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]):
+
         self.verbose = "DEBUG"
         self.target_gene_id = gene_list
-        self.output_path = "/home/tdrozd/Lexogen/ssuite/out/"
-        self.annotation_path = "/home/tdrozd/data/SIRVome_SIRVset4/SIRV_isoforms_multi-fasta-annotation_190418a.gtf"
+
+        if output_dir == None:
+            self.output_path = "/".join(__file__.split("/")[:-6]) + "/output"
+
+        self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRVsuite_annotation.gtf"
+        
+        self.load_annotation(self.annotation_path)
         
         ## constants
         self._strands = ["-","+"]
-        #self._strandNames = {"+":"sense","-":"antisense"}
         
         print ("SIRVsuite coverage creator initialized")
 
     def __values2intervals__(self, data, start_pos = 0):
+        """
+        A method to convert data array (coverage) into intervals specified by starts, ends and values
+        """
         tmp = np.logical_and(data[1:] != data[:-1], np.logical_or(np.isnan(data[1:]) == False, np.isnan(data[:-1]) == False))
         starts = np.append(np.array([start_pos]), np.where(tmp)[0] + start_pos + 1)
         ends = np.append(starts[1:], start_pos + len(data))
@@ -50,7 +58,21 @@ class SIRVsuiteCoverage():
             return "antisense"
 
     def __create_nested_dict__(self, input_list, init = 0):
-        # a recursive approach to create and initialize nested dictionary
+        """
+        Helper method using a recursive approach to create and initialize nested dictionary based on 2D-list of values.
+        Length of input list defines the depth of a dictionary, the nested lists defines the keys at a corresponding level.
+        Values are initialized based on init value. 
+        
+        Example: [[key1_level1,key2_level1,key3_level1],[[key1_level2,key2_level2]] as input_list creates a list corresponding to 
+        
+        {
+         key1_level1: {key1_level2: 0, key2_level2: 0},
+         key2_level1: {key1_level2: 0, key2_level2: 0},
+         key3_level1: {key1_level2: 0, key2_level2: 0}
+        }
+        
+        """
+
         input = input_list[0]
         input_list.pop(0)
         l = len(input_list)
@@ -90,9 +112,23 @@ class SIRVsuiteCoverage():
                                     cov.write(str(idx+1)+"\t"+str(coverage[idx])+"\n") 
         else:
             warnings.warn("No coverage detected to export..")
+
+    def set_output_dir(self, output_dir, create = False):
+
+        if ((not create) & (not os.path.exists(output_dir))):
+            raise ValueError("Provided folder does not exist.. please use create=True argument to make a new directory or change to valid path..")
+            return 
+        elif ((create) & (not os.path.exists(output_dir))):
+            os.makedirs(output_dir)
+            print ("New directories created.")
+
+        self.output_path = output_dir
+        print ("output directory changed to: "+self.output_path)
     
     def bam_to_coverage(self, sample_dict = None, output_type = "bigwig"):
-
+        """
+        A method for loading coverage from bam files
+        """
         if (sample_dict == None):
             raise ValueError("Sample_dict must be specified")
             return 
@@ -186,20 +222,18 @@ class SIRVsuiteCoverage():
                     positions = np.array(fragmentRead.positions)
                     positions = positions[positions<bam_gene_end] - bam_gene_start
                     bam_coverage[sample][gene][strand][positions] += 1
-                
-                """
-                except:
-                    print ("there was an error with extracting fragments for specified contig.. skipping")
-                    continue
-                """
 
         self.cov_stats = stat_dict
         self.bam_coverage = bam_coverage
 
-        self.__cov_data_export__(self.output_path)
+        # export coverage to .bw format
+        self.__cov_data_export__(self.output_path, output_type="bigWig")
         
 
     def _path_features(self, path):
+        """
+        Helper method to return features of a given path: parent directory, file name, extension and path of a directory and stores them into dictionary  
+        """
         matching_pattern = "((?:(?:.*\\/)*(.*)\\/))*(?:(.*)\\.(.*))*"
         feature_match = re.match(matching_pattern, path)
         out_dict = {"parent_dir": feature_match.group(2),
@@ -210,6 +244,9 @@ class SIRVsuiteCoverage():
 
 
     def load_annotation(self, annotation_path):
+        """
+        A method for loading annotation using pyranges library
+        """
         annotation_type = self._path_features(annotation_path)["extension"]
         
         try:
@@ -228,7 +265,10 @@ class SIRVsuiteCoverage():
         self.annotation_df = {"whole": annotation_df}
 
     def get_continous_coverage_ends(self, starts, ends):
-        ## This function returnes continous segment of oveerlapping features (exons) from list of starts and ends of the features 
+        """
+        The method returnes continous segment of oveerlapping features (exons) from list of starts and ends of the features
+        """
+        
         sorted_idx = np.argsort(starts)
 
         contig_start = [starts[sorted_idx[0]]]
@@ -248,7 +288,9 @@ class SIRVsuiteCoverage():
         return contig_start, contig_end
 
     def calc_start_transition(self,transcriptLength,mean=200,std=80):
-        ## This function estimates probability distribution of a fragment according to its length, mean and std of the model distribution
+        """
+        The method estimates probability distribution of a fragment according to its length, mean and std of the model distribution
+        """
         
         lengthProbability = norm.pdf(np.arange(1,transcriptLength+1),mean,std)
         
@@ -268,6 +310,11 @@ class SIRVsuiteCoverage():
         return startDistance, lengthProbability, adjustedLength
 
     def calc_statistics(self):
+        """
+        The method checks for bam coverages and expected coverages and then calculates CoD and scaling factor for particular samples, genes and strands 
+        """
+
+        # check if all attributes present
         if (not hasattr(self, "cov_stats") or not hasattr(self, "bam_coverage")):
             raise ValueError("Measured coverage not detected")
         elif (not hasattr(self, "expected_coverage")):
@@ -278,12 +325,15 @@ class SIRVsuiteCoverage():
                 for strand in self.expected_coverage[gene].keys():
                     expected_cov = self.expected_coverage[gene][strand]
                     measured_cov = self.bam_coverage[sample][gene][strand]
-                    self.cov_stat
-                    self.cov_stats[sample][gene][strand]["CoD"] = self.CoD(measured_cov, expected_cov)
+                    
+                    # calculate CoD and scaling factor and assign them to the cov_stats dictionary  
+                    self.cov_stats[sample][gene][strand]["CoD"], self.cov_stats[sample][gene][strand]["scale"] = self.CoD(measured_cov, expected_cov)
 
     def CoD(self,real_cov,expect_cov):
-        ## This function calculate CoD from 2 vectors (real and expected coverage)
-        ## and returns coefficient for scaling and CoD
+        """
+        The method calculate CoD from 2 vectors (real and expected coverage) and returns coefficient for scaling and CoD
+
+        """
 
         if (len(real_cov) != len(expect_cov)):
             raise ValueError("real and expected coverage must have the same length")
@@ -310,62 +360,76 @@ class SIRVsuiteCoverage():
         return COD, scaling_coefficient
 
     def annot_2_UTR(self, region_length = 200):
-        ## This function modifies annotation data frame and trims the transcripts to a length close to 3' (where QuantSeq is mostly expressed)
+        """
+        This method modifies annotation data frame and trims the transcripts to a length close to 3' (where QuantSeq is mostly expressed)
+        
+        """
 
+        # check if annotation loaded
         if (not hasattr(self, "annotation_df")):
             warnings.warn("There was no annotation detected.. skipping UTR mode..")
             return
         else:
             annotation_df = self.annotation_df["whole"]
-        
+
+
         UTR_annotation = annotation_df[0:0] # Creating an empty data frame with the same structure as annotation data frame
 
         for strand in self._strands:
             transcripts = np.unique(annotation_df[annotation_df["Strand"]  ==  strand]["transcript_id"])
-
             for transcript in transcripts:
-
                 annot_transcript = annotation_df[annotation_df["transcript_id"]  ==  transcript]
-
+                
+                # initiliaze parameters for a particular strand
                 if ( strand  ==  '+'):
-                    annot_transcript = annot_transcript.sort_values(by=["Start"], axis = 0, ascending = False).reset_index(drop=True)
-                    exon_lengths = annot_transcript["End"] - annot_transcript["Start"]
-
-                    remainder = region_length
-                    UTR_data_frame = annot_transcript
-
-                    for index, length in enumerate(exon_lengths):
-                        remainder = remainder - length
-                        if (remainder < 0):
-                            UTR_data_frame.loc[index,"Start"] = UTR_data_frame.loc[index,"Start"] - remainder
-                            UTR_data_frame = UTR_data_frame.loc[0:index,:]
-                            break
-
+                    ascending = False
+                    const = -1
+                    UTR_df_col = "Start"
                 elif ( strand  ==  '-'):
-                    annot_transcript = annot_transcript.sort_values(by=["Start"], axis = 0, ascending = True).reset_index(drop=True)
-                    exon_lengths = annot_transcript["End"] - annot_transcript["Start"]
+                    ascending = True
+                    const = 1
+                    UTR_df_col = "End"
 
-                    remainder = region_length
-                    UTR_data_frame = annot_transcript
-
-                    for index, length in enumerate(exon_lengths):
-                        remainder = remainder - length
-                        if ( remainder < 0 ):
-                            UTR_data_frame.loc[index,"End"] = UTR_data_frame.loc[index,"End"] + remainder
-                            UTR_data_frame = UTR_data_frame.loc[0:index,:]
-                            break
+                # sort annotation dataframe by Start column
+                annot_transcript = annot_transcript.sort_values(by=["Start"], axis = 0, ascending = ascending).reset_index(drop=True)
+                exon_lengths = annot_transcript["End"] - annot_transcript["Start"]
+                remainder = region_length
+                UTR_data_frame = annot_transcript
+                
+                # 
+                for index, length in enumerate(exon_lengths):
+                    remainder = remainder - length
+                    if (remainder < 0):
+                        UTR_data_frame.loc[index,UTR_df_col] = UTR_data_frame.loc[index,UTR_df_col] + remainder*const
+                        UTR_data_frame = UTR_data_frame.loc[0:index,:]
+                        break
                 
                 UTR_annotation = UTR_annotation.append(UTR_data_frame)
 
+
         UTR_annotation = UTR_annotation.reset_index(drop=True)
 
-        self.annotation_df["UTR"] = UTR_annotation
+
+        self.annotation_df["UTR_test"] = UTR_annotation
 
 
     def expected_coverage(self, transition_lengths = None):
+        """
+        Method to create expected coverage based on provided annotation.
+        
+        Experimental feature: transition lengths modelling
+            input: list, ndarray or tuple of a length 2, specifying model parameters in the following order [mean, std], e.g. [100, 50] 
+
+        Returns: 3-level dictionary gene_id -> strand -> expected_coverage
+        """
+
+        # check if annotation has been loaded
         if (not hasattr(self, "annotation_df")):
             raise ValueError("No annotation detected for theoretical coverage.. Please load annotation in .gtf or .bed format.")
         
+        if (len(transition_lengths) != 2):
+            raise ValueError("The length of passed array 'transition_lengths' does no correspond model requirement..")
+
         expected_coverage = dict()
 
         self.gene_coords = {}
@@ -378,6 +442,9 @@ class SIRVsuiteCoverage():
 
             for gene in self.target_gene_id:
                 gene_annot = annotation_df[annotation_df["gene_id"]==gene]
+
+                if (len(gene_annot) == 0):
+                    warnings.warn("No record for gene "+gene+" has been found in the provided annotation file.. skipping gene..")
 
                 end_coord = np.max(gene_annot["End"])
                 start_coord = np.min(gene_annot["Start"])
@@ -394,7 +461,7 @@ class SIRVsuiteCoverage():
                     if (len(stranded_gene_annot) == 0):
                         continue
 
-                    # declare base for coverage
+                    # initialize base for coverage with 0s 
                     expected_coverage[gene][strand] = np.zeros(end_coord-start_coord+1)
 
                     for transcript in np.unique(stranded_gene_annot["transcript_id"]):
@@ -403,6 +470,8 @@ class SIRVsuiteCoverage():
 
                         exon_lengths = np.array(transcript_annot["End"]) - np.array(transcript_annot["Start"]) + 1
 
+                        # if parameters for transition transcript lengths are defined, use probabilistic model to calculate multiplicative weights for starts and ends,
+                        # otherwise set weights to 1
                         if (transition_lengths is not None):
                             weights,_,_ = self.calc_start_transition(np.sum(exon_lengths), mean = transition_lengths[0], std = transition_lengths[1])
                         else:
@@ -435,9 +504,8 @@ stat_attrs = ["read_cnts","CoD","scaling_factor"]
 l = [samples,genes,strands]
 
 k = SIRVsuiteCoverage()
-k.load_annotation("./Resources/SIRV_isoforms_multi-fasta-annotation_190418a.gtf")
-#k.annot_2_UTR(200)
-k.expected_coverage(transition_lengths=(25,30))
-k.bam_to_coverage(test_dict)
-k.calc_statistics()
+k.annot_2_UTR(200)
+#k.expected_coverage(transition_lengths=(25,30))
+#k.bam_to_coverage(test_dict)
+#k.calc_statistics()
 print ()
