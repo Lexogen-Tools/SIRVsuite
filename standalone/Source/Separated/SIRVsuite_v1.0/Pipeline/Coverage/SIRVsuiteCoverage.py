@@ -5,9 +5,10 @@ import pyBigWig as bwig
 import pyranges
 from scipy.stats import norm
 import os
-import re
 import copy
 import warnings
+from ..helper import *
+import sys
 
 class SIRVsuiteCoverage():
     """
@@ -24,7 +25,7 @@ class SIRVsuiteCoverage():
     (annotation is identical to the one which can be found https://www.lexogen.com/sirvs/download/ under section SIRV-Set 4)
 
     """
-    def __init__(self, output_dir = None, gene_list = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]):
+    def __init__(self, sample_sheet=None, output_dir = None, gene_list = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]):
 
         self.verbose = "DEBUG"
         self.target_gene_id = gene_list
@@ -33,8 +34,12 @@ class SIRVsuiteCoverage():
             self.output_path = "/".join(__file__.split("/")[:-6]) + "/output"
 
         self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRVsuite_annotation.gtf"
-        
         self.load_annotation(self.annotation_path)
+
+        if sample_sheet == None:
+            raise ValueError("please specify path to the sample sheet..")
+        else:
+            self.sample_sheet = read_sample_sheet(sample_sheet)
         
         ## constants
         self._strands = ["-","+"]
@@ -55,37 +60,7 @@ class SIRVsuiteCoverage():
         if (text == "+"):
             return "sense"
         elif (text == "-"):
-            return "antisense"
-
-    def __create_nested_dict__(self, input_list, init = 0):
-        """
-        Helper method using a recursive approach to create and initialize nested dictionary based on 2D-list of values.
-        Length of input list defines the depth of a dictionary, the nested lists defines the keys at a corresponding level.
-        Values are initialized based on init value. 
-        
-        Example: [[key1_level1,key2_level1,key3_level1],[[key1_level2,key2_level2]] as input_list creates a list corresponding to 
-        
-        {
-         key1_level1: {key1_level2: 0, key2_level2: 0},
-         key2_level1: {key1_level2: 0, key2_level2: 0},
-         key3_level1: {key1_level2: 0, key2_level2: 0}
-        }
-        
-        """
-
-        input = input_list[0]
-        input_list.pop(0)
-        l = len(input_list)
-
-        if (l > 0):
-            temp = __create_nested_dict__(input_list)
-            temp = [copy.deepcopy(temp) for i in range(len(input))]
-            return dict(zip(input, temp))
-
-        elif (l == 0):
-            n = len(input)
-            init_list = [init] * n
-            return dict(zip(input, init_list))        
+            return "antisense"    
 
     def __cov_data_export__(self, output_path, output_type = "bigwig"):
         # function used for exporting coverage data to "bigwig" or "cov" file
@@ -138,8 +113,8 @@ class SIRVsuiteCoverage():
 
         stats = {"num_reads": 0}
 
-        bam_coverage = {} 
-        stat_dict = {}
+        bam_coverage = dict()
+        stat_dict = dict()
         
         for sample in sample_dict.keys():
 
@@ -159,8 +134,8 @@ class SIRVsuiteCoverage():
 
             bamFile = ps.AlignmentFile(bam_path,"rb")
 
-            bam_coverage[sample] = {}
-            stat_dict[sample] = {}
+            bam_coverage[sample] = dict()
+            stat_dict[sample] = dict()
 
             annotation_df = self.annotation_df["whole"]
 
@@ -174,8 +149,8 @@ class SIRVsuiteCoverage():
                 if (gene == "ERCC-00002"):
                     print ()
          
-                bam_coverage[sample][gene] = {}
-                stat_dict[sample][gene] = {}
+                bam_coverage[sample][gene] = dict()
+                stat_dict[sample][gene] = dict()
 
                 # check if annotation processed
                 if (hasattr(self, "gene_coords")):
@@ -228,26 +203,13 @@ class SIRVsuiteCoverage():
 
         # export coverage to .bw format
         self.__cov_data_export__(self.output_path, output_type="bigWig")
-        
-
-    def _path_features(self, path):
-        """
-        Helper method to return features of a given path: parent directory, file name, extension and path of a directory and stores them into dictionary  
-        """
-        matching_pattern = "((?:(?:.*\\/)*(.*)\\/))*(?:(.*)\\.(.*))*"
-        feature_match = re.match(matching_pattern, path)
-        out_dict = {"parent_dir": feature_match.group(2),
-                    "file_name": feature_match.group(3),
-                    "extension": feature_match.group(4),
-                    "path": feature_match.group(1)}
-        return out_dict
 
 
     def load_annotation(self, annotation_path):
         """
         A method for loading annotation using pyranges library
         """
-        annotation_type = self._path_features(annotation_path)["extension"]
+        annotation_type = path_features(annotation_path)["extension"]
         
         try:
             if self.verbose == "DEBUG":
@@ -258,7 +220,9 @@ class SIRVsuiteCoverage():
                 annotation_df = pyranges.read_bed(annotation_path, as_df=True)
 
             # limit only to a feature of interest
-            annotation_df[annotation_df["Feature"]=="exon"] 
+            annotation_df[annotation_df["Feature"]=="exon"]
+            # trim to required cols only 
+            annotation_df = annotation_df[["Chromosome", "Start", "End", "Strand", "gene_id", "transcript_id"]]
         except:
             raise ValueError("An error occured while loading annotation..")
         
@@ -319,12 +283,13 @@ class SIRVsuiteCoverage():
             raise ValueError("Measured coverage not detected")
         elif (not hasattr(self, "expected_coverage")):
             raise ValueError("Expected coverage not detected")
-
-        for sample in self.bam_coverage.keys():
-            for gene in self.bam_coverage[sample].keys():
-                for strand in self.expected_coverage[gene].keys():
-                    expected_cov = self.expected_coverage[gene][strand]
-                    measured_cov = self.bam_coverage[sample][gene][strand]
+        
+        for mode in self.annotation_df.keys():
+            for sample in self.bam_coverage.keys():
+                for gene in self.bam_coverage[sample].keys():
+                    for strand in self.expected_coverage[gene].keys():
+                        expected_cov = self.expected_coverage[mode][gene][strand]
+                        measured_cov = self.bam_coverage[sample][gene][strand]
                     
                     # calculate CoD and scaling factor and assign them to the cov_stats dictionary  
                     self.cov_stats[sample][gene][strand]["CoD"], self.cov_stats[sample][gene][strand]["scale"] = self.CoD(measured_cov, expected_cov)
@@ -413,7 +378,7 @@ class SIRVsuiteCoverage():
         self.annotation_df["UTR_test"] = UTR_annotation
 
 
-    def expected_coverage(self, transition_lengths = None):
+    def expected_coverage(self, transition_lengths = False, tlen_model_param = (0,0), mode = "normal", region_length = 200):
         """
         Method to create expected coverage based on provided annotation.
         
@@ -429,16 +394,20 @@ class SIRVsuiteCoverage():
         
         if (len(transition_lengths) != 2):
             raise ValueError("The length of passed array 'transition_lengths' does no correspond model requirement..")
+    
+        if mode == "UTR":
+            self.annot_2_UTR(region_length)
 
         expected_coverage = dict()
 
-        self.gene_coords = {}
+        self.gene_coords = dict()
 
         for mode in self.annotation_df.keys():
 
             annotation_df = self.annotation_df[mode]
 
             self.target_gene_id = np.unique(annotation_df["gene_id"])
+            expected_coverage[mode] = dict()
 
             for gene in self.target_gene_id:
                 gene_annot = annotation_df[annotation_df["gene_id"]==gene]
@@ -451,7 +420,7 @@ class SIRVsuiteCoverage():
 
                 self.gene_coords[gene] = (start_coord, end_coord) 
                 
-                expected_coverage[gene] = {}
+                expected_coverage[gene] = dict()
                 
                 for strand in self._strands:
                     
@@ -472,8 +441,11 @@ class SIRVsuiteCoverage():
 
                         # if parameters for transition transcript lengths are defined, use probabilistic model to calculate multiplicative weights for starts and ends,
                         # otherwise set weights to 1
-                        if (transition_lengths is not None):
-                            weights,_,_ = self.calc_start_transition(np.sum(exon_lengths), mean = transition_lengths[0], std = transition_lengths[1])
+                        if ( transition_lengths ):
+                            if (tlen_model_param == (0,0)):
+                                tlen_model_param = (25,30)
+
+                            weights,_,_ = self.calc_start_transition(np.sum(exon_lengths), mean = tlen_model_param[0], std = tlen_model_param[1])
                         else:
                             weights = np.ones(np.sum(exon_lengths))
 
@@ -491,21 +463,3 @@ class SIRVsuiteCoverage():
                             weight_idx += exon_lengths[row_idx]
 
         self.expected_coverage = expected_coverage
-
-
-test_dict = {"test_sample":{"bam":"/home/tdrozd/Lexogen/ssuite/NGS2.59/NGS2.59_0045/Aligned.sortedByCoord.out.bam",
-                                "lib_strand": "rev"}}
-
-samples = ["sample1","sample2","sample3"]
-genes = ["gene1","gene2","gene3","gene4"]
-strands = ["+","-"]
-stat_attrs = ["read_cnts","CoD","scaling_factor"]
-
-l = [samples,genes,strands]
-
-k = SIRVsuiteCoverage()
-k.annot_2_UTR(200)
-#k.expected_coverage(transition_lengths=(25,30))
-#k.bam_to_coverage(test_dict)
-#k.calc_statistics()
-print ()

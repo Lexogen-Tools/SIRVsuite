@@ -40,7 +40,6 @@ def create_nested_dict(input_list, init = 0):
         n = len(input)
         init_list = [init] * n
         return dict(zip(input, init_list))
-"""
 
 create_new_dataset = False
 
@@ -53,3 +52,12 @@ file_dict = load_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sh
 relative_abundance = get_relative_abundance(file_dict)
 
 export_data(relative_abundance, output_path = "/home/tdrozd/development/sirv-suite/test/")
+
+"""
+
+
+k = SIRVsuiteCoverage(sample_sheet="/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv", output_dir="/home/tdrozd/development/sirv-suite/")
+k.expected_coverage(transition_lengths=(25,30))
+k.bam_to_coverage(test_dict)
+k.calc_statistics()
+print ()

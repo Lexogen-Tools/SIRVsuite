@@ -74,6 +74,7 @@ tab = {"Sample":"Sample 0001",
 "Experiment":"Drosophila test experiment",
 "Gene":"SIRV1",
 "Mode":"complete coverage"}
+
 d.draw_table(table_dict=tab,x=exon_panel_x,y=header_y,width=exon_panel_width/3,height=header_height)
 
 ## DRAW TRANSCRIPT PANEL

@@ -2,13 +2,19 @@ import cairo
 import re
 import numpy as np
 
+from Pipeline.helper import *
+
 
 class CairoDrawer():
-    # The class utilizies drawing using cairo library. 
-    # Here, different graphic shapes can be defined within separate methods.
+    """
+    The class utilizies drawing using cairo library. 
+    Here, different graphic shapes can be defined within separate methods.
+    """
 
     def __init__(self, out_path = None, width = 1980, height = 1224, bg_color = (1,1,1)):
+        """
         
+        """
         # input handling
         
         if (out_path == None):
@@ -18,7 +24,7 @@ class CairoDrawer():
         
         # creating cairo surface for drawing
         
-        path_feature = self.path_features(out_path)
+        path_feature = path_features(out_path)
         
         if path_feature["extension"] == "pdf":
             self.surface = cairo.PDFSurface(out_path, width, height)
@@ -41,18 +47,10 @@ class CairoDrawer():
         self.ctx.rectangle(0,0,width,height)
         self.ctx.fill()
 
-
-    def path_features(self,filePath):
-        # this function fetches features from provided path
-        matching_pattern = "((?:(?:.*\\/)*(.*)\\/))*(?:(.*)\\.(.*))*"
-        feature_match = re.match(matching_pattern, filePath)
-        out_dict = {"parent_dir": feature_match.group(2),
-                    "file_name": feature_match.group(3),
-                    "extension": feature_match.group(4),
-                    "path": feature_match.group(1)}
-        return out_dict
-
     def get_text_size(self, text=None, fontsize=None):
+        """
+        
+        """
         self.ctx.save()
         self.ctx.set_font_size(fontsize)
         obj = self.ctx.text_extents(text)
@@ -62,6 +60,9 @@ class CairoDrawer():
 
 
     def draw_text(self, text = None, x = None, y = None, font_size = 28, rotate = 0, color_rgb = (0,0,0), h_align = "center", v_align = "center"):
+        """
+        
+        """
         # This function draws text according to the specifications to the cairo context
         
         self.ctx.save()
@@ -81,11 +82,6 @@ class CairoDrawer():
         elif h_align == "left":
             x = x
 
-        # test
-        #self.ctx.move_to(x-200,y)
-        #self.ctx.line_to(x+200,y)
-        #self.ctx.stroke()
-
         if v_align == "center":
             y = y + txt_obj.height/2 - (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "bottom":
@@ -99,6 +95,9 @@ class CairoDrawer():
         self.ctx.restore()    
 
     def draw_line(self, x = None, y = None, width = None, end_shape = ("",""), color = (0,0,0), line_width = 4, rotate = 0, alpha = 1):
+        """
+        
+        """
         # Draw arrow line
         
         ctx = self.ctx
@@ -148,6 +147,9 @@ class CairoDrawer():
         ctx.restore()
         
     def draw_rectangle(self, x = None, y = None, width = None, height = None, round_aspect = None, line_width = 0, color_line = (0,0,0), color_fill = (0,0,0), rotate = 0, alpha = 1):
+        """
+        
+        """
         ctx = self.ctx
         
         ctx.set_line_width(line_width)
@@ -184,6 +186,9 @@ class CairoDrawer():
         ctx.restore()
 
     def draw_triangle(self, x = None, y = None, width = None, height = None, rotate = 0, color_fill = None, color_line = (0,0,0), alpha = 1, line_width = 4):
+        """
+        
+        """
         ctx = self.ctx
         
         ctx.save()
@@ -209,9 +214,10 @@ class CairoDrawer():
         ctx.restore()
         
     def return_differences(self, vector, boundary_fill = False, mode = 'all'):
-        ## This function gives indexes of non-zero differences
-        ## input: ndarray num vector
-        ## output: nddarray of position of differences
+        """
+        This function gives indexes of non-zero differences
+        """
+        
         
         if (not boundary_fill):
             vector = np.append(0,vector)
@@ -231,6 +237,9 @@ class CairoDrawer():
         return differences
         
     def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0, alpha = 1, upside_down = False):
+        """
+        
+        """
         ctx = self.ctx
         
         ctx.save()
@@ -325,6 +334,9 @@ class CairoDrawer():
                                    rotate = rotate)
     
     def draw_table(self, table_dict = None, x = None, y = None, width = None, height = None):
+        """
+        
+        """
         
         num_lines = len(table_dict)
         atributes = table_dict.keys()
@@ -343,7 +355,10 @@ class CairoDrawer():
         
             
     def finish(self):
-        ext = self.path_features(self.out_path)["extension"]
+        """
+        
+        """
+        ext = path_features(self.out_path)["extension"]
         surface = self.surface
         ctx = self.ctx
 
