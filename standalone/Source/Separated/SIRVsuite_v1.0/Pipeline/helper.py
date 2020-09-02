@@ -40,27 +40,79 @@ def __create_nested_dict__(input_list, init = 0):
         elif (l == 0):
             n = len(input)
             init_list = [init] * n
-            return dict(zip(input, init_list))    
+            return dict(zip(input, init_list))
 
+def __entry_check__(valid_dict, colname, value):
+    if colname in valid_dict.keys():
+        if valid_dict[colname]:
+            if value.lower() not in valid_dict[colname]:
+                raise ValueError("Invalid entry %s for %s column.. possible options are: %s"%(value, colname, ", ".join(valid_dict[colname])))
+        else:
+            raise ValueError("%s column not defined.. please define it and insert one of the possible values: %s"%(colname,", ".join(valid_dict[colname])))
+    else:
+        raise ValueError("colname not in valid_dict")
 
 def read_sample_sheet(sheet_path):
-   
-    required_colnames = ["sample_name","counting_path","alignment_path","read_orientation"]
+
+    sample_sheet_dict = {}
+    
+    # name required columns
+    required_cols = dict()
+    required_cols["concentration"] = ["sample_name","counting_path","counting_method","counting_feature","library_prep_type"]
+    required_cols["coverage"] = ["sample_name","alignment_path","read_orientation","library_prep_type"]
+    
+    # name optional columns
+    optional_cols = dict()
+    optional_cols["concentration"] = ["replicate_group"]
+    optional_cols["coverage"] = []
+
+    # create a set of all possible columns in a sample sheet
+    required_all = set()
+    for mode in required_cols.keys():
+        required_all = required_all.union(set(required_cols[mode]))
+
+    # create dict from restricted values for a specified column
+    value_restriction = {col_name:[] for col_name in required_all}
+    value_restriction["library_prep_type"] = ["whole","qs"]
+    value_restriction["read_orientation"] = ["fwd","rev","none"]
+    value_restriction["counting_type"] = ["mix2","cufflinks","htseq"]
+    value_restriction["counting_feature"] = ["gene","trasncript"]
     
     try:
-        with open(sheet_path) as sheet_path:
-            csv.register_dialect('strip', skipinitialspace=True)
-            reader = csv.DictReader(sheet_path, restkey=None, restval=None, delimiter = ';', dialect='strip')
+        with open(sheet_path, 'r') as sheet:
+
+            csv.register_dialect('strip', skipinitialspace=True, delimiter = ';')
+
+            header = [h.strip() for h in next(sheet).split(";")]
+
+            # check if cols are complete for specific modes 
+            available_modes = [mode for mode in required_cols.keys() if set(required_cols[mode]) <= set(header)]
+            
+            reader = csv.DictReader(sheet, restkey=None, restval=None, dialect='strip', fieldnames=header)
 
             for row in reader:
-                if not set(required_colnames) == row.keys():
-                    raise ValueError("")
+
+                # remove tabs
+                row = {a:row[a].strip("\t") for a in row.keys()}
+
                 if None in row.values():
-                    raise ValueError("")
+                    raise ValueError("Incorrect number of rows in a sample sheet..")
+
+                __entry_check__(value_restriction, "library_prep_type", row.get("library_prep_type"))
                 
+                # check for valid values for a given column 
+                if 'coverage' in available_modes:
+                    __entry_check__(value_restriction, "library_prep_type", row.get("library_prep_type"))
+                    sample_sheet_dict["coverage"] = {row.get("sample_name"):{val:row[val] for val in required_cols["coverage"][1:] if val in row}}
+
+                if 'concentration' in available_modes:
+                    __entry_check__(value_restriction, "counting_type", row.get("library_prep_type"))
+                    __entry_check__(value_restriction, "counting_feature", row.get("counting_feature"))
+
+                    sample_sheet_dict["concentration"] = {row.get("sample_name"):{val:row[val] for val in required_cols["concentration"][1:] if val in row}}
+        
+        
     except ValueError as e:
         sys.exit(e)
-
-    sample_sheet_dict = None ## DELETE
 
     return sample_sheet_dict

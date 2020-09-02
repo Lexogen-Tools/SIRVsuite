@@ -1,5 +1,6 @@
 from Pipeline.Coverage.SIRVsuiteCoverage import SIRVsuiteCoverage
 from Pipeline.Concentration.SIRVsuite_concentration import *
+from Pipeline.helper import *
 import pyranges
 import numpy as np
 
@@ -55,8 +56,9 @@ export_data(relative_abundance, output_path = "/home/tdrozd/development/sirv-sui
 
 """
 
+input_dict = read_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sample_sheet_test.tsv")
 
-k = SIRVsuiteCoverage(sample_sheet="/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv", output_dir="/home/tdrozd/development/sirv-suite/")
+k = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir="/home/tdrozd/development/sirv-suite/", experiment_name = "")
 k.expected_coverage(transition_lengths=(25,30))
 k.bam_to_coverage(test_dict)
 k.calc_statistics()

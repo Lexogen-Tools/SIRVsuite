@@ -39,6 +39,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "sheet",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Pipeline/helper.py",
+            "console": "integratedTerminal"
         }
     ]
 }
