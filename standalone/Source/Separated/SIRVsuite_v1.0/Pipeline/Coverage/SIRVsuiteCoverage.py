@@ -147,9 +147,6 @@ class SIRVsuiteCoverage():
                     contig_id = annotation_df["Chromosome"][annotation_df["gene_id"] == gene].values[0]
                 else:
                     contig_id = gene
-
-                if (gene == "ERCC-00002"):
-                    print ()
          
                 bam_coverage[sample][gene] = dict()
                 stat_dict[sample][gene] = dict()

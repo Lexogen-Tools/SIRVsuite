@@ -47,6 +47,8 @@ def __entry_check__(valid_dict, colname, value):
         if valid_dict[colname]:
             if value.lower() not in valid_dict[colname]:
                 raise ValueError("Invalid entry %s for %s column.. possible options are: %s"%(value, colname, ", ".join(valid_dict[colname])))
+            else:
+                return value.lower()
         else:
             raise ValueError("%s column not defined.. please define it and insert one of the possible values: %s"%(colname,", ".join(valid_dict[colname])))
     else:
@@ -87,6 +89,8 @@ def read_sample_sheet(sheet_path):
 
             # check if cols are complete for specific modes 
             available_modes = [mode for mode in required_cols.keys() if set(required_cols[mode]) <= set(header)]
+
+            sample_sheet_dict = {mode:dict() for mode in available_modes}
             
             reader = csv.DictReader(sheet, restkey=None, restval=None, dialect='strip', fieldnames=header)
 
@@ -102,14 +106,15 @@ def read_sample_sheet(sheet_path):
                 
                 # check for valid values for a given column 
                 if 'coverage' in available_modes:
-                    __entry_check__(value_restriction, "library_prep_type", row.get("library_prep_type"))
-                    sample_sheet_dict["coverage"] = {row.get("sample_name"):{val:row[val] for val in required_cols["coverage"][1:] if val in row}}
+                    row["library_prep_type"] = __entry_check__(value_restriction, "library_prep_type", row.get("library_prep_type"))
+                    sample_sheet_dict["coverage"][row.get("sample_name")] = {val:row[val] for val in required_cols["coverage"][1:] if val in row}
+                    
 
                 if 'concentration' in available_modes:
-                    __entry_check__(value_restriction, "counting_type", row.get("library_prep_type"))
-                    __entry_check__(value_restriction, "counting_feature", row.get("counting_feature"))
+                    row["counting_type"] = __entry_check__(value_restriction, "counting_type", row.get("library_prep_type"))
+                    row["counting_feature"] = __entry_check__(value_restriction, "counting_feature", row.get("counting_feature"))
 
-                    sample_sheet_dict["concentration"] = {row.get("sample_name"):{val:row[val] for val in required_cols["concentration"][1:] if val in row}}
+                    sample_sheet_dict["concentration"][row.get("sample_name")] = {val:row[val] for val in required_cols["concentration"][1:] if val in row}
         
         
     except ValueError as e:
