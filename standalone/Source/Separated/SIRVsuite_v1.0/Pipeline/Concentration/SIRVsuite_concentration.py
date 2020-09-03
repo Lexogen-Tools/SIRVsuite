@@ -3,102 +3,51 @@ import numpy as np
 import os 
 import re
 import csv 
-import argparse as ap
 import matplotlib.pyplot as plt
 import matplotlib
 import pyranges
 from matplotlib import gridspec
 import copy
 from ..helper import *
+from ..countReader import countReader
 
 ## This module relevant to full-trancriptome libraries, i.e. CORALL
 
 class SIRVsuiteConcentration():
 
-    def __init__(self):
+    def __init__(self, sample_sheet = None, output_dir = "./", experiment_name = ""):
 
+        self.output_dir = output_dir
+        self.experiment_name = experiment_name
 
-    def read_mix2(self,file_dict, quantity_unit = 'fpkm_chn'):
-
-        # function used for loading mix-square output
+        if (sample_sheet == None):
+            raise ValueError("Please load and pass sample sheet..")
         
-        SIRV_gene_set3 = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]
-        files = [file_dict["counting_path"]] 
-
-        data_dict = {}
-
-        for idx in range(len(files)):
-            if os.path.exists(files[idx]):
-                with open(files[idx],'r') as MIX2_file:
-                    MIX2_reader = csv.reader(MIX2_file,delimiter = "\t")
-                    init = True
-                    for row in MIX2_reader:
-                        row = np.array(row)
-                        if init:
-                            columns = np.array(["tracking_ID","gene_ID","abundance","comp_frags_locus","FPKM_CHN","FPKM_THN"]) # trim to necessary info
-                            indices = (row[:,None] == columns).argmax(axis=0) # find which indexes in row corresponds to desired columns
-                            init = False
-                            continue
-                        
-                        if row[1] in SIRV_gene_set3:
-
-                            selected_columns = row[indices]
-
-                            if quantity_unit.lower() == 'fpkm_chn':
-                                value = float(selected_columns[4])  
-                            elif quantity_unit.lower() == 'counts':
-                                value = float(selected_columns[2] * selected_columns[3]) # multiplying abundance and comp_frag_locus result in counts for transcripts  
-                            elif quantity_unit.lower() == 'abundance':
-                                value = float(selected_columns[2])
-                            elif quantity_unit.lower() == 'fpkm_thn':
-                                value = float(selected_columns[5])
-                            else:
-                                print ("unknown quantity unit specified.. supported options are fpkm_chn or abundance")
-                                break
-
-                            if selected_columns[0] not in data_dict.keys():
-                                data_dict[selected_columns[0]] = [value]
-                            else:
-                                data_dict[selected_columns[0]].append(value)
+        grouped_samples = dict()
+        for sample in sample_sheet.keys():
+            if "replicate_group" in sample_sheet[sample].keys():
+                replicate_group = sample_sheet[sample]["replicate_group"]
+                if replicate_group == "none":
+                    replicate_group = sample
             else:
-                print ("Could not find file: "+files[idx]+". Skipping to the next file...")
-                continue
-                    
-        return data_dict
-
-    def read_cufflinks(self, file_dict):
-
-        SIRV_gene_set3 = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]
-        aliases = file_dict["alias"]
-        files = file_dict["path"] 
-
-        data_dict = {}
-
-        for idx in range(len(files)):
-            if os.path.exists(files[idx]):
-                data = pyranges.read_gtf(files[idx], as_df=True)
-                
-                # check if format correct
-                required_cols = ["FPKM","transcript_id","gene_id"]
-                if any([col not in data for col in required_cols]):
-                    raise ValueError("could not find FPKM feature in the gtf..")
-
-                filter_SIRV = data[data["gene_id"].isin(SIRV_gene_set3)]
-
-                transcripts_num = len(np.unique(filter_SIRV["transcript_id"]))
-
-                if (transcripts_num == 0 ):
-                    raise ValueError("No record of SIRVs found..")
-                elif ( (transcripts_num > 0 and transcripts_num < 68 ) or transcripts_num > 68):
-                    raise ValueError("Unexpected number of SIRVs transcripts..")
-                
-                for index, row in filter_SIRV.iterrows():
-                    data_dict[row["transcript_id"]] = float(row["FPKM"])
-
+                replicate_group = sample
+            
+            if not replicate_group in grouped_samples.keys():
+                grouped_samples[replicate_group] = dict()
+                grouped_samples[replicate_group]["path"] = [sample_sheet[sample]["counting_path"]]
+                method = sample_sheet[sample]["counting_method"]
             else:
-                print ("Could not find file: "+files[idx]+". Skipping to the next file...")
-                continue
-        return data_dict
+                grouped_samples[replicate_group]["path"].append(sample_sheet[sample]["counting_path"])
+        
+        self.grouped_samples = grouped_samples
+
+        cnts = dict()
+        for group in grouped_samples.keys():
+            c = countReader()
+            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV"], counting_method=method, counting_type = "transcript")
+
+        self.data = self.get_relative_abundance(cnts)
+        self.export_data(self.data)
 
     def heatmap_generator(self, data, row_labels, col_labels, title = "SIRVsuite heatmap", ax=None,
                 cbar_kw={}, cbarlabel="", no_x_ticks = True, **kwargs):
@@ -177,7 +126,7 @@ class SIRVsuiteConcentration():
 
         return texts
 
-    def get_text_size(self, fontsize,text):
+    def __get_text_size__(self, fontsize,text):
         ffam = 'DejaVu Sans'
         fp = matplotlib.font_manager.FontProperties(
         family=ffam, style='normal', size=fontsize,
@@ -187,26 +136,12 @@ class SIRVsuiteConcentration():
 
         return bb.width, bb.height
 
-    def get_relative_abundance(self, sample_sheet):
+    def get_relative_abundance(self, cnts):
+        
         norm_abund_dict = {}
 
-        extensions = np.array([sample_sheet[group]["counting_path"] for group in sample_sheet.keys()]).flatten()
-        extensions = np.unique([path_features(i)["extension"] for i in extensions])
-
-        if (len(extensions) > 1):
-            raise ValueError("It is forbidden to combine different transcript estimation tools.. Please specify input files using same method: Cufflinks or Mix2")
-
-        for group in sample_sheet.keys():
-            ## LOAD MIX2 ##
-            if (extensions[0] in ("tsv","csv","dat")):
-                SIRV_abundance = read_mix2(sample_sheet[group], quantity_unit = 'fpkm_chn')
-            elif (extensions[0] == "gtf"):
-                SIRV_abundance = read_cufflinks(sample_sheet[group])
-            else:
-                raise ValueError("Unsupported input format..")
-
-            averaged_SIRV_abundance = {t:np.mean(SIRV_abundance[t]) for t in sorted(SIRV_abundance.keys())}
-            
+        for group in cnts.keys():
+            averaged_SIRV_abundance = {t:np.mean(cnts[group]["SIRV"][t]) for t in sorted(cnts[group]["SIRV"].keys())}
             ## NORMALIZATION OF TRANSCRIPT FPKM ##
             expected_quantity = np.mean(list(averaged_SIRV_abundance.values()))
 
@@ -214,13 +149,14 @@ class SIRVsuiteConcentration():
                 {t: "NaN" for t in sorted(averaged_SIRV_abundance.keys())}
             else:
                 norm_abund_dict[group] = {t:( averaged_SIRV_abundance[t]/expected_quantity ) for t in sorted(averaged_SIRV_abundance.keys())}
-            
-        return norm_abund_dict
+        
+        return (norm_abund_dict)
 
-    def export_data(self, norm_abund_dict, output_path):
+    def export_data(self, norm_abund_dict):
+
         groups = list(norm_abund_dict.keys())
 
-        path = os.path.join(output_path+"data/concentration_data")
+        path = os.path.join(self.output_dir+"concentration/")
 
         if (not os.path.exists(path)):
             os.makedirs(path)
@@ -231,15 +167,21 @@ class SIRVsuiteConcentration():
             for transcript in transcript_ids:
                 out_file.write(transcript+"\t"+"\t".join([str(norm_abund_dict[group][transcript]) for group in groups])+"\n")
 
-    def create_sirvsuite_boxplot(self, relative_abundance, output_path, experiment_name = ""):
+    def create_sirvsuite_boxplot(self, relative_abundance):
 
-        fig, ax1 = plt.subplots(figsize=(12,5))
-        #ax1.set_xscale('log')
-        output_name = os.path.join(output_path, "SIRVsuite_boxplot.png")
-        ax1.set_title(experiment_name+": SIRV E0 relative concentration distribution", size = 20, pad = 10, loc = 'center',
+        path = os.path.join(self.output_dir,"concentration/")
+
+        fig, ax1 = plt.subplots(figsize=(12,len(relative_abundance)))
+        ax1.set_xscale('log')
+
+        if self.experiment_name != "":
+            self.experiment_name += ": "
+
+        output_name = os.path.join(path, "SIRVsuite_boxplot.png")
+        ax1.set_title(self.experiment_name+"SIRV E0 relative concentration distribution", size = 20, pad = 10, loc = 'center',
                     fontdict = {'verticalalignment':'baseline'})
 
-        heatmap_matrix = count_dict_to_matrix(relative_abundance)
+        heatmap_matrix = self.__count_dict_to_matrix__(relative_abundance)
 
         for i in range(np.shape(heatmap_matrix)[1]):
             relative_conc = heatmap_matrix[:,i]
@@ -266,8 +208,8 @@ class SIRVsuiteConcentration():
         ax1.set_yticklabels(relative_abundance.keys())
         plt.xlabel("relative SIRV transcript concentration")
         fig.savefig(output_name, dpi = 300, quality = 100, pad_inches = 0.2)
-    """
-    def count_dict_to_matrix(self, count_dict):
+    
+    def __count_dict_to_matrix__(self, count_dict):
         conc_matrix = np.array([])
         groups = count_dict.keys()
         for group in groups:
@@ -275,21 +217,27 @@ class SIRVsuiteConcentration():
             conc_matrix = np.append(conc_matrix, [count_dict[group][t] for t in transcripts])
 
         return np.reshape(conc_matrix, (len(transcripts),len(groups)), order = 'F')
-    """
+    
 
-    def create_sirvsuite_heatmap(self, relative_abundance, output_path, experiment_name = ""):
+    def create_sirvsuite_heatmap(self, relative_abundance):
+
+        path = os.path.join(self.output_dir,"concentration/")
 
         groups = list(relative_abundance.keys())
         transcript_names = np.array((sorted(relative_abundance[groups[0]].keys())))
 
         genes = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]
 
-        fig = plt.figure(figsize=(6,40))
+        fig = plt.figure(figsize=(len(relative_abundance),40))
 
         vectorized_len = np.vectorize(len)
         max_length_index =  np.argmax(vectorized_len(groups))
-        text_width, text_height = get_text_size(16, groups[max_length_index])
-        plt.title(experiment_name+": SIRV E0 relative concentrations", pad = text_width + 10 + 25, fontdict = {'fontsize': 24})
+        text_width, text_height = self.__get_text_size__(16, groups[max_length_index])
+
+        if self.experiment_name != "":
+            self.experiment_name += ": "
+
+        plt.title(self.experiment_name+"SIRV E0 relative concentrations", pad = text_width + 10 + 25, fontdict = {'fontsize': 24})
         plt.axis('off')
 
         transcript_num = np.zeros(len(genes)).astype(int)
@@ -304,7 +252,7 @@ class SIRVsuiteConcentration():
 
             filtered = [ i for i in range(len(transcript_names)) if bool(re.match(genes[idx],transcript_names[i])) ]
 
-            heatmap_matrix = count_dict_to_matrix(relative_abundance) ## creating matrix for heatmap
+            heatmap_matrix = self.__count_dict_to_matrix__(relative_abundance) ## creating matrix for heatmap
             heatmap_matrix = heatmap_matrix[filtered,:]
             t_filtered = transcript_names[filtered]
 
@@ -312,7 +260,7 @@ class SIRVsuiteConcentration():
 
             ax = fig.add_subplot(spec[idx])
 
-            text_width, text_height = get_text_size(16, genes[idx])
+            text_width, text_height = self.__get_text_size__(16, genes[idx])
 
             ax.text(-3.5, float(transcript_num[idx])/2 - 0.5," "*10+genes[idx]+" "*10,
             rotation = 90,
@@ -326,32 +274,14 @@ class SIRVsuiteConcentration():
             else:
                 draw_x_ticks = True
 
-            im, cbar = heatmap_generator(LFC, t_filtered, groups, ax=ax, cbarlabel="Log2 Fold Change ($c_r$)", no_x_ticks=draw_x_ticks)
-            texts = annotate_heatmap(im, data = LFC, valfmt="{x:.2f}", threshold=-10)
+            im, cbar = self.heatmap_generator(LFC, t_filtered, groups, ax=ax, cbarlabel="Log2 Fold Change ($c_r$)", no_x_ticks=draw_x_ticks)
+            texts = self.annotate_heatmap(im, data = LFC, valfmt="{x:.2f}", threshold=-10)
 
         plt.margins(1,1)
         fig.tight_layout()
 
-        output_name = os.path.join(output_path, "SIRVsuite_heatmap.png") 
+        output_name = os.path.join(path, "SIRVsuite_heatmap.png") 
         fig.savefig(output_name, dpi = 300, quality = 100, pad_inches = 0.2, bbox_inches = 'tight')
-
-    """
-    def load_sample_sheet(sample_sheet_path):
-        if (os.path.exists(sample_sheet_path)):
-            file_dict = {}
-            with open(sample_sheet_path) as sheet_file:
-                sheet_reader = csv.reader(sheet_file,delimiter = "\t")
-                for row in sheet_reader:
-                    if row[2] not in file_dict.keys():
-                        file_dict[row[2]] = {"path": [row[0]], "alias": [row[1]]}
-                    else:
-                        file_dict[row[2]]["path"].append(row[0])
-                        file_dict[row[2]]["alias"].append(row[1])
-        else:
-            raise ValueError("wrong input sample sheet")
-        
-        return file_dict   
-    """ 
 
 
 

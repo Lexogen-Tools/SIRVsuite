@@ -56,7 +56,7 @@ def __entry_check__(valid_dict, colname, value):
     else:
         raise ValueError("colname not in valid_dict")
 
-def read_sample_sheet(sheet_path):
+def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "coverage"]):
     """
     A function for loading sample sheet in a following format:
         - used ";" separator
@@ -119,7 +119,7 @@ def read_sample_sheet(sheet_path):
   
     # select only columns for which a restriction has been defined
     restricted_cols = dict()
-    for module in required_cols.keys():
+    for module in required_cols:
         restricted_cols[module] = [col for col in value_restriction.keys() if col in required_cols[module]]
     
     # select columns with defined restriction for all common modules
@@ -139,13 +139,14 @@ def read_sample_sheet(sheet_path):
             # check if cols are complete for specific modes 
             available_modules = [module for module in required_cols.keys() if set(required_cols[module]) <= set(header)]
 
-            sample_sheet_dict = {module:dict() for module in available_modules}
+            sample_sheet_dict = {module:dict() for module in modules_to_execute if module in available_modules}
             
             reader = csv.DictReader(sheet, restkey=None, restval=None, dialect='strip', fieldnames=header)
 
             for row in reader:
                 # delete first or last semicolon in the header
-                del row['']
+                if "" in row.keys():
+                    del row['']
                 # remove tabs
                 row = {a:row[a].strip("\t ") for a in row.keys()}
 
@@ -157,11 +158,30 @@ def read_sample_sheet(sheet_path):
                     __entry_check__(value_restriction, common_col, row.get(common_col))
                 
                 # check for valid values for a given column across modules
-                for module in available_modules:
-                    for col in restricted_cols[module]:
-                        row[col] = __entry_check__(value_restriction, col, row.get(col))
-                        sample_sheet_dict[module][row.get("sample_name")] = {val:row[val] for val in required_cols[module][1:] if val in row}
+                for module in modules_to_execute:
+                    if module in available_modules:
+                        for col in restricted_cols[module]:
+                            row[col] = __entry_check__(value_restriction, col, row.get(col))
+                            sample_sheet_dict[module][row.get("sample_name")] = {val:row[val] for val in required_cols[module][1:] if val in row}
+
+                        for col in optional_cols[module]:
+                            if col in header:
+                                sample_sheet_dict[module][row.get("sample_name")][col] = row.get(col)  
+                    else:
+                        raise ValueError("Cannot proceed with module: %s"%(module))
+
+        c_methods = set([sample_sheet_dict["concentration"][i]["counting_method"] for i in sample_sheet_dict["concentration"].keys()])
+        c_features = set([sample_sheet_dict["concentration"][i]["counting_feature"] for i in sample_sheet_dict["concentration"].keys()])
+        c_library_prep = set([sample_sheet_dict["concentration"][i]["library_prep_type"] for i in sample_sheet_dict["concentration"].keys()])
         
+        if len(c_methods) > 1:
+            raise ValueError("Cannot proceed with different counting_methods..")
+
+        if len(c_features) > 1:
+            raise ValueError("Cannot proceed with different counting_features..")
+
+        if len(c_library_prep) > 1:
+            raise ValueError("Cannot proceed with different library_preps..")
         
     except ValueError as e:
         sys.exit(e)
