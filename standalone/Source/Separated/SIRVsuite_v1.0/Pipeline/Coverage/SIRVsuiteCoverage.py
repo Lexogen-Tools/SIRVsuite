@@ -197,11 +197,14 @@ class SIRVsuiteCoverage():
                     positions = positions[positions<bam_gene_end] - bam_gene_start
                     bam_coverage[sample][gene][strand][positions] += 1
 
+        # export coverage to .bw format
+        bigwig_path = os.path.join(self.output_path, "bigwig")
+        self.__cov_data_export__(bigwig_path, output_type="bigWig")
+
         self.cov_stats = stat_dict
         self.bam_coverage = bam_coverage
 
-        # export coverage to .bw format
-        self.__cov_data_export__(self.output_path, output_type="bigWig")
+        
 
 
     def load_annotation(self, annotation_path):
