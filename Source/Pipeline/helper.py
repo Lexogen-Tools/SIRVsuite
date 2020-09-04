@@ -61,6 +61,8 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
     Any other columns will be ignored.
     """
 
+    print ("Reading sample sheet")
+
     ## ALLOWED COLUMNS FOR DIFFERENT MODULES CAN BE DEFINED HERE ##
 
     # name required columns

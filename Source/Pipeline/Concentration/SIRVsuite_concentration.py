@@ -45,7 +45,8 @@ class SIRVsuiteConcentration():
         for group in grouped_samples.keys():
             c = countReader()
             cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV"], counting_method=method, counting_type = "transcript")
-
+        
+        self.cnts = cnts
         self.data = self.get_relative_abundance(cnts)
         self.export_data(self.data)
 
@@ -166,6 +167,8 @@ class SIRVsuiteConcentration():
                 out_file.write(transcript+"\t"+"\t".join([str(norm_abund_dict[group][transcript]) for group in groups])+"\n")
 
     def create_sirvsuite_boxplot(self, relative_abundance):
+        
+        print ("Creating SIRVsuite boxplot")
 
         path = os.path.join(self.output_dir,"concentration/")
         figsize=(12, 5 + len(relative_abundance))
@@ -214,7 +217,7 @@ class SIRVsuiteConcentration():
         ax1.set_yticklabels(relative_abundance.keys())
         plt.xlabel("relative SIRV transcript concentration")
         fig.tight_layout()
-        fig.savefig(output_name, dpi = 300, quality = 100, pad_inches = 0.2)
+        fig.savefig(output_name, dpi = 300, pad_inches = 0.2)
     
     def __count_dict_to_matrix__(self, count_dict):
         conc_matrix = np.array([])
@@ -227,6 +230,8 @@ class SIRVsuiteConcentration():
     
 
     def create_sirvsuite_heatmap(self, relative_abundance):
+
+        print ("Creating SIRVsuite heatmap")
 
         path = os.path.join(self.output_dir,"concentration/")
 
@@ -288,4 +293,4 @@ class SIRVsuiteConcentration():
         fig.tight_layout()
 
         output_name = os.path.join(path, "SIRVsuite_heatmap.png") 
-        fig.savefig(output_name, dpi = 300, quality = 90, pad_inches = 0.2, bbox_inches = 'tight')
+        fig.savefig(output_name, dpi = 300, pad_inches = 0.2, bbox_inches = 'tight')

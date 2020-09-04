@@ -35,7 +35,7 @@ class SIRVsuiteCoverage():
             self.output_path = "/".join(__file__.split("/")[:-6]) + "/coverage"
         else:
             self.output_path = output_dir
-
+        print ("SIRVsuite coverage creator initialized")
         self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRVsuite_annotation.gtf"
         self.load_annotation(self.annotation_path)
 
@@ -48,8 +48,6 @@ class SIRVsuiteCoverage():
         
         ## constants
         self._strands = ["-","+"]
-        
-        print ("SIRVsuite coverage creator initialized")
 
     def __values2intervals__(self, data, start_pos = 0):
         """

@@ -28,6 +28,9 @@ class ERCCcorrelation():
         return (conc, reader.fieldnames[2:])
             
     def ERCC_correlation(self, data, experiment_name = "", output_dir = "./"):
+
+        print ("Creating ERCC correlation")
+
         # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
         # and experiment name, which is optional    
 
