@@ -171,6 +171,10 @@ class SIRVsuiteConcentration():
         print ("Creating SIRVsuite boxplot")
 
         path = os.path.join(self.output_dir,"concentration/")
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
         figsize=(12, 5 + len(relative_abundance))
         
         fig, ax1 = plt.subplots()
@@ -234,6 +238,9 @@ class SIRVsuiteConcentration():
         print ("Creating SIRVsuite heatmap")
 
         path = os.path.join(self.output_dir,"concentration/")
+
+        if not os.path.exists(path):
+            os.makedirs(path)
 
         groups = list(relative_abundance.keys())
         transcript_names = np.array((sorted(relative_abundance[groups[0]].keys())))
