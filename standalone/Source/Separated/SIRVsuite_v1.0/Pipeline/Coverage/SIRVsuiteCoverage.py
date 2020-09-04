@@ -9,6 +9,7 @@ import copy
 import warnings
 from ..helper import *
 import sys
+from Pipeline.Coverage.CairoDrawer import CairoDrawer
 
 class SIRVsuiteCoverage():
     """
@@ -32,6 +33,8 @@ class SIRVsuiteCoverage():
 
         if output_dir == None:
             self.output_path = "/".join(__file__.split("/")[:-6]) + "/coverage"
+        else:
+            self.output_path = output_dir
 
         self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRVsuite_annotation.gtf"
         self.load_annotation(self.annotation_path)
@@ -71,7 +74,7 @@ class SIRVsuiteCoverage():
             
             for strand in self._strands:
                 for sample in cov_dict.keys():
-                    if (output_type == "bigwig"):
+                    if (output_type.lower() == "bigwig"):
                         with bwig.open(os.path.join(output_path, sample+"_"+self.__strand2text__(strand)+".bw"), "w") as bw:
                             header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys())] 
                             bw.addHeader(header)
@@ -80,7 +83,7 @@ class SIRVsuiteCoverage():
                                 chroms = np.array([gene] * len(values))
                                 bw.addEntries(chroms, starts, ends = ends, values = values)
 
-                    elif (output_type == "cov"):
+                    elif (output_type.lower() == "cov"):
                         for gene in sorted(cov_dict[sample].keys()):
                             with open(os.path.join(output_path, sample+"_"+gene+"_"+self.__strand2text__(strand)), "w") as cov:
                                 cov.write("position"+"\t"+"coverage"+"\n")
@@ -102,13 +105,12 @@ class SIRVsuiteCoverage():
         self.output_path = output_dir
         print ("output directory changed to: "+self.output_path)
     
-    def bam_to_coverage(self, sample_dict = None, output_type = "bigwig"):
+    def bam_to_coverage(self, output_type = "bigwig"):
         """
         A method for loading coverage from bam files
         """
-        if (sample_dict == None):
-            raise ValueError("Sample_dict must be specified")
-            return 
+        
+        sample_dict = self.sample_dict
 
         if self.verbose == "DEBUG":
             print ("Calculating real coverage from input files")
@@ -120,8 +122,8 @@ class SIRVsuiteCoverage():
         
         for sample in sample_dict.keys():
 
-            strandeness = sample_dict[sample]["lib_strand"]
-            bam_path = sample_dict[sample]["bam"]
+            strandeness = sample_dict[sample]["read_orientation"]
+            bam_path = sample_dict[sample]["alignment_path"]
 
             if (not os.path.exists(bam_path)):
                 if self.verbose == "debug":
@@ -194,18 +196,18 @@ class SIRVsuiteCoverage():
 
                     stat_dict[sample][gene][strand]["num_reads"] += 1
                     positions = np.array(fragmentRead.positions)
-                    positions = positions[positions<bam_gene_end] - bam_gene_start
-                    bam_coverage[sample][gene][strand][positions] += 1
-
-        # export coverage to .bw format
-        bigwig_path = os.path.join(self.output_path, "bigwig")
-        self.__cov_data_export__(bigwig_path, output_type="bigWig")
+                    positions = positions[(positions<bam_gene_end) & (positions>bam_gene_start)] - bam_gene_start
+                    bam_coverage[sample][gene][strand][positions] += 1 
 
         self.cov_stats = stat_dict
         self.bam_coverage = bam_coverage
 
-        
+        # export coverage to .bw format
+        bigwig_path = os.path.join(self.output_path, "coverage/bigwig")
+        if (not os.path.exists(bigwig_path)):
+            os.makedirs(bigwig_path)
 
+        self.__cov_data_export__(bigwig_path, output_type="bigWig")        
 
     def load_annotation(self, annotation_path):
         """
@@ -239,13 +241,17 @@ class SIRVsuiteCoverage():
 
         contig_start = [starts[sorted_idx[0]]]
         contig_end = []
-
+        thre = 0
+        
         for i in range(0,len(sorted_idx)-1):
 
             prev_idx = ends[sorted_idx[i]]
             next_idx = starts[sorted_idx[i+1]]
 
-            if (next_idx > prev_idx):
+            if prev_idx > thre:
+                thre = prev_idx
+
+            if (next_idx > thre):
                 contig_end.append(prev_idx)
                 contig_start.append(next_idx)
             
@@ -286,15 +292,39 @@ class SIRVsuiteCoverage():
         elif (not hasattr(self, "expected_coverage")):
             raise ValueError("Expected coverage not detected")
         
+        CoD_table_path = os.path.join(self.output_path, "coverage/") 
+        if not os.path.exists(CoD_table_path):
+            os.makedirs(CoD_table_path)
+        
+        experiment_name = self.experiment_name
+        if experiment_name != "":
+            experiment_name = "_" + experiment_name
+
         for mode in self.annotation_df.keys():
-            for sample in self.bam_coverage.keys():
-                for gene in self.bam_coverage[sample].keys():
-                    for strand in self.expected_coverage[gene].keys():
-                        expected_cov = self.expected_coverage[mode][gene][strand]
-                        measured_cov = self.bam_coverage[sample][gene][strand]
-                    
-                    # calculate CoD and scaling factor and assign them to the cov_stats dictionary  
-                    self.cov_stats[sample][gene][strand]["CoD"], self.cov_stats[sample][gene][strand]["scale"] = self.CoD(measured_cov, expected_cov)
+            with open(CoD_table_path+"CoD_table"+experiment_name+"_"+mode+".tsv","w") as CoD_table:
+                header = ";" + ";".join(list(sorted(self.bam_coverage.keys()))) + "\n"
+                CoD_table.write(header)
+
+                rows = dict()
+                
+                for sample in sorted(self.bam_coverage.keys()):
+                    for gene in self.bam_coverage[sample].keys():
+                        for strand in self.expected_coverage[mode][gene].keys():
+                            expected_cov = self.expected_coverage[mode][gene][strand]
+                            measured_cov = self.bam_coverage[sample][gene][strand]
+
+                            # calculate CoD and scaling factor and assign them to the cov_stats dictionary  
+                            self.cov_stats[sample][gene][strand]["CoD"], self.cov_stats[sample][gene][strand]["scale"] = self.CoD(measured_cov, expected_cov) 
+                            
+                            row_key = gene+"("+strand+")"
+                            if row_key not in rows.keys():
+                                rows[row_key] = str(self.cov_stats[sample][gene][strand]["CoD"])
+                            else:
+                                rows[row_key] += ";" + str(self.cov_stats[sample][gene][strand]["CoD"])
+            
+                for row_idx in rows.keys():
+                    CoD_table.write(row_idx + ";" + rows[row_idx]+"\n") 
+                   
 
     def CoD(self,real_cov,expect_cov):
         """
@@ -394,7 +424,7 @@ class SIRVsuiteCoverage():
         if (not hasattr(self, "annotation_df")):
             raise ValueError("No annotation detected for theoretical coverage.. Please load annotation in .gtf or .bed format.")
         
-        if (len(transition_lengths) != 2):
+        if (len(tlen_model_param) != 2):
             raise ValueError("The length of passed array 'transition_lengths' does no correspond model requirement..")
     
         if mode == "UTR":
@@ -408,7 +438,7 @@ class SIRVsuiteCoverage():
 
             annotation_df = self.annotation_df[mode]
 
-            self.target_gene_id = np.unique(annotation_df["gene_id"])
+            #self.target_gene_id = np.unique(annotation_df["gene_id"])
             expected_coverage[mode] = dict()
 
             for gene in self.target_gene_id:
@@ -422,7 +452,7 @@ class SIRVsuiteCoverage():
 
                 self.gene_coords[gene] = (start_coord, end_coord) 
                 
-                expected_coverage[gene] = dict()
+                expected_coverage[mode][gene] = dict()
                 
                 for strand in self._strands:
                     
@@ -433,7 +463,7 @@ class SIRVsuiteCoverage():
                         continue
 
                     # initialize base for coverage with 0s 
-                    expected_coverage[gene][strand] = np.zeros(end_coord-start_coord+1)
+                    expected_coverage[mode][gene][strand] = np.zeros(end_coord-start_coord+1)
 
                     for transcript in np.unique(stranded_gene_annot["transcript_id"]):
                         
@@ -460,8 +490,168 @@ class SIRVsuiteCoverage():
 
                             # apply weights for transition lengths for transcript start and end
                             weights = weights * weights[::-1]
-                            expected_coverage[gene][strand][shifted_start:shifted_end] += weights[weight_idx:(weight_idx + exon_lengths[row_idx])]
+                            expected_coverage[mode][gene][strand][shifted_start:shifted_end] += weights[weight_idx:(weight_idx + exon_lengths[row_idx])]
 
                             weight_idx += exon_lengths[row_idx]
 
         self.expected_coverage = expected_coverage
+
+    def coverage_plot(self):
+        
+        # define base sizes, coordinates
+        page_width = 2000
+        page_height = 1324
+
+        title_y = 40
+        title_size = 40
+
+        panel_gap_y = title_size 
+
+        header_y = title_size + panel_gap_y
+        header_height = page_height / 6
+
+        exon_panel_x = page_width / 28
+        exon_panel_width = page_width - 2*exon_panel_x
+        exon_panel_height = page_height / 3
+
+        transcript_line_offset_x = exon_panel_x + exon_panel_width * 0.1
+        
+        transcript_line_width = exon_panel_width * 0.8
+
+        transcript_text_x = exon_panel_x + (transcript_line_offset_x - exon_panel_x)/2
+        coverage_panel_x = exon_panel_x
+        
+        coverage_panel_width = exon_panel_width
+        coverage_panel_height = exon_panel_height 
+        
+        if "UTR" in self.annotation_df.keys():
+            mode = "UTR"
+        else:
+            mode = "whole"
+
+        if self.experiment_name != "":
+            tab = {"Experiment":self.experiment_name}
+        else:
+            tab = {}
+            header_height = header_height*3/4
+
+        for gene in self.target_gene_id:
+
+            
+            max_expect_covs = max([max(self.expected_coverage["whole"][gene][s]) for s in self.expected_coverage["whole"][gene].keys()])
+            
+            gene_annot = self.annotation_df["whole"][self.annotation_df["whole"]["gene_id"] == gene]
+            transcripts = sorted(set(gene_annot["transcript_id"]))
+            start_pos, end_pos = self.get_continous_coverage_ends(list(gene_annot["Start"]), list(gene_annot["End"]))
+            segment_lengths = [end_pos[i] - start_pos[i] for i in range(len(start_pos))]
+            
+            total_segment_length = sum(segment_lengths)
+            num_segments = len(start_pos)
+            
+            exon_height = exon_panel_height/len(transcripts)*0.6
+            transcript_row_gap = exon_panel_height/(len(transcripts)+1)
+
+            intersegment_gap = 40
+            draw_length = transcript_line_width - (num_segments+1)*intersegment_gap
+            
+            tab["Gene"] = gene
+
+            for sample in self.bam_coverage.keys():
+
+                scale_coef = max([self.cov_stats[sample][gene][s]["scale"] for s in self.cov_stats[sample][gene].keys()])  
+                
+                output_path = os.path.join(self.output_path, "coverage/coverage_plots/"+sample+"/"+gene+"/")
+                
+                d = CairoDrawer(output_path+"coverage.png", width = page_width, height = page_height)
+
+                ## CREATE HEADER
+                d.draw_text(text="SIRVsuite coverage", y = title_y, x = page_width/2, h_align="center", font_size=title_size)
+                
+                tab["Sample"] = sample
+                tab["Mode"] = mode
+                
+                exon_panel_y = header_y + header_height + panel_gap_y
+                transcript_line_offset_y = exon_panel_y + exon_panel_height * 0.05
+                transcript_text_y = transcript_line_offset_y
+                coverage_panel_y = exon_panel_y + exon_panel_height + panel_gap_y
+                
+                d.draw_table(table_dict=tab,x=exon_panel_x,y=header_y,width=exon_panel_width/3,height=header_height)
+
+                d.draw_rectangle(x = exon_panel_x,
+                    y = exon_panel_y,
+                    width = exon_panel_width,
+                    height = exon_panel_height,
+                    color_fill=(.5,.5,.5),
+                    alpha = 0.3)
+
+                t_y = exon_panel_y + transcript_row_gap*2/3 
+
+                for transcript in transcripts:
+
+                    transcript_annot = gene_annot[gene_annot["transcript_id"] == transcript]
+
+                    if "+" in set(transcript_annot["Strand"]):
+                        color_exon = (60/255,140/255,80/255)
+                    elif "-" in set(transcript_annot["Strand"]):
+                        color_exon = (0/255,120/255,180/255)
+                    
+                    d.draw_line(x = transcript_line_offset_x, 
+                        y = t_y + exon_height/2, 
+                        width = transcript_line_width, line_width = 2)
+
+                    segment_start = transcript_line_offset_x + intersegment_gap
+                    for segment_idx in range(len(start_pos)):
+                        exons_in_segment = transcript_annot[(transcript_annot["Start"] >= start_pos[segment_idx]) & (transcript_annot["End"] <= end_pos[segment_idx])]
+                        lengths = exons_in_segment["End"] - exons_in_segment["Start"] + 1
+                    
+                        for exon_idx in range(len(exons_in_segment)):
+                            relative_pos_x = segment_start + (int(exons_in_segment.iloc[exon_idx]["Start"]) - start_pos[segment_idx] + 1) / total_segment_length * draw_length
+                            relative_width = (int(exons_in_segment.iloc[exon_idx]["End"]) - int(exons_in_segment.iloc[exon_idx]["Start"]) + 1) / total_segment_length * draw_length
+
+                            d.draw_rectangle(x=relative_pos_x, y=t_y, width=relative_width, height=exon_height, alpha=1, color_fill=color_exon)
+
+                        segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
+
+                    t_y += transcript_row_gap
+
+                    d.draw_text(text = transcript, 
+                        x = transcript_text_x, 
+                        y = t_y - 34, 
+                        font_size = 28,
+                        v_align="bottom")
+                
+                for strand in self.expected_coverage["whole"][gene].keys():
+                    segment_start = transcript_line_offset_x + intersegment_gap
+                    for segment_idx in range(len(start_pos)):
+
+                        gene_pos = self.gene_coords[gene]
+
+                        start = start_pos[segment_idx] - gene_pos[0]
+                        end = end_pos[segment_idx] - gene_pos[0]
+
+                        expected_cov = self.expected_coverage["whole"][gene][strand]
+                        max_e = max(expected_cov)
+                        expected_cov = expected_cov[start:end]
+
+                        if (strand == "+"):
+                            upside_down = True
+                            color_fill = (60/255,140/255,80/255)
+                        elif (strand == "-"):
+                            upside_down = False
+                            color_fill = (0/255,120/255,180/255)
+
+                        d.draw_signal(signal = expected_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
+                        width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = coverage_panel_height/2*max_e/max_expect_covs,
+                        mode = "segment", upside_down = upside_down, line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8)
+                        
+                        real_cov = self.bam_coverage[sample][gene][strand][start:end] / scale_coef
+
+                        d.draw_signal(signal = real_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
+                        width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = coverage_panel_height/2*max_e/max_expect_covs,
+                        mode = "normal", upside_down = upside_down, 
+                        y_max = max_e,
+                        line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8)
+                         
+                        segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
+                d.finish()
+

@@ -1124,8 +1124,7 @@ class SIRVsuite_coverage:
                         lineInnerHeight = coveragePlot_height-offsetY_lines
                         lineLength = endX_line-startX_line
 
-                        for i in np.arange(0,len(sirvTranscripts)): 
-
+                        for i in np.arange(0,len(sirvTranscripts)): s
                             
                             cr.set_font_size(exonHeight*12/10)
                             (_, _, width, height, _, _) = cr.text_extents(sirvTranscripts[i]) 

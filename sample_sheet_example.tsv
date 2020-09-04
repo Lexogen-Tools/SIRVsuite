@@ -1,0 +1,4 @@
+sample_name;	alignment_path;	counting_path;	read_orientation;	counting_method;	counting_feature; library_prep_type; replicate_group
+NGS2.54_0002;	/home/tdrozd/Lexogen/development/NGS2.59/NGS2.59_0067/Aligned.sortedByCoord.out.bam;	/home/data/slurm_scratch/tdrozd/DAP/DEV/575/output/transcripts_summary_Aligned.sortedByCoord.out.dat;	FWD;	mix2;	transcript; whole;	1
+NGS2.54_0003;	/home/tdrozd/Lexogen/development/NGS2.59/NGS2.59_0068/Aligned.sortedByCoord.out.bam;	/home/data/slurm_scratch/tdrozd/DAP/DEV/576/output/transcripts_summary_Aligned.sortedByCoord.out.dat;	FWD;	MIX2;	transcript;	whole;	2
+NGS2.54_0004;	/home/tdrozd/Lexogen/development/NGS2.59/NGS2.59_0069/Aligned.sortedByCoord.out.bam;	/home/data/slurm_scratch/tdrozd/DAP/DEV/577/output/transcripts_summary_Aligned.sortedByCoord.out.dat;	FWD;	mIx2;	transcript;	whole;	3

@@ -169,19 +169,20 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                                 sample_sheet_dict[module][row.get("sample_name")][col] = row.get(col)  
                     else:
                         raise ValueError("Cannot proceed with module: %s"%(module))
+                    
+                    if module == "concentration":
+                        c_methods = set([sample_sheet_dict[module][i]["counting_method"] for i in sample_sheet_dict[module].keys()])
+                        c_features = set([sample_sheet_dict[module][i]["counting_feature"] for i in sample_sheet_dict[module].keys()])
+                        c_library_prep = set([sample_sheet_dict[module][i]["library_prep_type"] for i in sample_sheet_dict[module].keys()])
+                        
+                        if len(c_methods) > 1:
+                            raise ValueError("Cannot proceed with different counting_methods..")
 
-        c_methods = set([sample_sheet_dict["concentration"][i]["counting_method"] for i in sample_sheet_dict["concentration"].keys()])
-        c_features = set([sample_sheet_dict["concentration"][i]["counting_feature"] for i in sample_sheet_dict["concentration"].keys()])
-        c_library_prep = set([sample_sheet_dict["concentration"][i]["library_prep_type"] for i in sample_sheet_dict["concentration"].keys()])
-        
-        if len(c_methods) > 1:
-            raise ValueError("Cannot proceed with different counting_methods..")
+                        if len(c_features) > 1:
+                            raise ValueError("Cannot proceed with different counting_features..")
 
-        if len(c_features) > 1:
-            raise ValueError("Cannot proceed with different counting_features..")
-
-        if len(c_library_prep) > 1:
-            raise ValueError("Cannot proceed with different library_preps..")
+                        if len(c_library_prep) > 1:
+                            raise ValueError("Cannot proceed with different library_preps..")
         
     except ValueError as e:
         sys.exit(e)

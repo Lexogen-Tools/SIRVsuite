@@ -1,6 +1,7 @@
 import cairo 
 import re
 import numpy as np
+import os
 
 from Pipeline.helper import *
 
@@ -21,6 +22,11 @@ class CairoDrawer():
             raise NameError("There must be out_path specified!")
         else:
             self.out_path = out_path
+        
+
+        path = path_features(out_path)["path"]
+        if not os.path.exists(path):
+            os.makedirs(path)
         
         # creating cairo surface for drawing
         
@@ -236,7 +242,7 @@ class CairoDrawer():
         
         return differences
         
-    def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0, alpha = 1, upside_down = False):
+    def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0, alpha_fill = 1, alpha_line = 1, upside_down = False):
         """
         
         """
@@ -245,7 +251,7 @@ class CairoDrawer():
         ctx.save()
         ctx.set_line_cap(cairo.LINE_CAP_ROUND)
         ctx.set_line_width(line_width)
-        ctx.translate(x, y + height/2)
+        ctx.translate(x, y)
         ctx.rotate(rotate * np.pi/180)
         
         if (upside_down):
@@ -255,14 +261,14 @@ class CairoDrawer():
         
         signal = np.array(signal)
         steps = np.linspace(len(signal)/width, width, len(signal))
-
-        height = height/2
         
         rel_x = 0
         rel_y = 0
         
         ctx.new_path()
         ctx.move_to(rel_x, rel_y) 
+
+        can_close_path = True
         
         if y_max != None:
             exceeding_part = np.array(signal>=y_max).astype(int)
@@ -283,8 +289,11 @@ class CairoDrawer():
                                    alpha = .4)
             """
             signal[signal>=y_max] = y_max
-            
-        calculate_pos_y = lambda x: x / max(signal) * height
+        if max(signal) != 0:    
+            calculate_pos_y = lambda x: x / max(signal) * height
+        else:
+            calculate_pos_y = lambda x: 0
+        
         val_y = calculate_pos_y(signal[0])
         
         ctx.line_to(rel_x, rel_y - val_y)
@@ -296,34 +305,41 @@ class CairoDrawer():
         
         elif (mode == "segment"):
             vector = self.return_differences(signal, boundary_fill = False)
-            
-            for index_diff, index_sig in enumerate(vector[:-1]):
+            if len(vector) != 0:
+                for index_diff, index_sig in enumerate(vector[:-1]):
+                    
+                    ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
+                    val_y = calculate_pos_y(signal[index_sig+1])
+                    ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
                 
-                ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
-                val_y = calculate_pos_y(signal[index_sig + 1])
-                ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
-            
-            ctx.line_to(rel_x + width, rel_y - val_y)
+                ctx.line_to(rel_x + width, rel_y - val_y)
+            else:
+                can_close_path = False
         
         ctx.line_to(rel_x + width, rel_y)
-        ctx.close_path()
-        ctx.set_source_rgba(color_fill[0], color_fill[1], color_fill[2], alpha)
-        ctx.fill_preserve()
-        ctx.set_source_rgba(color_line[0], color_line[1], color_line[2], alpha)
+        
+        if (can_close_path):
+            ctx.close_path()
+            ctx.set_source_rgba(color_fill[0], color_fill[1], color_fill[2], alpha_fill)
+            ctx.fill_preserve()
+
+        ctx.set_source_rgba(color_line[0], color_line[1], color_line[2], alpha_line)
         ctx.stroke()
         ctx.restore()
         
         if (y_max != None):
             
             if (not upside_down):
-                triangle_y = y - gap_arrow_y
+                triangle_y = y - height - gap_arrow_y
+                line_y = y - height
                 rotate = 0
             else:
-                triangle_y = y + height*2 + gap_arrow_y
+                triangle_y = y + height + gap_arrow_y
+                line_y = y + height
                 rotate = 180
             
             for i in range(len(starts)):
-                self.draw_line(x=x + steps[starts[i]],y=y, width=(steps[ends[i]-1]-steps[starts[i]]), color=(1,0,0), line_width=2)
+                self.draw_line(x=x + steps[starts[i]],y=line_y, width=(steps[ends[i]-1]-steps[starts[i]]), color=(1,0,0), line_width=2)
                 self.draw_triangle(x = x + steps[starts[i]] + (steps[ends[i]-1]-steps[starts[i]])/2,
                                    y = triangle_y,
                                    width = arrow_width,
