@@ -29,7 +29,7 @@ class SIRVsuiteCoverage():
     def __init__(self, sample_sheet = None, output_dir = "./", gene_list = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"], experiment_name = ""):
 
         self.verbose = "DEBUG"
-        self.target_gene_id = gene_list
+        #self.target_gene_id = gene_list
 
         if output_dir == None:
             self.output_path = "/".join(__file__.split("/")[:-6]) + "/coverage"
@@ -148,6 +148,9 @@ class SIRVsuiteCoverage():
                     contig_id = annotation_df["Chromosome"][annotation_df["gene_id"] == gene].values[0]
                 else:
                     contig_id = gene
+
+                if contig_id not in bamFile.references:
+                    continue
          
                 bam_coverage[sample][gene] = dict()
                 stat_dict[sample][gene] = dict()
@@ -170,7 +173,7 @@ class SIRVsuiteCoverage():
                     bam_coverage[sample][gene]["+"] = np.zeros(length)
                     bam_coverage[sample][gene]["-"] = np.zeros(length)
                     stat_dict[sample][gene]["+"] = copy.deepcopy(stats)
-                    stat_dict[sample][gene]["-"] = copy.deepcopy(stats)
+                    stat_dict[sample][gene]["-"] = copy.deepcopy(stats)                
 
                 for fragmentRead in bamFile.fetch(contig_id, bam_gene_start, bam_gene_end):
 
@@ -437,7 +440,7 @@ class SIRVsuiteCoverage():
 
             annotation_df = self.annotation_df[mode]
 
-            #self.target_gene_id = np.unique(annotation_df["gene_id"])
+            self.target_gene_id = np.unique(annotation_df["gene_id"])
             expected_coverage[mode] = dict()
 
             for gene in self.target_gene_id:
