@@ -155,7 +155,7 @@ class SIRVsuiteConcentration():
 
         groups = list(norm_abund_dict.keys())
 
-        path = os.path.join(self.output_dir+"concentration/")
+        path = os.path.join(self.output_dir,"concentration/")
 
         if (not os.path.exists(path)):
             os.makedirs(path)
