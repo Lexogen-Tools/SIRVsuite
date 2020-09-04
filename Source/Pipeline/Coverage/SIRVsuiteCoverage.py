@@ -131,7 +131,7 @@ class SIRVsuiteCoverage():
                 index_path = bam_path + ".bai"
 
                 if (not os.path.exists(index_path)):
-                    ps.index(index_path)
+                    ps.index(bam_path)
                     if self.verbose == "debug":
                         print (".bai index file not detected.. creating index file..")
 
