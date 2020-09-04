@@ -1,4 +1,5 @@
 import argparse as ap
+import os
 
 from Pipeline.Coverage.SIRVsuiteCoverage import SIRVsuiteCoverage
 from Pipeline.Concentration.SIRVsuite_concentration import SIRVsuiteConcentration
@@ -29,13 +30,26 @@ out = args.output_dir[0]
 input_dict = read_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv", modules_to_execute = modules_to_execute)
 
 if "concentration" in modules_to_execute:
-    if (args.ERCC_correlation):
-        a = ERCCcorrelation(sample_sheet=input_dict["concentration"], output_dir=out)
+
+    a = []
+    b = []
     
     if (args.SIRV_concentration):
         b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out)
-        b.create_sirvsuite_boxplot(c.data)
-        b.create_sirvsuite_heatmap(c.data)
+        b.create_sirvsuite_boxplot(b.data)
+        b.create_sirvsuite_heatmap(b.data)
+
+    if (args.ERCC_correlation and not args.SIRVsuite_concentration):
+        a = ERCCcorrelation(sample_sheet=input_dict["concentration"], output_dir=out)
+    else:
+        cnts = b.cnts
+        a = ERCCcorrelation()
+        a.ERCC_correlation(cnts, output_dir=os.path.join(out,"correlation/"))
+    
+    # delete after processsing
+    del cnts
+    del a
+    del b
 
 if "coverage" in modules_to_execute:
     c = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name = "")
@@ -43,3 +57,5 @@ if "coverage" in modules_to_execute:
     c.bam_to_coverage()
     c.calc_statistics()
     c.coverage_plot()
+
+    del c

@@ -62,12 +62,10 @@ class SIRVsuiteConcentration():
         
         im = ax.imshow(data, **kwargs, vmin = -1, vmax = 1, cmap = CustomCmap)
         ax.yaxis.set_label_coords(-0.1,10)
-
-        #norm = matplotlib.colors.Normalize(vmin=-1, vmax=1) norm = norm,
         
         fraction = 1
 
-        cbar = ax.figure.colorbar(im, ax = ax, **cbar_kw, cmap = CustomCmap, shrink = fraction*(6/len(row_labels)), pad = 0.05)
+        cbar = ax.figure.colorbar(im, ax = ax, **cbar_kw, shrink = fraction*(6/len(row_labels)), pad = 0.05)
         cbar.ax.set_ylabel(cbarlabel, rotation = -90, va = "top", fontsize = 16, labelpad = 20)
 
         if not no_x_ticks:
@@ -93,7 +91,7 @@ class SIRVsuiteConcentration():
         ax.set_yticks(np.arange(data.shape[0]+1)-.5, minor=True)
         ax.grid(which="minor", color="w", linestyle='-', linewidth=3)
         ax.tick_params(which="minor", bottom=False, left=False)
-        # return also cbar
+
         return im, cbar
 
 
@@ -203,7 +201,6 @@ class SIRVsuiteConcentration():
                     patch_artist = True,
                     showfliers = False)
 
-        # meanprops = dict(marker='o',markeredgecolor='red', markerfacecolor = 'green', markersize = 8 , alpha = 0.7),
         ax1.plot([1,1],[0,len(relative_abundance) + 1], color = 'darkblue', alpha = .6)
         ax1.set_ylim([0,len(relative_abundance) + 1])
 
@@ -292,49 +289,3 @@ class SIRVsuiteConcentration():
 
         output_name = os.path.join(path, "SIRVsuite_heatmap.png") 
         fig.savefig(output_name, dpi = 300, quality = 90, pad_inches = 0.2, bbox_inches = 'tight')
-
-
-
-
-## PARSING ARUGMENTS ##
-"""
-parser = ap.ArgumentParser()
-parser.add_argument('-f','--file-names', action = 'store', help = "", required = True, nargs = "+")
-parser.add_argument('-o','--output-path', action = 'store', help = "", required = True, nargs = 1)
-parser.add_argument('-n','--sample-names', action = 'store', help = "", required = False, nargs = "+")
-parser.add_argument('-g','--sample-groups', action = 'store', help = "", required = False, nargs = "+")
-parser.add_argument('--experiment-name',action = 'store', help = "", required = False, default = "", nargs = 1)
-args = parser.parse_args()
-
-
-
-## READING MIX2 FILES
-
-sample_names = np.array(args.sample_names)
-files = args.file_names
-groups = np.array(args.sample_groups)
-
-## Checking arguments ##
-#if (len(files) != len(sample_names)):
-#    raise Exception("Error while loading input..")
-    
-if (np.all(groups == None)):
-    groups = sample_names
-else:
-    if (len(files) != len(groups)):
-        raise Exception("Error while loading input..")
-
-groups_unique = np.unique(groups)
-
-"""
-"""
-experiment_name = "FFPE_k2"
-
-file_dict = load_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sheet_cufflinks.tsv")
-relative_abundance = get_relative_abundance(file_dict)
-
-
-"""
-#export_data(relative_abundance, "/home/tdrozd/development/sirv-suite/test/")
-#create_sirvsuite_heatmap(relative_abundance, output_path = "/home/tdrozd/development/sirv-suite/test/", experiment_name = experiment_name)
-#create_sirvsuite_boxplot(relative_abundance, output_path = "/home/tdrozd/development/sirv-suite/test/", experiment_name = experiment_name)
