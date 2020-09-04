@@ -65,7 +65,7 @@ class CairoDrawer():
 
 
 
-    def draw_text(self, text = None, x = None, y = None, font_size = 28, rotate = 0, color_rgb = (0,0,0), h_align = "center", v_align = "center"):
+    def draw_text(self, text = None, x = None, y = None, font_size = 28, rotate = 0, color_rgb = (0,0,0), alpha = 1, h_align = "center", v_align = "center"):
         """
         
         """
@@ -75,25 +75,27 @@ class CairoDrawer():
 
         if (text == None):
             return
+
+        self.ctx.translate(x, y)    
         
-        self.ctx.set_source_rgb(color_rgb[0],color_rgb[1],color_rgb[2])
+        self.ctx.set_source_rgba(color_rgb[0],color_rgb[1],color_rgb[2], alpha)
         self.ctx.set_font_size(font_size)
         
         txt_obj = self.ctx.text_extents(text) 
 
         if h_align == "center":
-            x = x - txt_obj.width/2 
+            x = -txt_obj.width/2 
         elif h_align == "right":
-            x = x - txt_obj.width
+            x = -txt_obj.width
         elif h_align == "left":
-            x = x
+            x = 0
 
         if v_align == "center":
-            y = y + txt_obj.height/2 - (txt_obj.height + txt_obj.y_bearing)
+            y = txt_obj.height/2 - (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "bottom":
-            y = y + txt_obj.height/2 + (txt_obj.height + txt_obj.y_bearing)
+            y = txt_obj.height/2 + (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "top":
-            y = y
+            y = 0
 
         self.ctx.move_to(x,y)
         self.ctx.rotate(rotate * np.pi/180)
@@ -260,14 +262,13 @@ class CairoDrawer():
         sig_length = len(signal)
         
         signal = np.array(signal)
-        steps = np.linspace(len(signal)/width, width, len(signal))
+        #steps = np.linspace(len(signal)/width, width, len(signal))
+        steps = np.linspace(0, width, len(signal)+1)
         
         rel_x = 0
         rel_y = 0
         
         ctx.new_path()
-        ctx.move_to(rel_x, rel_y) 
-
         can_close_path = True
         
         if y_max != None:
@@ -297,27 +298,35 @@ class CairoDrawer():
 
         val_y = calculate_pos_y(signal[0])
         
-        ctx.line_to(rel_x, rel_y - val_y)
-        
         if (mode == "normal"):
+
+            ctx.move_to(rel_x, rel_y)   
+            ctx.line_to(rel_x, rel_y - val_y)
+
             for index in range(1,len(signal)):
                 val_y = calculate_pos_y(signal[index])
                 ctx.line_to(rel_x + steps[index],rel_y - val_y)
+            
+            ctx.line_to(rel_x + width, rel_y)
         
         elif (mode == "segment"):
             vector = self.return_differences(signal, boundary_fill = False)
+
             if len(vector) != 0:
-                for index_diff, index_sig in enumerate(vector[:-1]):
+
+                ctx.move_to(rel_x + steps[vector[0]], rel_y)
+                ctx.line_to(rel_x + steps[vector[0]], rel_y - val_y)
+
+                for index_diff, index_sig in enumerate(vector[0:-1]):
                     
                     ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
                     val_y = calculate_pos_y(signal[index_sig])
                     ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
                 
-                ctx.line_to(rel_x + width, rel_y - val_y)
+                ctx.line_to(rel_x + steps[vector[-1]], rel_y - val_y)
+                ctx.line_to(rel_x + steps[vector[-1]], rel_y)
             else:
                 can_close_path = False
-        
-        ctx.line_to(rel_x + width, rel_y)
         
         if (can_close_path):
             ctx.close_path()

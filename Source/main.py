@@ -1,11 +1,10 @@
 import argparse as ap
 import os
-
+import sys
 from Pipeline.Coverage.SIRVsuiteCoverage import SIRVsuiteCoverage
 from Pipeline.Concentration.SIRVsuite_concentration import SIRVsuiteConcentration
 from Pipeline.Correlation.ERCC_correlation import ERCCcorrelation
 from Pipeline.helper import *
-
 
 parser = ap.ArgumentParser()
 parser.add_argument('-i','--sample-sheet', action = 'store', help = "Specify path to the sample sheet.", required = True, nargs = 1)
@@ -26,22 +25,32 @@ if (args.coverage or args.all_modules):
     modules_to_execute.append("coverage")
 
 out = args.output_dir[0]
+input_path = args.sample_sheet[0]
 
-input_dict = read_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv", modules_to_execute = modules_to_execute)
+input_dict = read_sample_sheet(input_path, modules_to_execute = modules_to_execute)
 
 if "concentration" in modules_to_execute:
 
     a = []
     b = []
+    cnts = []
+
+    if (args.all_modules):
+        b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out)
+        b.create_sirvsuite_boxplot(b.data)
+        b.create_sirvsuite_heatmap(b.data)
+        cnts = b.cnts
+        a = ERCCcorrelation()
+        a.ERCC_correlation(cnts, output_dir=os.path.join(out,"correlation/"))
     
     if (args.SIRV_concentration):
         b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out)
         b.create_sirvsuite_boxplot(b.data)
         b.create_sirvsuite_heatmap(b.data)
 
-    if (args.ERCC_correlation and not args.SIRVsuite_concentration):
+    if (args.ERCC_correlation and not args.SIRV_concentration):
         a = ERCCcorrelation(sample_sheet=input_dict["concentration"], output_dir=out)
-    else:
+    elif (args.ERCC_correlation and args.SIRV_concentration):
         cnts = b.cnts
         a = ERCCcorrelation()
         a.ERCC_correlation(cnts, output_dir=os.path.join(out,"correlation/"))

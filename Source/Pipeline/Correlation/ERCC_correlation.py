@@ -9,13 +9,14 @@ from ..countReader import countReader
 
 class ERCCcorrelation():
 
-    def __init__(self, sample_sheet, output_dir = "./"):
-        c = countReader()
-        cnts = dict()
-        for sample in sample_sheet.keys():    
-            cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method=sample_sheet[sample]["counting_method"],counting_type=sample_sheet[sample]["counting_feature"],spike_in_type=["ERCC"])
+    def __init__(self, sample_sheet = None, output_dir = "./"):
+        if sample_sheet:
+            c = countReader()
+            cnts = dict()
+            for sample in sample_sheet.keys():    
+                cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method=sample_sheet[sample]["counting_method"],counting_type=sample_sheet[sample]["counting_feature"],spike_in_type=["ERCC"])
         
-        self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"))
+            self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"))
 
     def read_ERCC_concentration_table(self, ERCC_table_path):
         # Reading of ERCC concentration table
@@ -28,10 +29,16 @@ class ERCCcorrelation():
         return (conc, reader.fieldnames[2:])
             
     def ERCC_correlation(self, data, experiment_name = "", output_dir = "./"):
+
+        print ("Creating ERCC correlation")
+
         # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
         # and experiment name, which is optional    
 
-        ERCC_conc,_ = self.read_ERCC_concentration_table("Resources/ERCC92_Concentration.tsv")
+        ERCC_table_path = os.path.dirname(__file__)
+        ERCC_table_path = ERCC_table_path.replace("Pipeline/Correlation","Resources/ERCC92_Concentration.tsv")
+
+        ERCC_conc,_ = self.read_ERCC_concentration_table(ERCC_table_path)
         ercc_spike_in = "Mix1"
 
         #cnt_data_total = get_data(file_list, types, sample_names)
