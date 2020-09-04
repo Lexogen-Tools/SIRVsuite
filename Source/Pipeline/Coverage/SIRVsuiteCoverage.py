@@ -26,10 +26,10 @@ class SIRVsuiteCoverage():
     (annotation is identical to the one which can be found https://www.lexogen.com/sirvs/download/ under section SIRV-Set 4)
 
     """
-    def __init__(self, sample_sheet = None, output_dir = "./", gene_list = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"], experiment_name = ""):
+    def __init__(self, sample_sheet = None, output_dir = "./", gene_list = ["SIRV1","SIRV2","SIRV3"], experiment_name = ""):
 
         self.verbose = "DEBUG"
-        #self.target_gene_id = gene_list
+        self.target_gene_id = gene_list
 
         if output_dir == None:
             self.output_path = "/".join(__file__.split("/")[:-6]) + "/coverage"
@@ -76,6 +76,8 @@ class SIRVsuiteCoverage():
                     if (output_type.lower() == "bigwig"):
                         with bwig.open(os.path.join(output_path, sample+"_"+self.__strand2text__(strand)+".bw"), "w") as bw:
                             header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys()) if strand in cov_dict[sample][gene].keys()] 
+                            if (len(header) == 0):
+                                    continue
                             bw.addHeader(header)
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
@@ -151,6 +153,8 @@ class SIRVsuiteCoverage():
 
                 if contig_id not in bamFile.references:
                     continue
+                    del self.expected_coverage["whole"][contig_id]
+                    del self.cov_stats[contig_id]
          
                 bam_coverage[sample][gene] = dict()
                 stat_dict[sample][gene] = dict()
@@ -287,6 +291,8 @@ class SIRVsuiteCoverage():
         """
         The method checks for bam coverages and expected coverages and then calculates CoD and scaling factor for particular samples, genes and strands 
         """
+
+        print ("calculating statistics")
 
         # check if all attributes present
         if (not hasattr(self, "cov_stats") or not hasattr(self, "bam_coverage")):
@@ -499,6 +505,8 @@ class SIRVsuiteCoverage():
         self.expected_coverage = expected_coverage
 
     def coverage_plot(self):
+
+        print ("creating coverage plots")
         
         # define base sizes, coordinates
         page_width = 2000
@@ -537,7 +545,9 @@ class SIRVsuiteCoverage():
             tab = {}
             header_height = header_height*3/4
 
-        for gene in self.target_gene_id:
+        for gene in self.expected_coverage["whole"].keys():
+
+            
             
             max_expect_covs = max([max(self.expected_coverage["whole"][gene][s]) for s in self.expected_coverage["whole"][gene].keys()])
             
@@ -560,7 +570,10 @@ class SIRVsuiteCoverage():
             basic_scaling = (coverage_panel_height)/(max_expect_covs*exon_height)
 
             for sample in self.bam_coverage.keys():
-
+                
+                if gene not in self.cov_stats[sample].keys():
+                    continue
+                
                 scale_coef = max([self.cov_stats[sample][gene][s]["scale"] for s in self.cov_stats[sample][gene].keys() if "CoD" in self.cov_stats[sample][gene][s].keys()])  
                 
                 output_path = os.path.join(self.output_path, "coverage/coverage_plots/"+sample+"/"+gene+"/")
