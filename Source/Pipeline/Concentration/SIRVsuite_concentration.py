@@ -44,7 +44,7 @@ class SIRVsuiteConcentration():
         cnts = dict()
         for group in grouped_samples.keys():
             c = countReader()
-            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV"], counting_method=method, counting_type = "transcript")
+            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV","ERCC"], counting_method=method, counting_type = "transcript")
         
         self.cnts = cnts
         self.data = self.get_relative_abundance(cnts)

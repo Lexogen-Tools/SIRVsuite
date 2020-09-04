@@ -9,13 +9,14 @@ from ..countReader import countReader
 
 class ERCCcorrelation():
 
-    def __init__(self, sample_sheet, output_dir = "./"):
-        c = countReader()
-        cnts = dict()
-        for sample in sample_sheet.keys():    
-            cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method=sample_sheet[sample]["counting_method"],counting_type=sample_sheet[sample]["counting_feature"],spike_in_type=["ERCC"])
+    def __init__(self, sample_sheet = None, output_dir = "./"):
+        if sample_sheet:
+            c = countReader()
+            cnts = dict()
+            for sample in sample_sheet.keys():    
+                cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method=sample_sheet[sample]["counting_method"],counting_type=sample_sheet[sample]["counting_feature"],spike_in_type=["ERCC"])
         
-        self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"))
+            self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"))
 
     def read_ERCC_concentration_table(self, ERCC_table_path):
         # Reading of ERCC concentration table
