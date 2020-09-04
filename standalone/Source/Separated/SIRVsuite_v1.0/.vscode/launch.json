@@ -10,7 +10,10 @@
             "type": "python",
             "request": "launch",
             "program": "main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": ["--SIRV-concentration",
+                    "-o", "/home/tdrozd/development/sirv-suite/standalone/output/",
+                    "-i","/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv"]
         },
         {
             "name": "drawer-test",

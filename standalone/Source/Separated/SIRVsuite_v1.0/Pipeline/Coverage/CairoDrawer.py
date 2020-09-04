@@ -271,7 +271,7 @@ class CairoDrawer():
         can_close_path = True
         
         if y_max != None:
-            exceeding_part = np.array(signal>=y_max).astype(int)
+            exceeding_part = np.array(signal>y_max).astype(int)
             starts = self.return_differences(exceeding_part, mode = 'positive')
             ends = self.return_differences(exceeding_part, mode = 'negative')
             
@@ -289,11 +289,12 @@ class CairoDrawer():
                                    alpha = .4)
             """
             signal[signal>=y_max] = y_max
-        if max(signal) != 0:    
-            calculate_pos_y = lambda x: x / max(signal) * height
+
+        if y_max:    
+            calculate_pos_y = lambda x: x / y_max * height
         else:
-            calculate_pos_y = lambda x: 0
-        
+            calculate_pos_y = lambda x: x / max(signal) * height
+
         val_y = calculate_pos_y(signal[0])
         
         ctx.line_to(rel_x, rel_y - val_y)
@@ -309,7 +310,7 @@ class CairoDrawer():
                 for index_diff, index_sig in enumerate(vector[:-1]):
                     
                     ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
-                    val_y = calculate_pos_y(signal[index_sig+1])
+                    val_y = calculate_pos_y(signal[index_sig])
                     ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
                 
                 ctx.line_to(rel_x + width, rel_y - val_y)

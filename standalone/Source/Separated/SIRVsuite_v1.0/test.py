@@ -17,9 +17,9 @@ parser.add_argument('--experiment-name',action = 'store', default="", help = "Sp
 args = parser.parse_args()
 """
 
-modules_to_execute = ["coverage"]
+modules_to_execute = ["coverage", "concentration"]
 
-input_dict = read_sample_sheet("/home/tdrozd/Lexogen/development/sirv-suite/sample_sheet_example.tsv", modules_to_execute = modules_to_execute)
+input_dict = read_sample_sheet("/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv", modules_to_execute = modules_to_execute)
 out = "/home/tdrozd/development/sirv-suite/standalone/output/"
 
 if "concentration" in modules_to_execute:

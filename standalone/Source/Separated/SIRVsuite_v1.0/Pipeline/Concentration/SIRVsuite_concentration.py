@@ -63,11 +63,11 @@ class SIRVsuiteConcentration():
         im = ax.imshow(data, **kwargs, vmin = -1, vmax = 1, cmap = CustomCmap)
         ax.yaxis.set_label_coords(-0.1,10)
 
-        norm = matplotlib.colors.Normalize(vmin=-1, vmax=1)
+        #norm = matplotlib.colors.Normalize(vmin=-1, vmax=1) norm = norm,
         
         fraction = 1
 
-        cbar = ax.figure.colorbar(im, ax = ax, **cbar_kw, norm = norm, cmap = CustomCmap, shrink = fraction*(6/len(row_labels)), pad = 0.05)
+        cbar = ax.figure.colorbar(im, ax = ax, **cbar_kw, cmap = CustomCmap, shrink = fraction*(6/len(row_labels)), pad = 0.05)
         cbar.ax.set_ylabel(cbarlabel, rotation = -90, va = "top", fontsize = 16, labelpad = 20)
 
         if not no_x_ticks:
@@ -170,15 +170,16 @@ class SIRVsuiteConcentration():
     def create_sirvsuite_boxplot(self, relative_abundance):
 
         path = os.path.join(self.output_dir,"concentration/")
-
-        fig, ax1 = plt.subplots(figsize=(12,len(relative_abundance)))
+        figsize=(12, 5 + len(relative_abundance))
+        
+        fig, ax1 = plt.subplots()
         ax1.set_xscale('log')
 
         if self.experiment_name != "":
             self.experiment_name += ": "
 
         output_name = os.path.join(path, "SIRVsuite_boxplot.png")
-        ax1.set_title(self.experiment_name+"SIRV E0 relative concentration distribution", size = 20, pad = 10, loc = 'center',
+        ax1.set_title(self.experiment_name+"SIRV E0 relative concentration distribution", size = 16, loc = 'center',
                     fontdict = {'verticalalignment':'baseline'})
 
         heatmap_matrix = self.__count_dict_to_matrix__(relative_abundance)
@@ -203,10 +204,19 @@ class SIRVsuiteConcentration():
                     showfliers = False)
 
         # meanprops = dict(marker='o',markeredgecolor='red', markerfacecolor = 'green', markersize = 8 , alpha = 0.7),
-        ax1.plot([1,1],[0,100], color = 'darkblue', alpha = .6)
+        ax1.plot([1,1],[0,len(relative_abundance) + 1], color = 'darkblue', alpha = .6)
+        ax1.set_ylim([0,len(relative_abundance) + 1])
 
+        if (heatmap_matrix.max() > 10):
+            limit_x = heatmap_matrix.max()
+        else:
+            limit_x = 10
+
+        ax1.set_xlim([0.01,limit_x])
+        
         ax1.set_yticklabels(relative_abundance.keys())
         plt.xlabel("relative SIRV transcript concentration")
+        fig.tight_layout()
         fig.savefig(output_name, dpi = 300, quality = 100, pad_inches = 0.2)
     
     def __count_dict_to_matrix__(self, count_dict):
@@ -281,7 +291,7 @@ class SIRVsuiteConcentration():
         fig.tight_layout()
 
         output_name = os.path.join(path, "SIRVsuite_heatmap.png") 
-        fig.savefig(output_name, dpi = 300, quality = 100, pad_inches = 0.2, bbox_inches = 'tight')
+        fig.savefig(output_name, dpi = 300, quality = 90, pad_inches = 0.2, bbox_inches = 'tight')
 
 
 

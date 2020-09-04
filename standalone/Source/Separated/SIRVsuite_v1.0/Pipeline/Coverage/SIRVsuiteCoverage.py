@@ -74,9 +74,10 @@ class SIRVsuiteCoverage():
             
             for strand in self._strands:
                 for sample in cov_dict.keys():
+
                     if (output_type.lower() == "bigwig"):
                         with bwig.open(os.path.join(output_path, sample+"_"+self.__strand2text__(strand)+".bw"), "w") as bw:
-                            header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys())] 
+                            header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys()) if strand in cov_dict[sample][gene].keys()] 
                             bw.addHeader(header)
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
@@ -536,7 +537,6 @@ class SIRVsuiteCoverage():
             header_height = header_height*3/4
 
         for gene in self.target_gene_id:
-
             
             max_expect_covs = max([max(self.expected_coverage["whole"][gene][s]) for s in self.expected_coverage["whole"][gene].keys()])
             
@@ -556,9 +556,11 @@ class SIRVsuiteCoverage():
             
             tab["Gene"] = gene
 
+            basic_scaling = (coverage_panel_height)/(max_expect_covs*exon_height)
+
             for sample in self.bam_coverage.keys():
 
-                scale_coef = max([self.cov_stats[sample][gene][s]["scale"] for s in self.cov_stats[sample][gene].keys()])  
+                scale_coef = max([self.cov_stats[sample][gene][s]["scale"] for s in self.cov_stats[sample][gene].keys() if "CoD" in self.cov_stats[sample][gene][s].keys()])  
                 
                 output_path = os.path.join(self.output_path, "coverage/coverage_plots/"+sample+"/"+gene+"/")
                 
@@ -621,7 +623,9 @@ class SIRVsuiteCoverage():
                         v_align="bottom")
                 
                 for strand in self.expected_coverage["whole"][gene].keys():
+                    
                     segment_start = transcript_line_offset_x + intersegment_gap
+
                     for segment_idx in range(len(start_pos)):
 
                         gene_pos = self.gene_coords[gene]
@@ -640,16 +644,18 @@ class SIRVsuiteCoverage():
                             upside_down = False
                             color_fill = (0/255,120/255,180/255)
 
-                        d.draw_signal(signal = expected_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
-                        width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = coverage_panel_height/2*max_e/max_expect_covs,
-                        mode = "segment", upside_down = upside_down, line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8)
+                        real_cov_scaled = self.bam_coverage[sample][gene][strand][start:end] / scale_coef 
                         
-                        real_cov = self.bam_coverage[sample][gene][strand][start:end] / scale_coef
+                        expected_coverage_height_total = coverage_panel_height/2 * max_e / max_expect_covs
 
-                        d.draw_signal(signal = real_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
-                        width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = coverage_panel_height/2*max_e/max_expect_covs,
+                        d.draw_signal(signal = expected_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
+                        width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total,
+                        mode = "segment", upside_down = upside_down, line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8, y_max = max_expect_covs)
+
+                        d.draw_signal(signal = real_cov_scaled, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
+                        width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total,
                         mode = "normal", upside_down = upside_down, 
-                        y_max = max_e,
+                        y_max=max_expect_covs,
                         line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8)
                          
                         segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
