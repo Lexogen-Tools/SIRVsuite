@@ -25,7 +25,7 @@ if (args.coverage or args.all_modules):
     modules_to_execute.append("coverage")
 
 out = args.output_dir[0]
-input_path = args.sample_sheet
+input_path = args.sample_sheet[0]
 
 input_dict = read_sample_sheet(input_path, modules_to_execute = modules_to_execute)
 
