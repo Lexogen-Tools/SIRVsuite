@@ -26,7 +26,7 @@ class SIRVsuiteCoverage():
     (annotation is identical to the one which can be found https://www.lexogen.com/sirvs/download/ under section SIRV-Set 4)
 
     """
-    def __init__(self, sample_sheet = None, output_dir = "./", gene_list = ["SIRV1","SIRV2","SIRV3"], experiment_name = ""):
+    def __init__(self, sample_sheet = None, output_dir = "./", gene_list = ["SIRV5"], experiment_name = ""):
 
         self.verbose = "DEBUG"
         self.target_gene_id = gene_list
@@ -248,8 +248,17 @@ class SIRVsuiteCoverage():
         contig_start = [starts[sorted_idx[0]]]
         contig_end = []
         thre = 0
-        
+
+        st = np.array(starts)[sorted_idx]
+        en = np.array(ends)[sorted_idx]
+
         for i in range(0,len(sorted_idx)-1):
+
+            if (sorted_idx[i] == 38):
+                print ()
+            
+            if (thre > 10000):
+                print ()
 
             prev_idx = ends[sorted_idx[i]]
             next_idx = starts[sorted_idx[i+1]]
@@ -258,10 +267,10 @@ class SIRVsuiteCoverage():
                 thre = prev_idx
 
             if (next_idx > thre):
-                contig_end.append(prev_idx)
+                contig_end.append(thre)
                 contig_start.append(next_idx)
             
-        contig_end.append(ends[sorted_idx[-1]])
+        contig_end.append(thre)
 
         return contig_start, contig_end
 
@@ -546,16 +555,17 @@ class SIRVsuiteCoverage():
             header_height = header_height*3/4
 
         for gene in self.expected_coverage["whole"].keys():
-
-            
             
             max_expect_covs = max([max(self.expected_coverage["whole"][gene][s]) for s in self.expected_coverage["whole"][gene].keys()])
             
+            if gene == "SIRV5":
+                print ()
+
             gene_annot = self.annotation_df["whole"][self.annotation_df["whole"]["gene_id"] == gene]
             transcripts = sorted(set(gene_annot["transcript_id"]))
             start_pos, end_pos = self.get_continous_coverage_ends(list(gene_annot["Start"]), list(gene_annot["End"]))
             segment_lengths = [end_pos[i] - start_pos[i] for i in range(len(start_pos))]
-            
+
             total_segment_length = sum(segment_lengths)
             num_segments = len(start_pos)
             
@@ -605,6 +615,9 @@ class SIRVsuiteCoverage():
                 for transcript in transcripts:
 
                     transcript_annot = gene_annot[gene_annot["transcript_id"] == transcript]
+
+                    if transcript == "SIRV504":
+                        print 
 
                     if "+" in set(transcript_annot["Strand"]):
                         color_exon = (60/255,140/255,80/255)
