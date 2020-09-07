@@ -247,7 +247,7 @@ class SIRVsuiteCoverage():
 
         contig_start = [starts[sorted_idx[0]]]
         contig_end = []
-        thre = 0
+        thre = ends[sorted_idx[0]]
 
         st = np.array(starts)[sorted_idx]
         en = np.array(ends)[sorted_idx]
@@ -269,7 +269,7 @@ class SIRVsuiteCoverage():
             if (next_idx > thre):
                 contig_end.append(thre)
                 contig_start.append(next_idx)
-            
+        
         contig_end.append(thre)
 
         return contig_start, contig_end
@@ -440,7 +440,7 @@ class SIRVsuiteCoverage():
         # check if annotation has been loaded
         if (not hasattr(self, "annotation_df")):
             raise ValueError("No annotation detected for theoretical coverage.. Please load annotation in .gtf or .bed format.")
-        
+        "SIRV1"
         if (len(tlen_model_param) != 2):
             raise ValueError("The length of passed array 'transition_lengths' does no correspond model requirement..")
     
@@ -456,6 +456,7 @@ class SIRVsuiteCoverage():
             annotation_df = self.annotation_df[mode]
 
             self.target_gene_id = np.unique(annotation_df["gene_id"])
+
             expected_coverage[mode] = dict()
 
             for gene in self.target_gene_id:
@@ -557,9 +558,6 @@ class SIRVsuiteCoverage():
         for gene in self.expected_coverage["whole"].keys():
             
             max_expect_covs = max([max(self.expected_coverage["whole"][gene][s]) for s in self.expected_coverage["whole"][gene].keys()])
-            
-            if gene == "SIRV5":
-                print ()
 
             gene_annot = self.annotation_df["whole"][self.annotation_df["whole"]["gene_id"] == gene]
             transcripts = sorted(set(gene_annot["transcript_id"]))
@@ -616,9 +614,6 @@ class SIRVsuiteCoverage():
 
                     transcript_annot = gene_annot[gene_annot["transcript_id"] == transcript]
 
-                    if transcript == "SIRV504":
-                        print 
-
                     if "+" in set(transcript_annot["Strand"]):
                         color_exon = (60/255,140/255,80/255)
                     elif "-" in set(transcript_annot["Strand"]):
@@ -628,14 +623,19 @@ class SIRVsuiteCoverage():
                         y = t_y + exon_height/2, 
                         width = transcript_line_width, line_width = 2)
 
+
                     segment_start = transcript_line_offset_x + intersegment_gap
                     for segment_idx in range(len(start_pos)):
+                        
+                        if segment_idx == 14 and gene == "SIRV5" and transcript == "SIRV503":
+                            print ()
+
                         exons_in_segment = transcript_annot[(transcript_annot["Start"] >= start_pos[segment_idx]) & (transcript_annot["End"] <= end_pos[segment_idx])]
-                        lengths = exons_in_segment["End"] - exons_in_segment["Start"] + 1
+                        lengths = list(exons_in_segment["End"] - exons_in_segment["Start"] + 1)
                     
                         for exon_idx in range(len(exons_in_segment)):
                             relative_pos_x = segment_start + (int(exons_in_segment.iloc[exon_idx]["Start"]) - start_pos[segment_idx] + 1) / total_segment_length * draw_length
-                            relative_width = (int(exons_in_segment.iloc[exon_idx]["End"]) - int(exons_in_segment.iloc[exon_idx]["Start"]) + 1) / total_segment_length * draw_length
+                            relative_width = lengths[exon_idx] / total_segment_length * draw_length
 
                             d.draw_rectangle(x=relative_pos_x, y=t_y, width=relative_width, height=exon_height, alpha=1, color_fill=color_exon)
 
@@ -660,6 +660,9 @@ class SIRVsuiteCoverage():
                         start = start_pos[segment_idx] - gene_pos[0]
                         end = end_pos[segment_idx] - gene_pos[0]
 
+                        if segment_idx == 14 and gene == "SIRV5" and strand == "+":
+                            print ()
+
                         expected_cov = self.expected_coverage["whole"][gene][strand]
                         max_e = max(expected_cov)
                         expected_cov = expected_cov[start:end]
@@ -678,13 +681,17 @@ class SIRVsuiteCoverage():
                         d.draw_signal(signal = expected_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
                         width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total,
                         mode = "segment", upside_down = upside_down, line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8, y_max = max_expect_covs)
-
+                        
                         d.draw_signal(signal = real_cov_scaled, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
                         width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total,
                         mode = "normal", upside_down = upside_down, 
                         y_max=max_expect_covs,
-                        line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8)
-                         
+                        line_width = 1, color_fill = color_fill, alpha_fill = 0.4, alpha_line = 0.9)
+                        
+                        #d.draw_line(x=segment_start,y=exon_panel_y,width=800,rotate=90,line_width = 1)
+                        #d.draw_line(x=segment_start+segment_lengths[segment_idx]/total_segment_length*draw_length,y=exon_panel_y,width=800,rotate=90,line_width = 1)
+
                         segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
+                        
                 d.finish()
 

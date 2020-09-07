@@ -260,14 +260,13 @@ class CairoDrawer():
         sig_length = len(signal)
         
         signal = np.array(signal)
-        steps = np.linspace(len(signal)/width, width, len(signal))
+        #steps = np.linspace(len(signal)/width, width, len(signal))
+        steps = np.linspace(0, width, len(signal)+1)
         
         rel_x = 0
         rel_y = 0
         
         ctx.new_path()
-        ctx.move_to(rel_x, rel_y) 
-
         can_close_path = True
         
         if y_max != None:
@@ -297,27 +296,37 @@ class CairoDrawer():
 
         val_y = calculate_pos_y(signal[0])
         
-        ctx.line_to(rel_x, rel_y - val_y)
-        
         if (mode == "normal"):
+
+            ctx.move_to(rel_x, rel_y)   
+            ctx.line_to(rel_x, rel_y - val_y)
+
             for index in range(1,len(signal)):
                 val_y = calculate_pos_y(signal[index])
                 ctx.line_to(rel_x + steps[index],rel_y - val_y)
+            
+            ctx.line_to(rel_x + width, rel_y)
         
         elif (mode == "segment"):
             vector = self.return_differences(signal, boundary_fill = False)
+            
             if len(vector) != 0:
-                for index_diff, index_sig in enumerate(vector[:-1]):
+
+                ctx.move_to(rel_x + steps[vector[0]], rel_y)
+                ctx.line_to(rel_x + steps[vector[0]], rel_y - val_y)
+
+                for index_diff, index_sig in enumerate(vector[1:-1]):
                     
                     ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
                     val_y = calculate_pos_y(signal[index_sig])
                     ctx.line_to(rel_x + steps[index_sig], rel_y - val_y)
                 
-                ctx.line_to(rel_x + width, rel_y - val_y)
+                ctx.line_to(rel_x + steps[vector[-1]], rel_y - val_y)
+                ctx.line_to(rel_x + steps[vector[-1]], rel_y)
             else:
                 can_close_path = False
         
-        ctx.line_to(rel_x + width, rel_y)
+        
         
         if (can_close_path):
             ctx.close_path()
