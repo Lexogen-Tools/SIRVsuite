@@ -254,12 +254,6 @@ class SIRVsuiteCoverage():
 
         for i in range(0,len(sorted_idx)-1):
 
-            if (sorted_idx[i] == 38):
-                print ()
-            
-            if (thre > 10000):
-                print ()
-
             prev_idx = ends[sorted_idx[i]]
             next_idx = starts[sorted_idx[i+1]]
 
@@ -622,13 +616,15 @@ class SIRVsuiteCoverage():
                     d.draw_line(x = transcript_line_offset_x, 
                         y = t_y + exon_height/2, 
                         width = transcript_line_width, line_width = 2)
-
+                    
+                    d.draw_text(text = transcript, 
+                        x = transcript_text_x, 
+                        y = t_y + exon_height/2, 
+                        font_size = 28,
+                        v_align="center")
 
                     segment_start = transcript_line_offset_x + intersegment_gap
                     for segment_idx in range(len(start_pos)):
-                        
-                        if segment_idx == 14 and gene == "SIRV5" and transcript == "SIRV503":
-                            print ()
 
                         exons_in_segment = transcript_annot[(transcript_annot["Start"] >= start_pos[segment_idx]) & (transcript_annot["End"] <= end_pos[segment_idx])]
                         lengths = list(exons_in_segment["End"] - exons_in_segment["Start"] + 1)
@@ -642,16 +638,36 @@ class SIRVsuiteCoverage():
                         segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
 
                     t_y += transcript_row_gap
-
-                    d.draw_text(text = transcript, 
-                        x = transcript_text_x, 
-                        y = t_y - 34, 
-                        font_size = 28,
-                        v_align="bottom")
                 
                 for strand in self.expected_coverage["whole"][gene].keys():
+
+                    expected_cov = self.expected_coverage["whole"][gene][strand]
+                    max_e = max(expected_cov)
                     
                     segment_start = transcript_line_offset_x + intersegment_gap
+
+                    axis_shift_y = 5
+
+                    # draw coverage levels
+
+                    if (strand == "+"):
+                        upside_down = False
+                        color_fill = (60/255,140/255,80/255)
+                        rotate_axis = 270
+                        factor = -1
+                    elif (strand == "-"):
+                        upside_down = True
+                        color_fill = (0/255,120/255,180/255)
+                        rotate_axis = 90
+                        factor = 1
+
+                    delta = coverage_panel_height/2/max_expect_covs*factor
+                    for i in range(1, int(max_expect_covs)+1):
+                        d.draw_line(x = transcript_line_offset_x, y = coverage_panel_y + coverage_panel_height/2 + delta*i, width = transcript_line_width, line_width = 1, alpha = 0.3)
+                        d.draw_line(x = transcript_line_offset_x - 5, y = coverage_panel_y + coverage_panel_height/2 + delta*i, width = 10, color = (0.3,0.3,0.3))
+                        d.draw_text(text = str(int(i*scale_coef)), x = transcript_line_offset_x - 10, y = coverage_panel_y + coverage_panel_height/2 + delta*i, h_align = "right", v_align = "center", font_size = 16, color_rgb = (0.3,0.3,0.3))
+
+                    d.draw_line(x = transcript_line_offset_x, y = coverage_panel_y + coverage_panel_height/2 + axis_shift_y*factor, width = coverage_panel_height/2 + panel_gap_y/2, end_shape = ("right","arrow"), rotate = rotate_axis, color = (0.3,0.3,0.3))
 
                     for segment_idx in range(len(start_pos)):
 
@@ -660,36 +676,28 @@ class SIRVsuiteCoverage():
                         start = start_pos[segment_idx] - gene_pos[0]
                         end = end_pos[segment_idx] - gene_pos[0]
 
-                        if segment_idx == 14 and gene == "SIRV5" and strand == "+":
-                            print ()
-
-                        expected_cov = self.expected_coverage["whole"][gene][strand]
-                        max_e = max(expected_cov)
-                        expected_cov = expected_cov[start:end]
-
-                        if (strand == "+"):
-                            upside_down = True
-                            color_fill = (60/255,140/255,80/255)
-                        elif (strand == "-"):
-                            upside_down = False
-                            color_fill = (0/255,120/255,180/255)
+                        expected_cov_slice = expected_cov[start:end]
 
                         real_cov_scaled = self.bam_coverage[sample][gene][strand][start:end] / scale_coef 
                         
-                        expected_coverage_height_total = coverage_panel_height/2 * max_e / max_expect_covs
+                        expected_coverage_height_total = coverage_panel_height/2 
 
-                        d.draw_signal(signal = expected_cov, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
+                        d.draw_signal(signal = expected_cov_slice, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
                         width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total,
-                        mode = "segment", upside_down = upside_down, line_width = 1, color_fill = color_fill, alpha_fill = 0.5, alpha_line = 0.8, y_max = max_expect_covs)
-                        
+                        mode = "segment", upside_down = upside_down, line_width = 1, color_fill = color_fill, alpha_fill = 0.7, alpha_line = 0.9, y_max = max_expect_covs)
+
                         d.draw_signal(signal = real_cov_scaled, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
                         width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total,
                         mode = "normal", upside_down = upside_down, 
-                        y_max=max_expect_covs,
-                        line_width = 1, color_fill = color_fill, alpha_fill = 0.4, alpha_line = 0.9)
+                        y_max = max_expect_covs,
+                        line_width = 1, color_fill = (0.2,0.2,0.2), color_line = (0.2,0.2,0.2), alpha_fill = 0.7, alpha_line = 0.8)
                         
-                        #d.draw_line(x=segment_start,y=exon_panel_y,width=800,rotate=90,line_width = 1)
-                        #d.draw_line(x=segment_start+segment_lengths[segment_idx]/total_segment_length*draw_length,y=exon_panel_y,width=800,rotate=90,line_width = 1)
+                        d.draw_line(x = segment_start, y = coverage_panel_y + coverage_panel_height + panel_gap_y, width = segment_lengths[segment_idx]/total_segment_length*draw_length, end_shape = ("both","line"), color = (0.3,0.3,0.3))
+
+                        # draw coordinates
+
+                        d.draw_text(text = str(start + gene_pos[0]), x = segment_start - 6, y = coverage_panel_y + coverage_panel_height + panel_gap_y + 5, font_size = 16, v_align = "center", h_align = "left", rotate = 90)
+                        d.draw_text(text = str(end + gene_pos[0]), x = segment_start + segment_lengths[segment_idx]/total_segment_length*draw_length - 6, y = coverage_panel_y + coverage_panel_height + panel_gap_y + 5, rotate = 90, font_size = 16, v_align = "center", h_align = "left")
 
                         segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
                         

@@ -35,7 +35,10 @@ class ERCCcorrelation():
         # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
         # and experiment name, which is optional    
 
-        ERCC_conc,_ = self.read_ERCC_concentration_table("Resources/ERCC92_Concentration.tsv")
+        ERCC_table_path = os.path.dirname(__file__)
+        ERCC_table_path = ERCC_table_path.replace("Pipeline/Correlation","Resources/ERCC92_Concentration.tsv")
+
+        ERCC_conc,_ = self.read_ERCC_concentration_table(ERCC_table_path)
         ercc_spike_in = "Mix1"
 
         #cnt_data_total = get_data(file_list, types, sample_names)
