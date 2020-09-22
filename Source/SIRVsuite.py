@@ -24,6 +24,10 @@ if (args.all_modules or args.ERCC_correlation or args.SIRV_concentration):
 if (args.coverage or args.all_modules):
     modules_to_execute.append("coverage")
 
+if (len(modules_to_execute) == 0):
+    print ("You have not specified any module..")
+    parser.print_help()
+
 out = args.output_dir[0]
 input_path = args.sample_sheet[0]
 
