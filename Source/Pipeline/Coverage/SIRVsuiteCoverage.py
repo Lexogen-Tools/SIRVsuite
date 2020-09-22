@@ -560,8 +560,14 @@ class SIRVsuiteCoverage():
 
             total_segment_length = sum(segment_lengths)
             num_segments = len(start_pos)
-            
-            exon_height = exon_panel_height/len(transcripts)*0.6
+
+            if (len(transcripts) < 3):
+                exon_panel_height = 60*(len(transcripts))
+                exon_height = exon_panel_height/len(transcripts)*0.6
+                transcript_row_gap = exon_panel_height/(len(transcripts)+1)*(1-0.6)
+            else:
+                exon_panel_height = page_height / 3
+                exon_height = exon_panel_height/len(transcripts)*0.6
             transcript_row_gap = exon_panel_height/(len(transcripts)+1)
 
             intersegment_gap = 40
@@ -602,7 +608,7 @@ class SIRVsuiteCoverage():
                     color_fill=(.5,.5,.5),
                     alpha = 0.3)
 
-                t_y = exon_panel_y + transcript_row_gap*2/3 
+                t_y = exon_panel_y + transcript_row_gap 
 
                 for transcript in transcripts:
 
