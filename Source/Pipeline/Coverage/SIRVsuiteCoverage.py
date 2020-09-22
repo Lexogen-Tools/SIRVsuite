@@ -568,7 +568,7 @@ class SIRVsuiteCoverage():
             else:
                 exon_panel_height = page_height / 3
                 exon_height = exon_panel_height/len(transcripts)*0.6
-            transcript_row_gap = exon_panel_height/(len(transcripts)+1)
+                transcript_row_gap = exon_panel_height/(len(transcripts)+1)
 
             intersegment_gap = 40
             draw_length = transcript_line_width - (num_segments+1)*intersegment_gap
