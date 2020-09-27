@@ -65,17 +65,14 @@ coverage_panel_height = exon_panel_height
 
 
 ## CREATE DRAWER
-d = drawer("test_output.png", width = page_width, height = page_height)
+d = CairoDrawer("/home/tdrozd/test_data/test_output.png", width = page_width, height = page_height)
 
 ## CREATE HEADER
-d.draw_text(text="SIRVsuite: coverage", y = title_y, x = page_width/2, h_align="center", font_size=title_size)
 
 tab = {"Sample":"Sample 0001",
 "Experiment":"Drosophila test experiment",
 "Gene":"SIRV1",
 "Mode":"complete coverage"}
-
-d.draw_table(table_dict=tab,x=exon_panel_x,y=header_y,width=exon_panel_width/3,height=header_height)
 
 ## DRAW TRANSCRIPT PANEL
 
@@ -89,31 +86,7 @@ intersegment_gap = 40
 num_segments = len(start)
 draw_length = transcript_line_width - (num_segments+1)*intersegment_gap
 
-d.draw_rectangle(x = exon_panel_x,
-                 y = exon_panel_y,
-                 width = exon_panel_width,
-                 height = exon_panel_height,
-                 color_fill=(.5,.5,.5),
-                 alpha = 0.2)
-
-d.draw_line(x = transcript_line_offset_x,
-            y = transcript_line_offset_y,
-            width = transcript_line_width,
-            line_width = 2, alpha=0.5)
-
-segment_start = transcript_line_offset_x + intersegment_gap
-for i in segment_lengths:
-    d.draw_rectangle(x=segment_start, y=transcript_line_offset_y-20, width=i/total_segment_length*draw_length, height=40, alpha=0.8, color_fill=(60/255,140/255,80/255))
-    segment_start += i/total_segment_length*draw_length + intersegment_gap
-
-d.draw_text(text = t_name, 
-            x = transcript_text_x, 
-            y = transcript_text_y, 
-            font_size = 28,
-            v_align="center")
-
-
-d.draw_text(text = "EXON DISTRIBUTION",x=exon_panel_x+120,y=exon_panel_y+exon_panel_height/2+140,font_size=28, v_align="center", h_align="center", rotate=270)
+#d.draw_text(text = "EXON DISTRIBUTION",x=exon_panel_x+120,y=exon_panel_y+exon_panel_height/2+140,font_size=28, v_align="center", h_align="center", rotate=90, rotation_axis = "center")
 
 ## DRAW COVERAGE PANEL
 d.draw_rectangle(x = coverage_panel_x,
@@ -123,8 +96,10 @@ d.draw_rectangle(x = coverage_panel_x,
                  color_fill=(.5,.5,.5),
                  alpha = 0.2)
 
-d.draw_text(text = "COVERAGE",x=exon_panel_x+60,y=coverage_panel_y+coverage_panel_height/2+80,font_size=28, v_align="center", h_align="center", rotate=270)
-
+#d.draw_text(text = "reads(+)",x=exon_panel_x+500,y=200,font_size=28, v_align="center", h_align="center", upside_down = False)
+d.draw_text(text = "reads",x=exon_panel_x+400,y=200,font_size=28, v_align="center", h_align="center", upside_down = True)
+d.draw_text(text = "reads",x=exon_panel_x+400,y=200,font_size=28, v_align="center", h_align="center", upside_down = False)
+"""
 d.draw_signal(x = transcript_line_offset_x,
               y = coverage_panel_y,
               width = transcript_line_width,
@@ -163,5 +138,6 @@ tab2 = {"CoD(+)":"0", "CoD(-)":"0.1231", "total_reads(+)": "4567", "total_reads(
 d.draw_rectangle(x=exon_panel_x+exon_panel_width*2/3-20,y=header_y-20,width=exon_panel_width/3+20,height=header_height+40, color_fill=(.5,.5,.5), alpha=.2)
 d.draw_table(table_dict=tab2,x=exon_panel_x+exon_panel_width*2/3,y=header_y,width=exon_panel_width/3,height=header_height)
 
+"""
 
 d.finish()

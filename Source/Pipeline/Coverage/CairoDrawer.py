@@ -63,9 +63,37 @@ class CairoDrawer():
         self.ctx.restore()
         return obj.width, obj.height
 
+    def __merge_close_coordinates__(self, thre = 50, starts = None, ends = None):
+        
+        if (len(starts) == 0 or len(ends) == 0):
+            return starts, ends
+
+        idx = 0
+
+        diffs = starts[1:] - ends[:-1]
+
+        starts_merged = []
+        ends_merged = [];
+
+        while idx < len(ends):
+            starts_merged.append(starts[idx])
+            pos_thre = starts[idx] + thre
+            end_idx_lower = np.argwhere(ends <= pos_thre).flatten()
+            start_idx_lower = np.argwhere(starts <= pos_thre).flatten() 
+            
+            if len(end_idx_lower) == 0 and len(start_idx_lower) == 0:
+                end_idx = idx
+            else:
+                end_idx = max(np.append(end_idx_lower,start_idx_lower))
+            
+            ends_merged.append(ends[end_idx])
+            
+            idx = end_idx + 1
+
+        return starts_merged, ends_merged
 
 
-    def draw_text(self, text = None, x = None, y = None, font_size = 28, rotate = 0, color_rgb = (0,0,0), alpha = 1, h_align = "center", v_align = "center"):
+    def draw_text(self, text = None, x = None, y = None, font_size = 28, rotate = 0, color_rgb = (0,0,0), alpha = 1, h_align = "center", v_align = "center", rotation_point = ""):
         """
         
         """
@@ -75,8 +103,6 @@ class CairoDrawer():
 
         if (text == None):
             return
-
-        self.ctx.translate(x, y)    
         
         self.ctx.set_source_rgba(color_rgb[0],color_rgb[1],color_rgb[2], alpha)
         self.ctx.set_font_size(font_size)
@@ -84,21 +110,35 @@ class CairoDrawer():
         txt_obj = self.ctx.text_extents(text) 
 
         if h_align == "center":
-            x = -txt_obj.width/2 
+            dx = -txt_obj.width/2
         elif h_align == "right":
-            x = -txt_obj.width
+            dx = -txt_obj.width
         elif h_align == "left":
-            x = 0
+            dx = 0
 
         if v_align == "center":
-            y = txt_obj.height/2 - (txt_obj.height + txt_obj.y_bearing)
+            dy = txt_obj.height/2 - (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "bottom":
-            y = txt_obj.height/2 + (txt_obj.height + txt_obj.y_bearing)
+            dy = txt_obj.height/2 + (txt_obj.height + txt_obj.y_bearing)
         elif v_align == "top":
-            y = 0
+            dy = 0
 
-        self.ctx.move_to(x,y)
-        self.ctx.rotate(rotate * np.pi/180)
+        self.ctx.translate(x, y)
+        
+        if rotate not in [0,180,360]:
+            x_shift = -dy
+        else:
+            x_shift = 0
+
+        if rotation_point == "center":
+            self.ctx.rotate(rotate * np.pi/180)
+            self.ctx.translate(dx, dy)
+        else:
+            self.ctx.translate(dx+x_shift, dy)
+            self.ctx.rotate(rotate * np.pi/180)
+
+        self.ctx.move_to(0, 0)
+
         self.ctx.show_text(text)
         self.ctx.restore()    
 
@@ -244,7 +284,7 @@ class CairoDrawer():
         
         return differences
         
-    def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0, alpha_fill = 1, alpha_line = 1, upside_down = False):
+    def draw_signal(self, signal = None, x = None, y = None, width = None, height = None, y_max = None, mode = "normal", color_fill = (0.3,0.3,0.3), color_line = (0,0,0), line_width = 4, rotate = 0, alpha_fill = 1, alpha_line = 1, upside_down = False, scale_factor = 1):
         """
         
         """
@@ -262,7 +302,6 @@ class CairoDrawer():
         sig_length = len(signal)
         
         signal = np.array(signal)
-        #steps = np.linspace(len(signal)/width, width, len(signal))
         steps = np.linspace(0, width, len(signal)+1)
         
         rel_x = 0
@@ -270,11 +309,21 @@ class CairoDrawer():
         
         ctx.new_path()
         can_close_path = True
+
+        if y_max == 0:
+            y_max = 1
         
         if y_max != None:
             exceeding_part = np.array(signal>y_max).astype(int)
-            starts = self.return_differences(exceeding_part, mode = 'positive')
-            ends = self.return_differences(exceeding_part, mode = 'negative')
+
+            exceed_starts = self.return_differences(exceeding_part, mode = 'positive')
+            exceed_ends = self.return_differences(exceeding_part, mode = 'negative')
+
+            starts_merged, ends_merged = self.__merge_close_coordinates__(starts = exceed_starts, ends = exceed_ends, thre = 100)
+
+            max_exceed = []
+            for i in range(len(starts_merged)):
+                max_exceed.append(max(signal[starts_merged[i]:ends_merged[i]])*scale_factor)
             
             arrow_width = 15
             arrow_height = 10
@@ -291,7 +340,7 @@ class CairoDrawer():
             """
             signal[signal>=y_max] = y_max
 
-        if y_max:    
+        if y_max is not None:    
             calculate_pos_y = lambda x: x / y_max * height
         else:
             calculate_pos_y = lambda x: x / max(signal) * height
@@ -343,21 +392,30 @@ class CairoDrawer():
                 triangle_y = y - height - gap_arrow_y
                 line_y = y - height
                 rotate = 0
+                factor = -1
             else:
                 triangle_y = y + height + gap_arrow_y
                 line_y = y + height
+                factor = 1
                 rotate = 180
             
-            for i in range(len(starts)):
-                self.draw_line(x=x + steps[starts[i]],y=line_y, width=(steps[ends[i]-1]-steps[starts[i]]), color=(1,0,0), line_width=2)
-                self.draw_triangle(x = x + steps[starts[i]] + (steps[ends[i]-1]-steps[starts[i]])/2,
+            for i in range(len(exceed_starts)):
+                self.draw_line(x=x + steps[exceed_starts[i]],y=line_y, width=(steps[exceed_ends[i]-1]-steps[exceed_starts[i]]), color=(1,0,0), line_width=2)
+
+            for i in range(len(starts_merged)):
+                self.draw_triangle(x = x + steps[starts_merged[i]] + (steps[ends_merged[i]-1]-steps[starts_merged[i]])/2,
                                    y = triangle_y,
                                    width = arrow_width,
                                    height = 10,
-                                   color_line = (1,0,0),
+                                   color_line = (0.5,0,0),
                                    line_width = 2,
-                                   alpha = .4,
+                                   alpha = 1,
                                    rotate = rotate)
+
+                self.draw_text(text = str(int(max_exceed[i])),
+                x = x + steps[starts_merged[i]] + (steps[ends_merged[i]]-steps[starts_merged[i]])/2,
+                y = triangle_y + factor*arrow_width,
+                v_align = "center", h_align = "center", color_rgb = (0.5,0,0), font_size = 12)
     
     def draw_table(self, table_dict = None, x = None, y = None, width = None, height = None):
         """
