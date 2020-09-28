@@ -1,6 +1,9 @@
 import re
 import csv
 import sys
+import logging
+
+log = logging.getLogger(__name__)
 
 def path_features(filePath):
     """
@@ -27,20 +30,18 @@ def __entry_check__(valid_dict, colname, value):
         raise ValueError("colname not in valid_dict")
 
 def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "coverage"]):
-    """
-    A function for loading sample sheet in a following format:
+    sample_sheet_info = """
+    Sample sheet is required to have a following format:
         - used ";" separator
         - trailing whitespace or tab is allowed (trimmed during reading process)
         - UTF-8 encoding
         - every column must have a name which is predefined (see more info below)
 
-    Input: path to the sample sheet file
-
     Allowed column names:
         General columns:
-            sample_name - Supported value: any set of characters to identify samples (this will be printed in the final graphics).
+            sample_name - Supported values: any set of characters to identify samples (this will be printed in the final graphics).
             
-            library_prep_type - supported values: whole (whole transcriptome library prep) or qs (QuantSeq library preparation) 
+            library_prep_type - Supported values: whole (whole transcriptome library prep) or qs (QuantSeq library preparation) 
 
         Concentration specific columns:
             counting_path - Supported values: valid path to count files.
@@ -61,7 +62,7 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
     Any other columns will be ignored.
     """
 
-    print ("Reading sample sheet")
+    logging.info("Reading sample sheet")
 
     ## ALLOWED COLUMNS FOR DIFFERENT MODULES CAN BE DEFINED HERE ##
 
@@ -103,6 +104,8 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
 
     try:
         with open(sheet_path, 'r') as sheet:
+
+            sheet = filter(lambda row: row[0]!='#', sheet)
 
             csv.register_dialect('strip', skipinitialspace=True, delimiter = ';')
 
@@ -157,6 +160,7 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                             raise ValueError("Cannot proceed with different library_preps..")
         
     except ValueError as e:
+        log.error(sample_sheet_info)
         sys.exit(e)
 
     return sample_sheet_dict
