@@ -16,13 +16,15 @@ conda env create -p PATH_TO_CONDA -f install/sirvsuite_env.yml
 Another option would be to install python packages directly, which is not recommended due to possible dependency conflicts.
 
 ## 2. Preparing sample sheet
-The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. Let's have a look at an example:
+The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
 
 ```
 sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
 sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole
 sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
 ```
+
+The SIRVsuite tool will automatically check whether specified module can be processed based on the sample sheets. 
 
 ### Sample sheet content description
 
@@ -32,6 +34,7 @@ Sample sheet is required to have a following format:
 - UTF-8 encoding
 - every column must have a name which is predefined (see more info below)
 - column values are case insensitive
+- the order of columns can be arbitrary
 
 **Allowed columns**:
 
@@ -45,7 +48,7 @@ Concentration specific columns:
 3. counting_path: valid path to count files.
 4. counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
 5. counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
-6. replicate_group: any set of characters to identify replicate groups (this will be printed in the final graphics). 
+6. replicate_group(optional): any set of characters to identify replicate groups (this will be printed in the final graphics). 
                             An optional column, if the same replicate group assigned to multiple samples, their mean value will be used for quantification 
 
 Coverage specific columns:
