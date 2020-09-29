@@ -59,3 +59,5 @@ Coverage specific columns:
 Any other columns will be ignored.
 
 ## 3. Running SIRVsuite
+
+<img src="https://latex.codecogs.com/svg.latex?\Large&space; {\color{White} x = \frac {y} {z}}"/>
