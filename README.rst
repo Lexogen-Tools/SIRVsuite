@@ -7,7 +7,7 @@ SIRVsuite is permitted under the following licence xxx.
 
 ::
 
-    python SIRVsuite.py [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
+    python SIRVsuite.py [-h] -i |  SAMPLE_SHEET -o OUTPUT_DIR [ [-a|--all-modules] | --coverage | --ERCC-correlation | --SIRV-concentration ] [--experiment-name EXPERIMENT_NAME]
 
 Getting started
 ===============
@@ -31,8 +31,7 @@ not recommended due to possible dependency conflicts.
 
 The SIRVsuite consists of the following modules: coverage, SIRV
 concentration and ERCC correlation. The modules have different
-requirements in terms of input files and necessary parameters for ther
-processing. Therefore, a .csv file comprised of such information needs
+requirements in terms of input files type and necessary information for processing. Therefore, a .csv file comprised of such information needs
 to be created. We call this type of file a sample sheet. An example of a
 valid sample sheet:
 
@@ -91,11 +90,11 @@ SIRVsuite accepts the following arguments:
 ::
 
     required arguments:
-      -i | --sample-sheet       path to the sample sheet
-      -o | --output-dir         directory for output files
+      -i, --sample-sheet       path to the sample sheet
+      -o, --output-dir         directory for output files
 
     selectively required arguments* (at least one is required):
-      -a | --all-modules        triggers all available modules
+      -a, --all-modules        triggers all available modules
       --ERCC-correlation        triggers processing of ERCCs ratios
       --SIRV-concentration      triggers processing of SIRVs relative concentration
       --coverage                triggers coverage processing
@@ -105,6 +104,7 @@ SIRVsuite accepts the following arguments:
 
     optional arguments:
       --experiment-name         name of the experiment to displayed in the final graphics (if empty, general title will be used)
+      -h, --help                show help message and exit
 
 Example commands:
 ::

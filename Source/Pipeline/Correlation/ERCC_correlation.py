@@ -5,7 +5,9 @@ import os
 import numpy as np
 import math
 from ..countReader import countReader
+import logging
 
+log = logging.getLogger(__name__)
 
 class ERCCcorrelation():
 
@@ -30,7 +32,7 @@ class ERCCcorrelation():
             
     def ERCC_correlation(self, data, experiment_name = "", output_dir = "./"):
 
-        print ("Creating ERCC correlation")
+        log.info("Creating ERCC correlation")
 
         # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
         # and experiment name, which is optional    

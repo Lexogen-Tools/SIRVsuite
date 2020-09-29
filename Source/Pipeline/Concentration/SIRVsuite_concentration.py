@@ -10,6 +10,9 @@ from matplotlib import gridspec
 import copy
 from ..helper import *
 from ..countReader import countReader
+import logging
+
+log = logging.getLogger(__name__)
 
 ## This module relevant to full-trancriptome libraries, i.e. CORALL
 
@@ -168,7 +171,7 @@ class SIRVsuiteConcentration():
 
     def create_sirvsuite_boxplot(self, relative_abundance):
         
-        print ("Creating SIRVsuite boxplot")
+        log.info("Creating SIRVsuite boxplot")
 
         path = os.path.join(self.output_dir,"concentration/")
 
@@ -235,7 +238,7 @@ class SIRVsuiteConcentration():
 
     def create_sirvsuite_heatmap(self, relative_abundance):
 
-        print ("Creating SIRVsuite heatmap")
+        log.info("Creating SIRVsuite heatmap")
 
         path = os.path.join(self.output_dir,"concentration/")
 

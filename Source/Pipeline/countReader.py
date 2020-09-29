@@ -2,6 +2,9 @@ import csv
 import pyranges
 import numpy as np
 import re
+import logging
+
+log = logging.getLogger(__name__)
 
 class countReader():
     def __init__(self, sample_sheet = None):
@@ -64,7 +67,7 @@ class countReader():
                             elif quantity_unit.lower() == 'fpkm_thn':
                                 value = float(selected_columns[5])
                             else:
-                                print ("unknown quantity unit specified.. supported options are fpkm_chn or abundance")
+                                log.warning("unknown quantity unit specified.. supported options are fpkm_chn or abundance")
                                 break
                             
                             if selected_columns[identifier_idx] not in counting_dict[spike_in].keys():

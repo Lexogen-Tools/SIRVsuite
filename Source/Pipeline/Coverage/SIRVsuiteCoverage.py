@@ -10,6 +10,9 @@ import warnings
 from ..helper import *
 import sys
 from Pipeline.Coverage.CairoDrawer import CairoDrawer
+import logging
+
+log = logging.getLogger(__name__)
 
 class SIRVsuiteCoverage():
     """
@@ -35,7 +38,7 @@ class SIRVsuiteCoverage():
             self.output_path = "/".join(__file__.split("/")[:-6]) + "/coverage"
         else:
             self.output_path = output_dir
-        print ("SIRVsuite coverage creator initialized")
+        log.info("SIRVsuite coverage creator initialized")
         self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRVsuite_annotation.gtf"
         self.load_annotation(self.annotation_path)
 
@@ -101,10 +104,10 @@ class SIRVsuiteCoverage():
             return 
         elif ((create) & (not os.path.exists(output_dir))):
             os.makedirs(output_dir)
-            print ("New directories created.")
+            log.info("New directories created.")
 
         self.output_path = output_dir
-        print ("output directory changed to: "+self.output_path)
+        log.info("output directory changed to: "+self.output_path)
     
     def bam_to_coverage(self, output_type = "bigwig"):
         """
@@ -113,8 +116,7 @@ class SIRVsuiteCoverage():
         
         sample_dict = self.sample_dict
 
-        if self.verbose == "DEBUG":
-            print ("Calculating real coverage from input files")
+        log.info("Calculating real coverage from input files")
 
         stats = {"num_reads": 0}
 
@@ -127,15 +129,14 @@ class SIRVsuiteCoverage():
             bam_path = sample_dict[sample]["alignment_path"]
 
             if (not os.path.exists(bam_path)):
-                if self.verbose == "debug":
-                    print (bam_path+"does not exist.. skipping to the next file")
+                log.info(bam_path+"does not exist.. skipping to the next file")
             else:
                 index_path = bam_path + ".bai"
 
                 if (not os.path.exists(index_path)):
                     ps.index(bam_path)
-                    if self.verbose == "debug":
-                        print (".bai index file not detected.. creating index file..")
+                    
+                    log.info(".bai index file not detected.. creating index file..")
 
             bamFile = ps.AlignmentFile(bam_path,"rb")
 
@@ -222,8 +223,8 @@ class SIRVsuiteCoverage():
         annotation_type = path_features(annotation_path)["extension"]
         
         try:
-            if self.verbose == "DEBUG":
-                print ("loading "+annotation_path)
+            log.info("loading "+annotation_path)
+
             if (annotation_type == "gtf"):
                 annotation_df = pyranges.read_gtf(annotation_path, as_df=True)
             elif (annotation_type == "bed"):
@@ -295,7 +296,7 @@ class SIRVsuiteCoverage():
         The method checks for bam coverages and expected coverages and then calculates CoD and scaling factor for particular samples, genes and strands 
         """
 
-        print ("calculating statistics")
+        log.info("calculating statistics")
 
         # check if all attributes present
         if (not hasattr(self, "cov_stats") or not hasattr(self, "bam_coverage")):
@@ -510,7 +511,7 @@ class SIRVsuiteCoverage():
 
     def coverage_plot(self):
 
-        print ("creating coverage plots")
+        log.info("creating coverage plots")
         
         # define base sizes, coordinates
         page_width = 2000
