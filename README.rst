@@ -88,6 +88,8 @@ Any other columns will be ignored.
 ====================
 
 .. math::
-   FPKM_{expected} = \frac{\sum_{i=1}^{n}FPKM_i}{n}
+\\frac{1}{n}
 
-   FPKM_{i,rel} = \frac {FPKM_i} {FPKM_{expected}} = \frac {FPKM_i} {\sum_{i=1}^{n}FPKM_i} / \frac {1} {n}
+.. FPKM_{expected} = \\frac{\sum_{i=1}^{n}FPKM_i}{n}
+
+.. FPKM_{i,rel} = \frac {FPKM_i} {FPKM_{expected}} = \frac {FPKM_i} {\sum_{i=1}^{n}FPKM_i} / \frac {1} {n}
