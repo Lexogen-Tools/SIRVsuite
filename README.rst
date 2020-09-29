@@ -7,7 +7,7 @@ SIRVsuite is permitted under the following licence xxx.
 
 ::
 
-    python SIRVsuite.py [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
+   python SIRVsuite.py [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
 
 Getting started
 ===============
@@ -21,7 +21,7 @@ conda to create one via
 
 ::
 
-    conda env create -p PATH_TO_CONDA -f install/sirvsuite_env.yml
+   conda env create -p PATH_TO_CONDA -f install/sirvsuite_env.yml
 
 Another option would be to install python packages directly, which is
 not recommended due to possible dependency conflicts.
@@ -38,9 +38,9 @@ valid sample sheet:
 
 ::
 
-    sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
-    sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole
-    sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
+   sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
+   sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole
+   sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
 
 The SIRVsuite tool will automatically check whether specified module can
 be processed based on the sample sheets.
