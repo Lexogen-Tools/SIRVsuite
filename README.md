@@ -58,6 +58,4 @@ Coverage specific columns:
 
 Any other columns will be ignored.
 
-
-
 ## 3. Running SIRVsuite
