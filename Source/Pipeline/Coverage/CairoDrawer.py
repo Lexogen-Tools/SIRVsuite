@@ -2,9 +2,10 @@ import cairo
 import re
 import numpy as np
 import os
-
+import logging
 from Pipeline.helper import *
 
+log = logging.getLogger(__name__)
 
 class CairoDrawer():
     """
