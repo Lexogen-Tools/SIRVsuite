@@ -18,6 +18,8 @@ modules_to_execute = []
 
 if __name__ == '__main__':
 
+    os.path.expanduser("~")
+
     parser = ap.ArgumentParser()
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('-i','--sample-sheet', action = 'store', help = "Specify path to the sample sheet.", required = True, nargs = 1)
@@ -41,8 +43,8 @@ if __name__ == '__main__':
         log.warning("You have not specified any module..")
         parser.print_help()
 
-    out = args.output_dir[0]
-    input_path = args.sample_sheet[0]
+    out = os.path.expanduser(args.output_dir[0])
+    input_path = os.path.expanduser(args.sample_sheet[0])
 
     # read sample sheet + module availibility check based on sample sheet
     input_dict = read_sample_sheet(input_path, modules_to_execute = modules_to_execute)
