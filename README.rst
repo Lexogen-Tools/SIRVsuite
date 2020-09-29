@@ -88,7 +88,7 @@ Any other columns will be ignored.
 ====================
 
 .. math::
-\\frac{1}{n}
+\sqrt{16}
 
 .. FPKM_{expected} = \\frac{\sum_{i=1}^{n}FPKM_i}{n}
 
