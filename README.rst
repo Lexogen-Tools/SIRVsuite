@@ -39,8 +39,8 @@ valid sample sheet:
 ::
 
     sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
-    sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole
-    sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
+    sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole;1
+    sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole;2
 
 The SIRVsuite tool will automatically check whether specified module can
 be processed based on the sample sheets.
@@ -87,9 +87,30 @@ Any other columns will be ignored.
 3. Running SIRVsuite
 ====================
 
-.. math::
-\sqrt{16}
+SIRVsuite accepts the following arguments:
+::
 
-.. FPKM_{expected} = \\frac{\sum_{i=1}^{n}FPKM_i}{n}
+    required arguments:
+      -i | --sample-sheet       path to the sample sheet
+      -o | --output-dir         directory for output files
 
-.. FPKM_{i,rel} = \frac {FPKM_i} {FPKM_{expected}} = \frac {FPKM_i} {\sum_{i=1}^{n}FPKM_i} / \frac {1} {n}
+    selectively required arguments* (at least one is required):
+      -a | --all-modules        triggers all available modules
+      --ERCC-correlation        triggers processing of ERCCs ratios
+      --SIRV-concentration      triggers processing of SIRVs relative concentration
+      --coverage                triggers coverage processing
+
+      *Note that using "-a" is the same as "--ERCC-correlation --SIRV-concentration --coverage".
+       A valid usage is to specify at least one of the modules or to use -a argument.
+
+    optional arguments:
+      --experiment-name         name of the experiment to displayed in the final graphics (if empty, general title will be used)
+
+Example commands:
+::
+
+  # run SIRVsuite to generate coverage plots, data, relative abundance with heatmap and boxplot from sample information in sample_sheet.csv
+  python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" --coverage --SIRV-concentration
+
+  # run SIRVsuite to perform whole analysis from sample information in sample_sheet.csv
+  python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" -a
