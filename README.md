@@ -24,7 +24,7 @@ sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_c
 sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
 ```
 
-The SIRVsuite tool will automatically check whether specified module can be processed based on the sample sheets. 
+The SIRVsuite tool will automatically check whether specified module can be invoked based on the sample sheets. 
 
 ### Sample sheet content description
 
@@ -43,7 +43,7 @@ General columns:
         
 2. library_prep_type: whole (whole transcriptome library prep) or qs (QuantSeq library preparation) 
 
-Concentration specific columns:
+SIRV-concentration & ERCC-correlation:
 
 3. counting_path: valid path to count files.
 4. counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
@@ -51,13 +51,12 @@ Concentration specific columns:
 6. replicate_group(optional): any set of characters to identify replicate groups (this will be printed in the final graphics). 
                             An optional column, if the same replicate group assigned to multiple samples, their mean value will be used for quantification 
 
-Coverage specific columns:
+Coverage:
 
 7. alignment_path: valid paths to a .bam file.
 8. read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries. 
 
-Any other columns will be ignored.
+Any other column will be ignored.
 
 ## 3. Running SIRVsuite
 
-<img src="https://latex.codecogs.com/svg.latex?\Large&space; {\color{White} x = \frac {y} {z}}"/>

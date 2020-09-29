@@ -1,3 +1,7 @@
+=========
+SIRVsuite
+=========
+
 SIRVsuite is a command line tool to analyze performance of SIRV set 3
 and 4 spike-ins based on alignment and transcript count data.
 
@@ -10,10 +14,10 @@ SIRVsuite is permitted under the following licence xxx.
     python SIRVsuite.py [-h] -i |  SAMPLE_SHEET -o OUTPUT_DIR [ [-a|--all-modules] | --coverage | --ERCC-correlation | --SIRV-concentration ] [--experiment-name EXPERIMENT_NAME]
 
 Getting started
-===============
+---------------
 
 1. Installation
-===============
+---------------
 
 To install SIRVsuite, an environment for all depedent packages needs to
 be created. To this end, install/sirvsuite\_env.yml can be used via
@@ -114,3 +118,31 @@ Example commands:
 
   # run SIRVsuite to perform whole analysis from sample information in sample_sheet.csv
   python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" -a
+
+
+Output:
+
+The pipeline will create subfolder for every specified module with module-specific output data.
+
+   Coverage module:
+   
+   The module processes .bam files + SIRV-set 3 or 4 annotation and calculates read coverage and creates 3 types of output: 
+   
+      - CoD table,
+      - coverage data in bigwig format,
+      - coverage plot.
+
+   ERCC-Correlation module:
+      
+      The module processes transcript or gene counts for ERCCs and creates 2 types of output:
+         
+         - correlation table,
+         - correlation plot.
+
+   SIRV-concentration module:
+      
+      The module processes transcript FPKM for ERCCs and creates 3 types of output:
+         
+         - relative concentration table,
+         - boxplot,
+         - heatmap.
