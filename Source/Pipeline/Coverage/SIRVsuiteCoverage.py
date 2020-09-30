@@ -39,7 +39,7 @@ class SIRVsuiteCoverage():
         else:
             self.output_path = output_dir
         log.info("SIRVsuite coverage creator initialized")
-        self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRVsuite_annotation.gtf"
+        self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRV_isoforms_multi-fasta-annotation_190418a.gtf"
         self.load_annotation(self.annotation_path)
 
         self.experiment_name = experiment_name
@@ -725,9 +725,6 @@ class SIRVsuiteCoverage():
 
                         expected_cov_slice = expected_cov[start:end]
                         real_cov_scaled_slice = real_cov_scaled[start:end]
-                        
-                        if len(real_cov_scaled_slice) == 0:
-                            print ('')
 
                         expected_coverage_height_total = coverage_panel_height/2 
 
