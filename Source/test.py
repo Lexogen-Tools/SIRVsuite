@@ -1,3 +1,4 @@
+"""
 import argparse as ap
 
 from Pipeline.Coverage.SIRVsuiteCoverage import SIRVsuiteCoverage
@@ -5,7 +6,7 @@ from Pipeline.Concentration.SIRVsuite_concentration import SIRVsuiteConcentratio
 from Pipeline.Correlation.ERCC_correlation import ERCCcorrelation
 from Pipeline.helper import *
 
-"""
+
 parser = ap.ArgumentParser()
 parser.add_argument('-s','--sample-sheet', action = 'store', help = "Specify path to the sample sheet.", required = True, nargs = 1)
 parser.add_argument('-o','--output-dir', action = 'store', help = "Specify output directory.", required = True, nargs = 1)
@@ -15,7 +16,7 @@ parser.add_argument('--SIRV-concentration', action = 'store_true', help = "Speci
 parser.add_argument('--coverage', action = 'store_true', help = "Specify to create coverages for all spike-in genes.")
 parser.add_argument('--experiment-name',action = 'store', default="", help = "Specify name of an experiment.", required = False, nargs = 1)
 args = parser.parse_args()
-"""
+
 
 modules_to_execute = ["coverage", "concentration"]
 
@@ -35,3 +36,13 @@ if "coverage" in modules_to_execute:
     k.bam_to_coverage()
     k.calc_statistics()
     k.coverage_plot()
+
+"""
+
+import pyBigWig as bw
+
+bb = bw.open("/home/tdrozd/test_data/out/coverage/bigwig/NGS2.54_0002_antisense.bw")
+
+print (bb.chroms())
+print (bb.header())
+
