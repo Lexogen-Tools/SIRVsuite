@@ -69,6 +69,9 @@ class SIRVsuiteCoverage():
             return "antisense"    
 
     def __cov_data_export__(self, output_path, output_type = "bigwig"):
+
+        log.info("Exporting coverage data")
+
         # function used for exporting coverage data to "bigwig" or "cov" file
         if (hasattr(self, "bam_coverage")):
             cov_dict = self.bam_coverage
@@ -85,6 +88,7 @@ class SIRVsuiteCoverage():
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
                                 chroms = np.array([gene] * len(values))
+                                # if trimmed, need to use + self.gene_coords[gene][0] to start & end
                                 bw.addEntries(chroms, starts, ends = ends, values = values)
 
                     elif (output_type.lower() == "cov"):
@@ -162,13 +166,17 @@ class SIRVsuiteCoverage():
 
                 # check if annotation processed
                 if (hasattr(self, "gene_coords")):
-                    bam_gene_start = self.gene_coords[gene][0]
+                #if (False):
+                #    bam_gene_start = self.gene_coords[gene][0]
+                #    bam_gene_end = self.gene_coords[gene][1]
+                #    length = bam_gene_end - bam_gene_start + 1
+                #    length = [bamFile.lengths[i] for i in range(len(bamFile.references)) if bamFile.references[i] == gene][0]
+                    bam_gene_start = 1
                     bam_gene_end = self.gene_coords[gene][1]
                     length = bam_gene_end - bam_gene_start + 1
                 else:
-                    length = [bamFile.lengths[i] for i in range(len(bamFile.references)) if bamFile.references[i] == gene][0]
-                    bam_gene_start = 1
-                    bam_gene_end = length
+                    raise ValueError("expected coverage attribute not detected")
+                    
 
                 if (strandeness == "none"):
                     bam_coverage[sample][gene]["none"] = np.zeros(length)
@@ -223,7 +231,7 @@ class SIRVsuiteCoverage():
         annotation_type = path_features(annotation_path)["extension"]
         
         try:
-            log.info("loading "+annotation_path)
+            log.info("Loading "+annotation_path)
 
             if (annotation_type == "gtf"):
                 annotation_df = pyranges.read_gtf(annotation_path, as_df=True)
@@ -296,7 +304,7 @@ class SIRVsuiteCoverage():
         The method checks for bam coverages and expected coverages and then calculates CoD and scaling factor for particular samples, genes and strands 
         """
 
-        log.info("calculating statistics")
+        log.info("Calculating statistics")
 
         # check if all attributes present
         if (not hasattr(self, "cov_stats") or not hasattr(self, "bam_coverage")):
@@ -432,6 +440,8 @@ class SIRVsuiteCoverage():
         Returns: 3-level dictionary gene_id -> strand -> expected_coverage
         """
 
+        log.info("Calculating expected coverage from the annotation")
+
         # check if annotation has been loaded
         if (not hasattr(self, "annotation_df")):
             raise ValueError("No annotation detected for theoretical coverage.. Please load annotation in .gtf or .bed format.")
@@ -452,6 +462,8 @@ class SIRVsuiteCoverage():
 
             self.target_gene_id = np.unique(annotation_df["gene_id"])
 
+            #self.target_gene_id = ["SIRV6001","SIRV1"]
+
             expected_coverage[mode] = dict()
 
             for gene in self.target_gene_id:
@@ -461,7 +473,8 @@ class SIRVsuiteCoverage():
                     warnings.warn("No record for gene "+gene+" has been found in the provided annotation file.. skipping gene..")
 
                 end_coord = np.max(gene_annot["End"])
-                start_coord = np.min(gene_annot["Start"])
+                #start_coord = np.min(gene_annot["Start"])
+                start_coord = 1
 
                 self.gene_coords[gene] = (start_coord, end_coord) 
                 
@@ -480,7 +493,8 @@ class SIRVsuiteCoverage():
 
                     for transcript in np.unique(stranded_gene_annot["transcript_id"]):
                         
-                        transcript_annot = stranded_gene_annot[stranded_gene_annot["transcript_id"] == transcript].copy(deep=True).reset_index(drop = True)                    
+                        transcript_annot = stranded_gene_annot[stranded_gene_annot["transcript_id"] == transcript].copy(deep=True).reset_index(drop = True)
+                        transcript_annot["Start"] += 1     
 
                         exon_lengths = np.array(transcript_annot["End"]) - np.array(transcript_annot["Start"]) + 1
 
@@ -511,7 +525,7 @@ class SIRVsuiteCoverage():
 
     def coverage_plot(self):
 
-        log.info("creating coverage plots")
+        log.info("Creating coverage plots")
         
         # define base sizes, coordinates
         page_width = 2000
@@ -706,12 +720,15 @@ class SIRVsuiteCoverage():
 
                         gene_pos = self.gene_coords[gene]
 
-                        start = start_pos[segment_idx] - gene_pos[0]
-                        end = end_pos[segment_idx] - gene_pos[0]
+                        start = start_pos[segment_idx] - gene_pos[0] + 1 
+                        end = end_pos[segment_idx] - gene_pos[0] + 1
 
                         expected_cov_slice = expected_cov[start:end]
                         real_cov_scaled_slice = real_cov_scaled[start:end]
                         
+                        if len(real_cov_scaled_slice) == 0:
+                            print ('')
+
                         expected_coverage_height_total = coverage_panel_height/2 
 
                         d.draw_signal(signal = expected_cov_slice, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
@@ -722,7 +739,6 @@ class SIRVsuiteCoverage():
 
                         if (gene == "SIRV2" and segment_idx == 8 and strand == "-"):
                             k = 0
-
                         d.draw_signal(signal = real_cov_scaled_slice, x = segment_start, y = coverage_panel_y + coverage_panel_height/2,
                         width = segment_lengths[segment_idx]/total_segment_length*draw_length, height = expected_coverage_height_total*real_cov_limit_factor,
                         mode = "normal", upside_down = upside_down, 
@@ -731,8 +747,8 @@ class SIRVsuiteCoverage():
 
                         # draw coordinates
                         d.draw_line(x = segment_start, y = xAxis_y, width = segment_lengths[segment_idx]/total_segment_length*draw_length, end_shape = ("both","line"), color = (0.3,0.3,0.3))
-                        d.draw_text(text = str(start + gene_pos[0]), x = segment_start, y = xAxis_y + 6, font_size = 16, v_align = "center", h_align = "left", rotate = 90)
-                        d.draw_text(text = str(end + gene_pos[0]), x = segment_start + segment_lengths[segment_idx]/total_segment_length*draw_length, y = xAxis_y + 6, rotate = 90, font_size = 16, v_align = "bottom", h_align = "left")
+                        d.draw_text(text = str(gene_pos[0] + start), x = segment_start, y = xAxis_y + 6, font_size = 16, v_align = "center", h_align = "left", rotate = 90)
+                        d.draw_text(text = str(gene_pos[0] + end - 1), x = segment_start + segment_lengths[segment_idx]/total_segment_length*draw_length, y = xAxis_y + 6, rotate = 90, font_size = 16, v_align = "bottom", h_align = "left")
 
                         segment_start += segment_lengths[segment_idx]/total_segment_length*draw_length + intersegment_gap
                         

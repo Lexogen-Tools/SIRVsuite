@@ -18,8 +18,6 @@ modules_to_execute = []
 
 if __name__ == '__main__':
 
-    os.path.expanduser("~")
-
     parser = ap.ArgumentParser()
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('-i','--sample-sheet', action = 'store', help = "Specify path to the sample sheet.", required = True, nargs = 1)
@@ -48,8 +46,6 @@ if __name__ == '__main__':
 
     # read sample sheet + module availibility check based on sample sheet
     input_dict = read_sample_sheet(input_path, modules_to_execute = modules_to_execute)
-    
-    sys.exit() # TO BE DELETED
 
     # run modules
     if "concentration" in modules_to_execute:
@@ -92,5 +88,5 @@ if __name__ == '__main__':
 
         del c
 
-    sys.exit()
+    sys.exit(0)
 
