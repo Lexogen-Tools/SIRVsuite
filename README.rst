@@ -51,10 +51,13 @@ be processed based on the sample sheets.
 Sample sheet content description
 --------------------------------
 
-Sample sheet is required to have a following format: - used ";"
-separator - trailing whitespace or tab is allowed (trimmed during
-reading process) - UTF-8 encoding - every column must have a name which
-is predefined (see more info below) - column values are case insensitive
+Sample sheet is required to have a following format:
+
+- used ";" separator
+- trailing whitespace or tab is allowed (trimmed during reading process)
+- UTF-8 encoding
+- every column must have a name which is predefined (see more info below)
+- column values are case insensitive
 - the order of columns can be arbitrary
 
 **Allowed columns**:
@@ -67,7 +70,7 @@ samples (this will be printed in the final graphics).
 
 Concentration specific columns:
 
-3. counting\_path: valid path to count files.
+3. counting\_path: valid path to the count file.
 4. counting\_method: mix2, cufflinks or htseq. Defines, how the count
    file should be read.
 5. counting\_feature: gene or transcript. Defines, whether ERCC
@@ -88,7 +91,7 @@ Coverage specific columns:
 Any other columns will be ignored.
 
 3. Running SIRVsuite
-====================
+--------------------
 
 SIRVsuite accepts the following arguments:
 ::
@@ -120,29 +123,37 @@ Example commands:
   python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" -a
 
 
-Output:
+Output data:
+------------
 
 The pipeline will create subfolder for every specified module with module-specific output data.
 
-   Coverage module:
-   
-   The module processes .bam files + SIRV-set 3 or 4 annotation and calculates read coverage and creates 3 types of output: 
-   
-      - CoD table,
-      - coverage data in bigwig format,
-      - coverage plot.
+**Coverage module**
 
-   ERCC-Correlation module:
-      
-      The module processes transcript or gene counts for ERCCs and creates 2 types of output:
-         
-         - correlation table,
-         - correlation plot.
+The module processes .bam files + SIRV-set 3-4 annotation, calculates coverage (expected + measured) and creates 3 types of output:
 
-   SIRV-concentration module:
-      
-      The module processes transcript FPKM for ERCCs and creates 3 types of output:
-         
-         - relative concentration table,
-         - boxplot,
-         - heatmap.
+- CoD table,
+- coverage data in bigwig format,
+- coverage plot.
+
+The CoD metrics allows to measure the resemblence between expected (theoretical) and measured (real) coverage. The theoretical coverage is calculated based on annotated distribution of exons, whilst the measured coverage is quantified from the reads obtained from the sequencer. For CoD applies
+CoD >= 0
+
+Measured coverage in bigwig (.bw) format can be used, for example, in a IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html.
+
+**ERCC-Correlation module**
+
+The module processes transcript or gene counts and input concentration of ERCCs. It creates two types of output:
+
+- correlation table,
+- correlation plot.
+
+The correlation table consist of R^2 values for each sample, the correlation plot displays an overview of distribution of ERCC gene concentration ratios.
+
+**SIRV-concentration module**
+
+The module processes transcript FPKM values for SIRVs and creates 3 types of output:
+
+- boxplot,
+- relative concentration table,
+- heatmap.
