@@ -20,6 +20,10 @@ class SIRVsuiteConcentration():
 
     def __init__(self, sample_sheet = None, output_dir = "./", experiment_name = ""):
 
+        """
+
+        """
+
         self.output_dir = output_dir
         self.experiment_name = experiment_name
 
@@ -55,8 +59,9 @@ class SIRVsuiteConcentration():
 
     def heatmap_generator(self, data, row_labels, col_labels, title = "SIRVsuite heatmap", ax=None,
                 cbar_kw={}, cbarlabel="", no_x_ticks = True, **kwargs):
-
-        # This method creates a heatmap with a colorbar 
+        """
+        This method creates a heatmap with a colorbar 
+        """
 
         if not ax:
             ax = plt.gca()
@@ -102,8 +107,10 @@ class SIRVsuiteConcentration():
     def annotate_heatmap(self, image, data=None, valfmt="{x:.2f}",
                         textcolors=("black", "white"),
                         threshold=None, **textkw):
-        # Create annotation for heatmap to compare relative abundance values
-        
+        """
+        Create annotation for heatmap to compare relative abundance values
+        """
+
         if not isinstance(data, (list, np.ndarray)):
             data = image.get_array()
 
@@ -129,6 +136,9 @@ class SIRVsuiteConcentration():
         return texts
 
     def __get_text_size__(self, fontsize,text):
+        """
+        
+        """
         ffam = 'DejaVu Sans'
         fp = matplotlib.font_manager.FontProperties(
         family=ffam, style='normal', size=fontsize,
@@ -139,7 +149,9 @@ class SIRVsuiteConcentration():
         return bb.width, bb.height
 
     def get_relative_abundance(self, cnts):
-        
+        """
+
+        """
         norm_abund_dict = {}
 
         for group in cnts.keys():
@@ -155,7 +167,9 @@ class SIRVsuiteConcentration():
         return (norm_abund_dict)
 
     def export_data(self, norm_abund_dict):
+        """
 
+        """
         groups = list(norm_abund_dict.keys())
 
         path = os.path.join(self.output_dir,"concentration/")
@@ -170,17 +184,17 @@ class SIRVsuiteConcentration():
                 out_file.write(transcript+"\t"+"\t".join([str(norm_abund_dict[group][transcript]) for group in groups])+"\n")
 
     def create_sirvsuite_boxplot(self, relative_abundance):
-        
+        """
+
+        """
         log.info("Creating SIRVsuite boxplot")
 
         path = os.path.join(self.output_dir,"concentration/")
 
         if not os.path.exists(path):
             os.makedirs(path)
-
-        figsize=(12, 5 + len(relative_abundance))
         
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(12, 2 + len(relative_abundance)))
         ax1.set_xscale('log')
 
         if self.experiment_name != "":
@@ -212,7 +226,7 @@ class SIRVsuiteConcentration():
                     showfliers = False)
 
         ax1.plot([1,1],[0,len(relative_abundance) + 1], color = 'darkblue', alpha = .6)
-        ax1.set_ylim([0,len(relative_abundance) + 1])
+        ax1.set_ylim([0,len(relative_abundance)+1])
 
         if (heatmap_matrix.max() > 10):
             limit_x = heatmap_matrix.max()
@@ -227,6 +241,9 @@ class SIRVsuiteConcentration():
         fig.savefig(output_name, dpi = 300, pad_inches = 0.2)
     
     def __count_dict_to_matrix__(self, count_dict):
+        """
+
+        """
         conc_matrix = np.array([])
         groups = count_dict.keys()
         for group in groups:
@@ -237,7 +254,9 @@ class SIRVsuiteConcentration():
     
 
     def create_sirvsuite_heatmap(self, relative_abundance):
+        """
 
+        """
         log.info("Creating SIRVsuite heatmap")
 
         path = os.path.join(self.output_dir,"concentration/")
@@ -250,7 +269,7 @@ class SIRVsuiteConcentration():
 
         genes = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]
 
-        fig = plt.figure(figsize=(len(relative_abundance),40))
+        fig = plt.figure(figsize=(2+len(relative_abundance),40))
 
         vectorized_len = np.vectorize(len)
         max_length_index =  np.argmax(vectorized_len(groups))
