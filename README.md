@@ -44,21 +44,21 @@ Sample sheet is required to have a following format:
 Columns in the sample sheet can be divided into different categories. General columns are always required, the other columns relate to the module of interest.
 
 General columns:
-1. sample_name: any set of characters to identify samples (this will be printed in the final graphics).
+- sample_name: any set of characters to identify samples (this will be printed in the final graphics).
 
-2. library_prep_type: whole (whole transcriptome library prep) or qs (QuantSeq library preparation)
+- library_prep_type: whole (whole transcriptome library prep) or qs (QuantSeq library preparation)
 
 SIRV-concentration & ERCC-correlation:
 
-3. counting_path: valid path to count files.
-4. counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
-5. counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
-6. replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
+- counting_path: valid path to count files.
+- counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
+- counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
+- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
 
-7. alignment_path: valid path to a .bam file.
-8. read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries.
+- alignment_path: valid path to a .bam file.
+- read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries.
 
 Any other column will be ignored.
 
@@ -109,9 +109,9 @@ Measured coverage in bigwig (.bw) format can be used, for example, in a IGV brow
 
 Coverage plot can serve as an overview of exon distribution for different transcript variants, the corresponding expected coverage based on annotation and the measured read distribution fits into these regions. In addition, it provides a basic statistics along with a CoD value.
 
-Example of a coverage plot:
+An example of a coverage plot:
 
-![image](./examples/output_preview/coverage_preview.png)
+<p align="center"><img src="./examples/output_preview/coverage_preview.png" width=1280></p>
 
 **ERCC-Correlation module**
 
@@ -120,12 +120,23 @@ The module processes transcript or gene counts and input concentration of ERCCs.
 - correlation table,
 - correlation plot.
 
-The correlation table consist of R^2 values for each sample, the correlation plot displays an overview of distribution of ERCC gene concentration ratios.
+The correlation table consist of Pearson correlation R values, the correlation plot displays an overview of distribution of ERCC gene concentration ratios for each sample.
+
+An example of a correlation plot:
+
+<p align="center"><img src="./examples/output_preview/ERCC_correlation_preview.png" width=800></p>
 
 **SIRV-concentration module**
 
 The module processes transcript FPKM values for SIRVs and creates 3 types of output:
 
-- boxplot,
 - relative concentration table,
-- heatmap.
+- boxplot of SIRV relative transcript concentration,
+- heatmap of Log<sub>2</sub> Fold Change SIRV transcript relative concentrations.
+
+An example of a SIRV concentration boxplot:
+
+<p align="center"><img src="./examples/output_preview/SIRV_boxplot_preview.png" width=800></p>
+
+An example of a SIRV concentration heatmap for SIRV1 and SIRV2:
+<p align="center"><img src="./examples/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>
