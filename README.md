@@ -11,10 +11,10 @@ python SIRVsuite.py [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--cov
 ## 1. Installation
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
 ```
-conda env create -p PATH_TO_CONDA -f install/sirvsuite_env.yml
+conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
 ```
 
-to create a virtual conda environment, from which SIRVsuite.py can run.
+to create a virtual conda environment, from which SIRVsuite.py can run. Conda is installed to the home directory by default. In this case CONDA_PATH would refer to /home/user_name/anaconda3 or /home/user_name/miniconda3. See more info about conda enironments: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html. 
 
 Another option is to install python packages directly, which is not recommended due to possible dependency conflicts.
 
@@ -45,7 +45,6 @@ Columns in the sample sheet can be divided into different categories. General co
 
 General columns:
 - sample_name: any set of characters to identify samples (this will be printed in the final graphics).
-
 - library_prep_type: whole (whole transcriptome library prep) or qs (QuantSeq library preparation)
 
 SIRV-concentration & ERCC-correlation:
@@ -103,9 +102,17 @@ The module processes .bam files + SIRV-set 3-4 annotation, calculates coverage (
 - coverage data in bigwig format,
 - coverage plot.
 
-The CoD metrics allows to measure the resemblence between expected (theoretical) and measured (real) coverage. The theoretical coverage is calculated based on annotated distribution of exons, whilst the measured coverage is quantified from the reads obtained from the sequencer. For CoD applies: CoD >= 0, where values around 0 indicate an ideal match between expected and measured coverage.
+The CoD metrics allows to measure the resemblence between expected (theoretical) and measured (real) coverage. The theoretical coverage is calculated based on annotated distribution of exons, whilst the measured coverage is quantified from the reads obtained from the sequencer.
 
-Measured coverage in bigwig (.bw) format can be used, for example, in a IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html.
+CoD value is given as follows:
+
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;CoD=\frac{\sum_{i=1}^{n}(cov_{theory}-cov_{real,scaled})^2}{\sum_{i=1}^{n}cov_{theory,i}}"\></p>
+
+ For CoD applies:
+ CoD >= 0
+ , where values around 0 indicate an ideal match between expected and measured coverage.
+
+Measured coverage in bigwig (.bw) format can be used, for example, in a IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
 
 Coverage plot can serve as an overview of exon distribution for different transcript variants, the corresponding expected coverage based on annotation and the measured read distribution fits into these regions. In addition, it provides a basic statistics along with a CoD value.
 
@@ -130,11 +137,25 @@ An example of a correlation plot:
 
 The module processes transcript FPKM values for SIRVs and creates 3 types of output:
 
-- relative concentration table,
-- boxplot of SIRV relative transcript concentration,
-- heatmap of Log<sub>2</sub> Fold Change SIRV transcript relative concentrations.
+- relative concentration table (concentration/relative_concentration.tsv),
+- boxplot of SIRV relative transcript concentration (concentration/SIRV_boxplot.png),
+- heatmap of Log<sub>2</sub> Fold Change SIRV transcript relative concentrations (concentration/SIRV_heatmap.png).
 
-An example of a SIRV concentration boxplot:
+The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcripts. This enables the folowing calculation procedure. Consider SIRV transcript i of n SIRV transcripts present in a sample. Given a measured FPKM concentration FPKM<sub>i</sub>,  FPKM<sub>expected</sub> for each transcript is quantified as follows:
+
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,expected}=\frac{\sum_{i=1}^{n}FPKM_i}{n}"\></p>
+
+and we can define relative FPKM value as a ratio of estimated and expected relative abundance using formula
+
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,rel}=\frac{FPKM_i}{FPKM_{expected}}=\frac{FPKM_i}{\sum_{i=1}^{n}FPKM_i} \ \frac{1}{n}"\></p>
+
+The FPKM<sub>i,rel</sub> values can be found in relative concentration/relative_concentration.tsv in the output directory.
+
+Log<sub>2</sub> Fold Change of FPKM<sub>i,rel</sub> is displayed in a heatmap, showing the difference between expected and calculated values. The green signalizes match between concentrations, blue transcript underexpression and red overexpression.
+
+The distribution of FPKM<sub>i,rel</sub> is summarized into a boxplot.
+
+An example of a SIRV concentration boxplot (mean - read circle, median - white strip):
 
 <p align="center"><img src="./examples/output_preview/SIRV_boxplot_preview.png" width=800></p>
 
