@@ -47,7 +47,7 @@ class ERCCcorrelation():
         if experiment_name != "":
             experiment_name = "_"+experiment_name
 
-        data_path = os.path.join(output_dir, "ERCC_correlation%s.tsv"%(experiment_name))
+        data_path = os.path.join(output_dir, "ERCC_correlation.tsv")
 
         corr_per_sample = {}
 
@@ -82,8 +82,8 @@ class ERCCcorrelation():
             if ( not os.path.exists(nested_dir)):
                 os.makedirs(nested_dir)
 
-            plot_path = os.path.join(nested_dir, "ERCC_correlation_%s.png"%(sample_name))
-            fig.savefig(plot_path)
+            plot_path = os.path.join(nested_dir, "ERCC_correlation.png")
+            fig.savefig(plot_path, dpi = 200)
             plt.close(fig)
         
         # write summary file for all given samples
