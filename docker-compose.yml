@@ -1,0 +1,12 @@
+version: "2.2"
+
+services:
+  sirvsuite:
+    container_name: sirvsuite_standalone
+    environment:
+      TEST_VAR: "test_val_1" 
+    volumes:
+      - ${SSUITE_INPUT:-/input}:/input
+      - ${SSUITE_PATH:-./Source}:/home/Source
+      - ${SSUITE_OUTPUT:-/output}:/output
+    build: .

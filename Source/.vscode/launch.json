@@ -1,0 +1,54 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "main.py",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "console": "integratedTerminal",
+            "args": ["--coverage",
+                    "-o", "/home/tdrozd/development/sirv-suite/standalone/output/",
+                    "-i","/home/tdrozd/development/sirv-suite/test/input/sample_sheet_merged.tsv"]
+        },
+        {
+            "name": "drawer-test",
+            "type": "python",
+            "request": "launch",
+            "program": "test_drawer.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "covtest",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Pipeline/Coverage/SIRVsuiteCoverage.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "conc",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Pipeline/Concentration/SIRVsuite_concentration.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "test",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "sheet",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Pipeline/helper.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}
