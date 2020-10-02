@@ -12,6 +12,9 @@ log = logging.getLogger(__name__)
 class ERCCcorrelation():
 
     def __init__(self, sample_sheet = None, output_dir = "./"):
+        """
+        """
+        
         if sample_sheet:
             c = countReader()
             cnts = dict()
@@ -21,7 +24,10 @@ class ERCCcorrelation():
             self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"))
 
     def read_ERCC_concentration_table(self, ERCC_table_path):
-        # Reading of ERCC concentration table
+        """
+        Reading of ERCC concentration table
+        """
+        
         conc = {}
 
         with open(ERCC_table_path, "r") as f:
@@ -31,11 +37,14 @@ class ERCCcorrelation():
         return (conc, reader.fieldnames[2:])
             
     def ERCC_correlation(self, data, experiment_name = "", output_dir = "./"):
+        """
+        This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
+        and experiment name, which is optional   
+        """
 
         log.info("Creating ERCC correlation")
 
-        # This functions loads list of input files (gene or transcript counts), type of quantification, names of samples, type of ERCC spike mix (Mix1 or Mix2) 
-        # and experiment name, which is optional    
+         
 
         ERCC_table_path = os.path.dirname(__file__)
         ERCC_table_path = ERCC_table_path.replace("Pipeline/Correlation","Resources/ERCC92_Concentration.tsv")

@@ -31,6 +31,10 @@ class SIRVsuiteCoverage():
     """
     def __init__(self, sample_sheet = None, output_dir = "./", gene_list = ["SIRV5"], experiment_name = ""):
 
+        """
+
+        """
+
         self.verbose = "DEBUG"
         self.target_gene_id = gene_list
 
@@ -63,12 +67,19 @@ class SIRVsuiteCoverage():
         return (starts, ends, values)
 
     def __strand2text__(self, text):
+        """
+        
+        """
+
         if (text == "+"):
             return "sense"
         elif (text == "-"):
             return "antisense"    
 
     def __cov_data_export__(self, output_path, output_type = "bigwig"):
+        """
+
+        """
 
         log.info("Exporting coverage data")
 
@@ -102,6 +113,8 @@ class SIRVsuiteCoverage():
             warnings.warn("No coverage detected to export..")
 
     def set_output_dir(self, output_dir, create = False):
+        """
+        """
 
         if ((not create) & (not os.path.exists(output_dir))):
             raise ValueError("Provided folder does not exist.. please use create=True argument to make a new directory or change to valid path..")
@@ -525,6 +538,10 @@ class SIRVsuiteCoverage():
 
     def coverage_plot(self):
 
+        """
+
+        """
+
         log.info("Creating coverage plots")
         
         # define base sizes, coordinates
@@ -628,14 +645,14 @@ class SIRVsuiteCoverage():
                 tab["Mode"] = mode
                 
                 d.draw_table(table_dict=tab,x=exon_panel_x,y=header_y,width=exon_panel_width/3,height=header_height)
-
+                
                 d.draw_rectangle(x = exon_panel_x,
                     y = exon_panel_y,
                     width = exon_panel_width,
                     height = exon_panel_height,
                     color_fill=(.5,.5,.5),
-                    alpha = 0.3)
-
+                    alpha = 0.15)
+                
                 t_y = exon_panel_y + transcript_row_gap 
 
                 for transcript in transcripts:
@@ -685,8 +702,7 @@ class SIRVsuiteCoverage():
                     max_e = max(expected_cov)
 
                     if len(existing_strands) == 1:
-                        real_cov_limit_factor = max(real_cov_scaled) / max_e 
-                        #max_scale_limit = 
+                        real_cov_limit_factor = max([max(real_cov_scaled), max_e]) / max_e 
                     
                     segment_start = transcript_line_offset_x + intersegment_gap
 
