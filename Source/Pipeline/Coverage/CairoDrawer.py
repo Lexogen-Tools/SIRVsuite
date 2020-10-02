@@ -65,7 +65,9 @@ class CairoDrawer():
         return obj.width, obj.height
 
     def __merge_close_coordinates__(self, thre = 50, starts = None, ends = None):
-        
+        """
+
+        """
         if (len(starts) == 0 or len(ends) == 0):
             return starts, ends
 
@@ -74,7 +76,7 @@ class CairoDrawer():
         diffs = starts[1:] - ends[:-1]
 
         starts_merged = []
-        ends_merged = [];
+        ends_merged = []
 
         while idx < len(ends):
             starts_merged.append(starts[idx])
