@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="./SIRV_isoforms_multi-fasta_190418a.fasta" hasGeneTrack="false" hasSequenceTrack="true" locus="All" version="8">
+    <Resources>
+        <Resource path="SIRV_isoforms_multi-fasta-annotation_190418a.gtf"/>
+    </Resources>
+    <Panel height="654" name="FeaturePanel" width="1516">
+        <Track attributeKey="Reference sequence" clazz="org.broad.igv.track.SequenceTrack" fontSize="10" id="Reference sequence" name="Reference sequence" visible="true"/>
+        <Track attributeKey="SIRV_isoforms_multi-fasta-annotation_190418a.gtf" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;29.0;255,255,255;0,0,178" fontSize="10" id="/home/tdrozd/development/SIRVsuitev1.0/sirv-suite/Source/Resources/SIRV_isoforms_multi-fasta-annotation_190418a.gtf" name="SIRV_isoforms_multi-fasta-annotation_190418a.gtf" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.009022556390977444"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>
