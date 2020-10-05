@@ -152,7 +152,6 @@ class SIRVsuiteCoverage():
 
                 if (not os.path.exists(index_path)):
                     ps.index(bam_path)
-                    
                     log.info(".bai index file not detected.. creating index file..")
 
             bamFile = ps.AlignmentFile(bam_path,"rb")

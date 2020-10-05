@@ -49,19 +49,22 @@ General columns:
 
 SIRV-concentration & ERCC-correlation:
 
-- counting_path: valid path to count files.
+- counting_path: valid absolute path to count files.
 - counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
 - counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
 - replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
 
-- alignment_path: valid path to a .bam file.
+- alignment_path: valid absolute path to a .bam file.
 - read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries.
 
 Any other column will be ignored.
 
 ## 3. Running SIRVsuite
+
+(TO BE CHANGED)
+To run SIRVsuite, execute Source/SIRVsuite.py from sirvsuite conda environment
 
 SIRVsuite accepts the following arguments:
 
@@ -85,10 +88,10 @@ SIRVsuite accepts the following arguments:
 Example commands:
 ```
   # run SIRVsuite to generate coverage plots, data, relative abundance with heatmap and boxplot from sample information in sample_sheet.csv
-  python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" --coverage --SIRV-concentration
+  python SIRVsuite.py -i examples/sample_sheet_test_SIRVset3.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset3" --coverage --SIRV-concentration
 
   # run SIRVsuite to perform whole analysis from sample information in sample_sheet.csv
-  python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" -a
+  python SIRVsuite.py -i examples/sample_sheet_test_SIRVset4.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset4" -a
 ```
 
 ## 4. Output data
