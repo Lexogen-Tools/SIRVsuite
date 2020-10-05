@@ -88,10 +88,10 @@ SIRVsuite accepts the following arguments:
 Example commands:
 ```
   # run SIRVsuite to generate coverage plots, data, relative abundance with heatmap and boxplot from sample information in sample_sheet.csv
-  python SIRVsuite.py -i examples/sample_sheet_test_SIRVset3.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset3" --coverage --SIRV-concentration
+  python SIRVsuite.py -i ./examples/sample_sheet_test_SIRVset3.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset3" --coverage --SIRV-concentration
 
   # run SIRVsuite to perform whole analysis from sample information in sample_sheet.csv
-  python SIRVsuite.py -i examples/sample_sheet_test_SIRVset4.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset4" -a
+  python SIRVsuite.py -i ./examples/sample_sheet_test_SIRVset4.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset4" -a
 ```
 
 ## 4. Output data
