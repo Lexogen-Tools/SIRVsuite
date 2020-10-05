@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class ERCCcorrelation():
 
-    def __init__(self, sample_sheet = None, output_dir = "./"):
+    def __init__(self, sample_sheet = None, output_dir = "./", experiment_name = ""):
         """
         """
         
@@ -21,7 +21,7 @@ class ERCCcorrelation():
             for sample in sample_sheet.keys():    
                 cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method=sample_sheet[sample]["counting_method"],counting_type=sample_sheet[sample]["counting_feature"],spike_in_type=["ERCC"])
         
-            self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"))
+            self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"), experiment_name = experiment_name)
 
     def read_ERCC_concentration_table(self, ERCC_table_path):
         """
@@ -54,7 +54,7 @@ class ERCCcorrelation():
 
         #cnt_data_total = get_data(file_list, types, sample_names)
         if experiment_name != "":
-            experiment_name = "_"+experiment_name
+            experiment_name = experiment_name + ": "
 
         data_path = os.path.join(output_dir, "ERCC_correlation.tsv")
 
@@ -84,7 +84,7 @@ class ERCCcorrelation():
             corr = pearsonr([math.log10(x[i]) for i in range(len(x)) if x[i]!=0 and y[i]!=0],
                                     [math.log10(y[i]) for i in range(len(y)) if x[i]!=0 and y[i]!=0])[0]
             corr_per_sample[sample_name] = corr
-            fig.gca().title.set_text("Sample %s (R=%.3f)"%(sample_name,corr))
+            fig.gca().title.set_text("%s %s (R=%.3f)"%(experiment_name,sample_name,corr))
 
             nested_dir = os.path.join(output_dir, sample_name)
 

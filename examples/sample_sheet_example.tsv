@@ -1,2 +1,0 @@
-sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;
-NGS2.54_0002;/home/tdrozd/development/NGS2.54/BAM/NGS2.54_0002.bam;/home/tdrozd/development/NGS2.54/mix2/NGS2.54_0002;FWD;mix2;transcript;whole
