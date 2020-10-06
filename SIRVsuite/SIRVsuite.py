@@ -14,9 +14,9 @@ logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO)
 log = logging.getLogger()
 
-modules_to_execute = []
+def main():
 
-if __name__ == '__main__':
+    modules_to_execute = []
 
     parser = ap.ArgumentParser()
     required_args = parser.add_argument_group('required arguments')
@@ -43,7 +43,6 @@ if __name__ == '__main__':
 
     out = os.path.expanduser(args.output_dir[0])
     input_path = os.path.expanduser(args.sample_sheet[0])
-    experiment_name = args.experiment_name[0]
 
     # read sample sheet + module availibility check based on sample sheet
     input_dict = read_sample_sheet(input_path, modules_to_execute = modules_to_execute)
@@ -56,15 +55,15 @@ if __name__ == '__main__':
         cnts = []
 
         if (args.all_modules):
-            b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out, experiment_name=experiment_name)
+            b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out)
             b.create_sirvsuite_boxplot(b.data)
             b.create_sirvsuite_heatmap(b.data)
             cnts = b.cnts
             a = ERCCcorrelation()
-            a.ERCC_correlation(cnts, output_dir=os.path.join(out,"correlation/"), experiment_name=experiment_name)
+            a.ERCC_correlation(cnts, output_dir=os.path.join(out,"correlation/"))
         
         if (args.SIRV_concentration):
-            b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out, experiment_name=experiment_name)
+            b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out)
             b.create_sirvsuite_boxplot(b.data)
             b.create_sirvsuite_heatmap(b.data)
 
@@ -81,7 +80,7 @@ if __name__ == '__main__':
         del b
 
     if "coverage" in modules_to_execute:
-        c = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name = experiment_name)
+        c = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name = "")
         c.expected_coverage()
         c.bam_to_coverage()
         c.calc_statistics()
@@ -89,5 +88,6 @@ if __name__ == '__main__':
 
         del c
 
-    sys.exit(0)
-
+if __name__ == '__main__':
+    sys.exit(main())
+    
