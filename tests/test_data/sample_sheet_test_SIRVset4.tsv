@@ -1,0 +1,3 @@
+sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;
+test_sample4;./Source/Resources/test_data/alignment/SIRVset4/test_alignment_4.bam;./Source/Resources/test_data/mix2/SIRVset4/test_transcript_count_4;FWD;mix2;transcript;whole
+test_sample5;./Source/Resources/test_data/alignment/SIRVset4/test_alignment_5.bam;./Source/Resources/test_data/mix2/SIRVset4/test_transcript_count_5;FWD;mix2;transcript;whole
