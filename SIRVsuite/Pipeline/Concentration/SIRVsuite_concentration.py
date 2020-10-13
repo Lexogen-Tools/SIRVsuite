@@ -242,7 +242,7 @@ class SIRVsuiteConcentration():
     
     def __count_dict_to_matrix__(self, count_dict):
         """
-
+        A method to convert dictionary to numpy matrix 
         """
         conc_matrix = np.array([])
         groups = count_dict.keys()
@@ -255,7 +255,7 @@ class SIRVsuiteConcentration():
 
     def create_sirvsuite_heatmap(self, relative_abundance):
         """
-
+        A method to create heatmap from 
         """
         log.info("Creating SIRVsuite heatmap")
 

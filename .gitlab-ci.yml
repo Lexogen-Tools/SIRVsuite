@@ -6,6 +6,6 @@ test_run:
     - pip3 install pyBigWig
     - pip3 install SIRVsuite --extra-index-url=https://test.pypi.org/simple/
   script:
-    - python -m tests.unitTest -v
+    - python -m tests.test_parse -v
   when: manual
   

@@ -1,3 +1,5 @@
+# SIRVsuite
+
 SIRVsuite is a command line tool to analyze performance of SIRV set 3 and 4 spike-ins based on alignment and transcript count data.
 
 SIRVsuite is permitted under the following licence xxx.
@@ -8,7 +10,11 @@ python SIRVsuite.py [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--cov
 ```
 
 ## Getting started
+
 ## 1. Installation
+
+### a) Using conda environment
+
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
 ```
 conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
@@ -17,6 +23,20 @@ conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
 to create a virtual conda environment, from which SIRVsuite.py can run. Conda is installed to the home directory by default. In this case CONDA_PATH would refer to /home/user_name/anaconda3 or /home/user_name/miniconda3. See more info about conda enironments: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html. 
 
 Another option is to install python packages directly, which is not recommended due to possible dependency conflicts.
+
+### b) Using PyPI repo
+
+Currently being implemented...
+
+Soon available via: 
+```
+pip install SIRVsuite
+```
+
+Non-python requirements:
+- cairo >= 1.15.10
+- zlib
+- libcurl (and the curl-config config)
 
 ## 2. Preparing sample sheet
 The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
@@ -49,22 +69,19 @@ General columns:
 
 SIRV-concentration & ERCC-correlation:
 
-- counting_path: valid absolute path to count files.
+- counting_path: valid path to count files.
 - counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
 - counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
 - replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
 
-- alignment_path: valid absolute path to a .bam file.
+- alignment_path: valid path to a .bam file.
 - read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries.
 
 Any other column will be ignored.
 
 ## 3. Running SIRVsuite
-
-(TO BE CHANGED)
-To run SIRVsuite, execute Source/SIRVsuite.py from sirvsuite conda environment
 
 SIRVsuite accepts the following arguments:
 
@@ -88,10 +105,10 @@ SIRVsuite accepts the following arguments:
 Example commands:
 ```
   # run SIRVsuite to generate coverage plots, data, relative abundance with heatmap and boxplot from sample information in sample_sheet.csv
-  python Source/SIRVsuite.py -i ./examples/sample_sheet_test_SIRVset3.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset3" --coverage --SIRV-concentration
+  python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" --coverage --SIRV-concentration
 
   # run SIRVsuite to perform whole analysis from sample information in sample_sheet.csv
-  python Source/SIRVsuite.py -i ./examples/sample_sheet_test_SIRVset4.tsv -o /home/user_name/SIRVsuite_output/ --experiment-name "sequencing-run-SIRVset4" -a
+  python SIRVsuite.py -i sample_sheet.csv -o /home/user/SIRVsuite_output/ --experiment-name "sequencing-run-1" -a
 ```
 
 ## 4. Output data
@@ -130,7 +147,7 @@ The module processes transcript or gene counts and input concentration of ERCCs.
 - correlation table,
 - correlation plot.
 
-The correlation table consist of Pearson correlation R values, the correlation plot displays an overview of distribution of ERCC gene concentration ratios for each sample.
+The correlation table consist of Pearson correlation R values, the correlation plot is a scatterplot revealing dependency between theoretical and measured concentration for ERCC genes based on concentration table: https://assets.thermofisher.com/TFS-Assets/LSG/manuals/cms_095046.txt.
 
 An example of a correlation plot:
 

@@ -81,7 +81,7 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
     ## RESTRICTIONS FOR THE COLUMNS CAN BE DEFINED HERE ##
     
     value_restriction = dict()
-    value_restriction["library_prep_type"] = ["whole","qs"]
+    value_restriction["library_prep_type"] = ["whole"]
     value_restriction["read_orientation"] = ["fwd","rev","none"]
     value_restriction["counting_method"] = ["mix2","cufflinks","htseq"]
     value_restriction["counting_feature"] = ["gene","transcript"]
@@ -159,8 +159,8 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                         if len(c_library_prep) > 1:
                             raise ValueError("Cannot proceed with different library_preps..")
         
-    except ValueError as e:
-        log.error(sample_sheet_info)
+    except Exception as e:
+        log.error(str(e)+"\n"+sample_sheet_info)
         sys.exit(e)
 
     return sample_sheet_dict

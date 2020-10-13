@@ -1,0 +1,7 @@
+pyranges
+pandas
+pycairo<=1.14.0
+scipy
+pysam>=0.15.0
+matplotlib
+pyBigWig

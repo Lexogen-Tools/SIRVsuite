@@ -15,7 +15,7 @@ class ERCCcorrelation():
         """
         """
         
-        if sample_sheet:
+        if sample_sheet is not None:
             c = countReader()
             cnts = dict()
             for sample in sample_sheet.keys():    

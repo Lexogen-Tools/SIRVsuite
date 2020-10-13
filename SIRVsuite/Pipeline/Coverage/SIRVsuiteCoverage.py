@@ -2,7 +2,7 @@ import pysam as ps
 import pandas as pd
 import numpy as np
 import pyBigWig as bwig
-import pyranges
+import gtfparse
 from scipy.stats import norm
 import os
 import copy
@@ -164,7 +164,7 @@ class SIRVsuiteCoverage():
             for gene in self.target_gene_id:
 
                 if (hasattr(self, "annotation_df")):
-                    contig_id = annotation_df["Chromosome"][annotation_df["gene_id"] == gene].values[0]
+                    contig_id = annotation_df["seqname"][annotation_df["gene_id"] == gene].values[0]
                 else:
                     contig_id = gene
 
@@ -246,17 +246,16 @@ class SIRVsuiteCoverage():
             log.info("Loading "+annotation_path)
 
             if (annotation_type == "gtf"):
-                annotation_df = pyranges.read_gtf(annotation_path, as_df=True)
-            elif (annotation_type == "bed"):
-                annotation_df = pyranges.read_bed(annotation_path, as_df=True)
+                annotation_df = gtfparse.read_gtf(annotation_path)
 
             # limit only to a feature of interest
-            annotation_df[annotation_df["Feature"]=="exon"]
+            annotation_df[annotation_df["feature"]=="exon"]
             # trim to required cols only 
-            annotation_df = annotation_df[["Chromosome", "Start", "End", "Strand", "gene_id", "transcript_id"]]
+            annotation_df = annotation_df[["seqname", "start", "end", "strand", "gene_id", "transcript_id"]]
         except:
             raise ValueError("An error occured while loading annotation..")
         
+        annotation_df["start"] -= 1
         self.annotation_df = {"whole": annotation_df}
 
     def get_continous_coverage_ends(self, starts, ends):
@@ -413,15 +412,15 @@ class SIRVsuiteCoverage():
                 if ( strand  ==  '+'):
                     ascending = False
                     const = -1
-                    UTR_df_col = "Start"
+                    UTR_df_col = "start"
                 elif ( strand  ==  '-'):
                     ascending = True
                     const = 1
-                    UTR_df_col = "End"
+                    UTR_df_col = "end"
 
                 # sort annotation dataframe by Start column
-                annot_transcript = annot_transcript.sort_values(by=["Start"], axis = 0, ascending = ascending).reset_index(drop=True)
-                exon_lengths = annot_transcript["End"] - annot_transcript["Start"]
+                annot_transcript = annot_transcript.sort_values(by=["start"], axis = 0, ascending = ascending).reset_index(drop=True)
+                exon_lengths = annot_transcript["end"] - annot_transcript["start"]
                 remainder = region_length
                 UTR_data_frame = annot_transcript
                 
@@ -484,7 +483,7 @@ class SIRVsuiteCoverage():
                 if (len(gene_annot) == 0):
                     warnings.warn("No record for gene "+gene+" has been found in the provided annotation file.. skipping gene..")
 
-                end_coord = np.max(gene_annot["End"])
+                end_coord = np.max(gene_annot["end"])
                 #start_coord = np.min(gene_annot["Start"])
                 start_coord = 1
 
@@ -494,7 +493,7 @@ class SIRVsuiteCoverage():
                 
                 for strand in self._strands:
                     
-                    stranded_gene_annot = gene_annot[gene_annot["Strand"] == strand]
+                    stranded_gene_annot = gene_annot[gene_annot["strand"] == strand]
 
                     # skip when no record for gene and strand
                     if (len(stranded_gene_annot) == 0):
@@ -506,9 +505,9 @@ class SIRVsuiteCoverage():
                     for transcript in np.unique(stranded_gene_annot["transcript_id"]):
                         
                         transcript_annot = stranded_gene_annot[stranded_gene_annot["transcript_id"] == transcript].copy(deep=True).reset_index(drop = True)
-                        transcript_annot["Start"] += 1     
+                        transcript_annot["start"] += 1     
 
-                        exon_lengths = np.array(transcript_annot["End"]) - np.array(transcript_annot["Start"]) + 1
+                        exon_lengths = np.array(transcript_annot["end"]) - np.array(transcript_annot["start"]) + 1
 
                         # if parameters for transition transcript lengths are defined, use probabilistic model to calculate multiplicative weights for starts and ends,
                         # otherwise set weights to 1
@@ -524,8 +523,8 @@ class SIRVsuiteCoverage():
 
                         for row_idx,row in transcript_annot.iterrows():
 
-                            shifted_start = row["Start"] - start_coord
-                            shifted_end = row["End"] - start_coord + 1
+                            shifted_start = row["start"] - start_coord
+                            shifted_end = row["end"] - start_coord + 1
 
                             # apply weights for transition lengths for transcript start and end
                             weights = weights * weights[::-1]
@@ -586,7 +585,7 @@ class SIRVsuiteCoverage():
 
             gene_annot = self.annotation_df["whole"][self.annotation_df["whole"]["gene_id"] == gene]
             transcripts = sorted(set(gene_annot["transcript_id"]))
-            start_pos, end_pos = self.get_continous_coverage_ends(list(gene_annot["Start"]), list(gene_annot["End"]))
+            start_pos, end_pos = self.get_continous_coverage_ends(list(gene_annot["start"]), list(gene_annot["end"]))
             segment_lengths = [end_pos[i] - start_pos[i] for i in range(len(start_pos))]
 
             total_segment_length = sum(segment_lengths)
@@ -658,9 +657,9 @@ class SIRVsuiteCoverage():
 
                     transcript_annot = gene_annot[gene_annot["transcript_id"] == transcript]
 
-                    if "+" in set(transcript_annot["Strand"]):
+                    if "+" in set(transcript_annot["strand"]):
                         color_exon = (60/255,140/255,80/255)
-                    elif "-" in set(transcript_annot["Strand"]):
+                    elif "-" in set(transcript_annot["strand"]):
                         color_exon = (0/255,120/255,180/255)
                     
                     d.draw_line(x = transcript_line_offset_x, 
@@ -676,11 +675,11 @@ class SIRVsuiteCoverage():
                     segment_start = transcript_line_offset_x + intersegment_gap
                     for segment_idx in range(len(start_pos)):
 
-                        exons_in_segment = transcript_annot[(transcript_annot["Start"] >= start_pos[segment_idx]) & (transcript_annot["End"] <= end_pos[segment_idx])]
-                        lengths = list(exons_in_segment["End"] - exons_in_segment["Start"] + 1)
+                        exons_in_segment = transcript_annot[(transcript_annot["start"] >= start_pos[segment_idx]) & (transcript_annot["end"] <= end_pos[segment_idx])]
+                        lengths = list(exons_in_segment["end"] - exons_in_segment["start"] + 1)
                     
                         for exon_idx in range(len(exons_in_segment)):
-                            relative_pos_x = segment_start + (int(exons_in_segment.iloc[exon_idx]["Start"]) - start_pos[segment_idx] + 1) / total_segment_length * draw_length
+                            relative_pos_x = segment_start + (int(exons_in_segment.iloc[exon_idx]["start"]) - start_pos[segment_idx] + 1) / total_segment_length * draw_length
                             relative_width = lengths[exon_idx] / total_segment_length * draw_length
 
                             d.draw_rectangle(x=relative_pos_x, y=t_y, width=relative_width, height=exon_height, alpha=1, color_fill=color_exon)

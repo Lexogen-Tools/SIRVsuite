@@ -7,6 +7,9 @@ import logging
 log = logging.getLogger(__name__)
 
 class countReader():
+    """
+    A helper class for reading count files such as mix2 or htseq output table 
+    """
     def __init__(self, sample_sheet = None):
         
         self.spike_in_name_pattern = {"SIRV":{"gene":"","transcript":""}, "ERCC":{"gene":"","transcript":""}}
