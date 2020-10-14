@@ -10,8 +10,6 @@ with open('README.md') as readme_file:
 with open('HISTORY.md') as history_file:
     history = history_file.read()
 
-# 'pyBigWig>=0.3.17',
-
 requirements = [
 'numpy>=1.13.3',
 'pycairo>=1.16.0',
@@ -19,7 +17,8 @@ requirements = [
 'pysam>=0.15.0',
 'pandas>=0.24.0',
 'matplotlib==3.0.0',
-'gtfparse>=1.2.0'
+'gtfparse>=1.2.0',
+'pyBigWig>=0.3.17'
 ]
 
 setup_requirements = ['pytest-runner', 'setuptools>=30.3.0', 'wheel', 'setuptools_scm', "Cython"]
@@ -56,6 +55,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/TomasDrozd/SIRVsuite',
-    version="0.0.dev1",
+    version="0.0.dev4",
     zip_safe=False,
 )

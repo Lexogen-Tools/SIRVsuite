@@ -36,6 +36,4 @@ def test_sample_fail(sample_sheet_fail):
 ])
 
 def test_sample_pass(sample_sheet_pass):
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        read_sample_sheet(sample_sheet_pass)
-    assert pytest_wrapped_e.type == SystemExit
+	read_sample_sheet(sample_sheet_pass)

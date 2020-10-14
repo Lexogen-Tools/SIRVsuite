@@ -7,7 +7,7 @@ import math
 from ..countReader import countReader
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__.split(".")[-1])
 
 class ERCCcorrelation():
 
@@ -42,9 +42,7 @@ class ERCCcorrelation():
         and experiment name, which is optional   
         """
 
-        log.info("Creating ERCC correlation")
-
-         
+        log.info("calculating correlation of ERCC spike-in ratios")
 
         ERCC_table_path = os.path.dirname(__file__)
         ERCC_table_path = ERCC_table_path.replace("Pipeline/Correlation","Resources/ERCC92_Concentration.tsv")

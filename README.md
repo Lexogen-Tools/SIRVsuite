@@ -1,19 +1,19 @@
 # SIRVsuite
 
-SIRVsuite is a command line tool to analyze performance of SIRV set 3 and 4 spike-ins based on alignment and transcript count data.
+SIRVsuite is a command line tool to analyze performance of SIRV set 3 and 4 spike-ins based on alignment and transcript count data. For more specific details about SIRV sets visit: https://www.lexogen.com/sirvs/sirv-sets/.
 
 SIRVsuite is permitted under the following licence xxx.
 
 **General usage**
 ```
-python SIRVsuite.py [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
+SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
 ```
 
 ## Getting started
 
 ## 1. Installation
 
-### a) Using conda environment
+### a) docker image
 
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
 ```
@@ -24,7 +24,7 @@ to create a virtual conda environment, from which SIRVsuite.py can run. Conda is
 
 Another option is to install python packages directly, which is not recommended due to possible dependency conflicts.
 
-### b) Using PyPI repo
+### b) PyPI
 
 Currently being implemented...
 

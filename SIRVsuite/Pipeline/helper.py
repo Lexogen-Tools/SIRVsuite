@@ -3,7 +3,7 @@ import csv
 import sys
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__.split(".")[-1])
 
 def path_features(filePath):
     """
@@ -62,7 +62,7 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
     Any other columns will be ignored.
     """
 
-    logging.info("Reading sample sheet")
+    log.info("reading sample sheet")
 
     ## ALLOWED COLUMNS FOR DIFFERENT MODULES CAN BE DEFINED HERE ##
 
@@ -81,7 +81,7 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
     ## RESTRICTIONS FOR THE COLUMNS CAN BE DEFINED HERE ##
     
     value_restriction = dict()
-    value_restriction["library_prep_type"] = ["whole"]
+    value_restriction["library_prep_type"] = ["whole","qs"]
     value_restriction["read_orientation"] = ["fwd","rev","none"]
     value_restriction["counting_method"] = ["mix2","cufflinks","htseq"]
     value_restriction["counting_feature"] = ["gene","transcript"]

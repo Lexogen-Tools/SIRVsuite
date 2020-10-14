@@ -1,17 +1,12 @@
 import csv
-import pyranges
 import numpy as np
 import re
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__.split(".")[-1])
 
 class countReader():
-    """
-    A helper class for reading count files such as mix2 or htseq output table 
-    """
     def __init__(self, sample_sheet = None):
-        
         self.spike_in_name_pattern = {"SIRV":{"gene":"","transcript":""}, "ERCC":{"gene":"","transcript":""}}
         #self.spike_in_ids["SIRV"]["gene"] = ["SIRV1","SIRV2","SIRV3","SIRV4","SIRV5","SIRV6","SIRV7"]
         #self.spike_in_ids["SIRV"]["transcript"] = ["SIRV101", "SIRV101", "SIRV101", "SIRV101", "SIRV101", "SIRV101", "SIRV102", "SIRV102", "SIRV102", "SIRV102", "SIRV103", "SIRV103", "SIRV103", "SIRV103", "SIRV103", "SIRV103", "SIRV105", "SIRV105", "SIRV105", "SIRV105", "SIRV105", "SIRV106", "SIRV106", "SIRV106", "SIRV107", "SIRV107", "SIRV107", "SIRV108", "SIRV108", "SIRV108", "SIRV109", "SIRV109", "SIRV109", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV201", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV202", "SIRV203", "SIRV203", "SIRV203", "SIRV203", "SIRV203", "SIRV204", "SIRV204", "SIRV204", "SIRV205", "SIRV206", "SIRV301", "SIRV301", "SIRV301", "SIRV301", "SIRV301", "SIRV302", "SIRV302", "SIRV303", "SIRV303", "SIRV303", "SIRV304", "SIRV304", "SIRV304", "SIRV304", "SIRV304", "SIRV304", "SIRV304", "SIRV304", "SIRV305", "SIRV305", "SIRV305", "SIRV306", "SIRV306", "SIRV306", "SIRV307", "SIRV307", "SIRV307", "SIRV307", "SIRV307", "SIRV308", "SIRV308", "SIRV308", "SIRV309", "SIRV309", "SIRV309", "SIRV310", "SIRV310", "SIRV310", "SIRV311", "SIRV403", "SIRV403", "SIRV403", "SIRV403", "SIRV404", "SIRV404", "SIRV404", "SIRV404", "SIRV405", "SIRV405", "SIRV406", "SIRV406", "SIRV408", "SIRV408", "SIRV408", "SIRV408", "SIRV408", "SIRV409", "SIRV409", "SIRV409", "SIRV410", "SIRV410", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV501", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV502", "SIRV503", "SIRV503", "SIRV503", "SIRV504", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV505", "SIRV506", "SIRV506", "SIRV507", "SIRV507", "SIRV507", "SIRV507", "SIRV507", "SIRV507", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV508", "SIRV509", "SIRV509", "SIRV509", "SIRV509", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV510", "SIRV511", "SIRV511", "SIRV512", "SIRV601", "SIRV601", "SIRV601", "SIRV601", "SIRV601", "SIRV601", "SIRV601", "SIRV601", "SIRV601", "SIRV602", "SIRV602", "SIRV602", "SIRV602", "SIRV602", "SIRV602", "SIRV602", "SIRV602", "SIRV603", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV604", "SIRV605", "SIRV605", "SIRV605", "SIRV605", "SIRV605", "SIRV605", "SIRV605", "SIRV605", "SIRV605", "SIRV606", "SIRV606", "SIRV606", "SIRV606", "SIRV607", "SIRV607", "SIRV607", "SIRV607", "SIRV608", "SIRV608", "SIRV608", "SIRV608", "SIRV609", "SIRV609", "SIRV609", "SIRV609", "SIRV610", "SIRV610", "SIRV610", "SIRV610", "SIRV610", "SIRV611", "SIRV611", "SIRV611", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV612", "SIRV613", "SIRV613", "SIRV613", "SIRV613", "SIRV613", "SIRV613", "SIRV614", "SIRV614", "SIRV614", "SIRV614", "SIRV614", "SIRV615", "SIRV615", "SIRV615", "SIRV616", "SIRV616", "SIRV616", "SIRV616", "SIRV617", "SIRV618", "SIRV701", "SIRV701", "SIRV701", "SIRV701", "SIRV701", "SIRV702", "SIRV702", "SIRV702", "SIRV702", "SIRV702", "SIRV702", "SIRV703", "SIRV703", "SIRV703", "SIRV703", "SIRV703", "SIRV704", "SIRV704", "SIRV704", "SIRV705", "SIRV705", "SIRV705", "SIRV705", "SIRV705", "SIRV706", "SIRV706", "SIRV706", "SIRV706", "SIRV706", "SIRV708", "SIRV708", "SIRV708", "SIRV708", "SIRV708", "SIRV708"]
@@ -80,28 +75,6 @@ class countReader():
 
                 except:
                     raise ValueError("An error occured during loading file: %s"%(path))
-
-        elif counting_method == "cufflinks":
-            
-            data = pyranges.read_gtf(files[idx], as_df=True)
-                
-            # check if format correct
-            required_cols = ["FPKM","transcript_id","gene_id"]
-            if any([col not in data for col in required_cols]):
-                raise ValueError("could not find FPKM, transcript_id or gene_id in the gtf file..")
-
-            filter_SIRV = data[data["gene_id"].isin(SIRV_gene_set3)]
-            filter_ERCC = data[data["gene_id"].star]
-
-            transcripts_num = len(np.unique(filter_SIRV["transcript_id"]))
-
-            if (transcripts_num == 0 ):
-                raise ValueError("No record of SIRVs found..")
-            elif ( (transcripts_num > 0 and transcripts_num < 68 ) or transcripts_num > 68):
-                raise ValueError("Unexpected number of SIRVs transcripts..")
-            
-            for index, row in filter_SIRV.iterrows():
-                data_dict[row["transcript_id"]] = float(row["FPKM"])
 
         elif counting_method == "htseq":
             for path in files:
