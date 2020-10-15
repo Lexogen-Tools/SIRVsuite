@@ -98,6 +98,9 @@ class SIRVsuiteCoverage():
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
                                 chroms = np.array([gene] * len(values))
+                                print (chroms)
+                                print (ends)
+                                print (values)
                                 # if trimmed, need to use + self.gene_coords[gene][0] to start & end
                                 bw.addEntries(chroms, starts, ends=ends, values=values)
 
