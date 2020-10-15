@@ -19,6 +19,9 @@ Non-python requirements:
 - zlib
 - libcurl (and the curl-config config)
 
+Python requirements prior to SIRVsuite installation
+- numpy - 1.19.2 (recommended & tested)
+
 ### a) Docker
 
 <!--
@@ -74,7 +77,7 @@ Valid after publishing on github
 You can install sirv-suite using gitlab repo for internal testing purposes.
 
 It is recommended to create a virtual python environment or conda environment with python version 3.6-3.8 first. Next, 
-after env activation you can run:
+after env activation you need to make sure, that all requirement libraries are installed. Then, you can simply run
 
 ```
 pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git@SIRVsuite_v0.1
