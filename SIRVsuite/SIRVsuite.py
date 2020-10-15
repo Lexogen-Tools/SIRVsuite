@@ -50,6 +50,9 @@ def main():
     if (len(modules_to_execute) == 0):
         raise ValueError("a module has to be specified.. use -h or --help arg for more information")
 
+    if (args.verbose):
+        logging.root.setLevel(logging.DEBUG)
+
     out = os.path.expanduser(args.output_dir[0])
     input_path = os.path.expanduser(args.sample_sheet[0])
     # read sample sheet + module availibility check based on sample sheet

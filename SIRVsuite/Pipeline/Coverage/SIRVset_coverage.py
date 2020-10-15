@@ -61,10 +61,11 @@ class SIRVsuiteCoverage():
         """
         A method to convert data array (coverage) into intervals specified by starts, ends and values
         """
-        tmp = np.logical_and(data[1:] != data[:-1], np.logical_or(np.isnan(data[1:]) is False, np.isnan(data[:-1]) is False))
+        tmp = np.logical_and(data[1:] != data[:-1], np.logical_or(np.isnan(data[1:]) == False, np.isnan(data[:-1]) == False))
         starts = np.append(np.array([start_pos]), np.where(tmp)[0] + start_pos + 1)
         ends = np.append(starts[1:], start_pos + len(data))
         values = data[starts - start_pos]
+        
         return (starts, ends, values)
 
     def __strand2text__(self, text):
@@ -99,10 +100,10 @@ class SIRVsuiteCoverage():
                             bw.addHeader(header)
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
-                                chroms = np.array([str(gene)] * len(values))
+                                chroms = np.array([gene] * len(values))
 
                                 # if trimmed, need to use + self.gene_coords[gene][0] to start & end
-                                bw.addEntries(chroms, starts=starts, ends=ends, values=values)
+                                bw.addEntries(chroms, starts, ends=ends, values=values)
 
                     elif (output_type.lower() == "cov"):
                         for gene in sorted(cov_dict[sample].keys()):

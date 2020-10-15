@@ -19,7 +19,7 @@ Non-python requirements:
 - zlib
 - libcurl (and the curl-config config)
 
-### a) docker
+### a) Docker
 
 <!--
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
@@ -33,6 +33,7 @@ Another option is to install python packages directly, which is not recommended 
 -->
 
 You can build a docker image by running from a project directory:
+
 ```
 docker build . -t 'sirvsuite:latest'
 ```
@@ -43,11 +44,17 @@ Then, you can run the SIRVsuite via command
 docker run -v DATA_DIR_PATH:/data SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
 ```
 
-However, you need to fill sample sheet alignment and counting paths which correspond to the mapped directory.
+Please note that yous need to fill into the sample sheet alignment and counting paths which correspond to the mapped directory. 
+
+Example usage:
+
+First, locate to the cloned repository root location. You can then invoke SIRVsuite via:
 
 ```
-SIRVsuite -i /data/examples/sample_sheet_test_SIRVset4_docker.tsv -o /data/out --coverage
+docker run -it -v $(pwd):/data sirvsuite SIRVsuite -i /data/examples/sample_sheet_test_SIRVset4_docker.tsv -o /data/out -a
 ```
+
+To make local files visible inside of docker container, the current working directory is mapped into /data directory inside of docker container. Therefore, -i and -o arguments and sample sheet path information need to be changed accordingly. The command will create out/ folder in the project root directory containing output data of all modules.
 
 ### b) PyPI
 
