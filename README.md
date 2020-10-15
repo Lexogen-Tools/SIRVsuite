@@ -37,6 +37,13 @@ You can build a docker image by running from a project directory:
 docker build . -t 'sirvsuite:latest'
 ```
 
+Then, you can run the SIRVsuite via command
+
+```
+docker run -v DATA_DIR_PATH:/data SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
+```
+
+However, you need to fill sample sheet alignment and counting paths which correspond to the mapped directory.
 
 ### b) PyPI
 
@@ -162,7 +169,7 @@ Coverage plot can serve as an overview of exon distribution for different transc
 
 An example of a coverage plot:
 
-<p align="center"><img src="./examples/output_preview/coverage_preview.png" width=1280></p>
+<p align="center"><img src="./docs/output_preview/coverage_preview.png" width=1280></p>
 
 **ERCC-Correlation module**
 
@@ -175,7 +182,7 @@ The correlation table consist of Pearson correlation R values, the correlation p
 
 An example of a correlation plot:
 
-<p align="center"><img src="./examples/output_preview/ERCC_correlation_preview.png" width=800></p>
+<p align="center"><img src="./docs/output_preview/ERCC_correlation_preview.png" width=800></p>
 
 **SIRV-concentration module**
 
@@ -201,7 +208,7 @@ The distribution of FPKM<sub>i,rel</sub> is summarized into a boxplot.
 
 An example of a SIRV concentration boxplot (mean - read circle, median - white strip):
 
-<p align="center"><img src="./examples/output_preview/SIRV_boxplot_preview.png" width=800></p>
+<p align="center"><img src="./docs/output_preview/SIRV_boxplot_preview.png" width=800></p>
 
 An example of a SIRV concentration heatmap for SIRV1 and SIRV2:
-<p align="center"><img src="./examples/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>
+<p align="center"><img src="./docs/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>

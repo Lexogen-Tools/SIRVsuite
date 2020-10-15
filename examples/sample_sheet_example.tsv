@@ -1,4 +1,0 @@
-sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;
-test_sample_1;/path/to/alignemnt/test_sample_1.bam;/path/to/transcript_count/test_sample_1.tsv;FWD;mix2;transcript;whole
-test_sample_2;/path/to/alignemnt/test_sample_2.bam;/path/to/transcript_count/test_sample_2.tsv;FWD;mix2;transcript;whole
-test_sample_3;/path/to/alignemnt/test_sample_3.bam;/path/to/transcript_count/test_sample_3.tsv;FWD;mix2;transcript;whole

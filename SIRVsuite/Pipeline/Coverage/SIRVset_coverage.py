@@ -43,7 +43,7 @@ class SIRVsuiteCoverage():
         log.info("calculating spike-in gene coverage")
         log.debug("SIRVsuite coverage creator initialized")
         
-        self.annotation_path = "./SIRVsuite/Resources/SIRV_isoforms_multi-fasta-annotation_190418a.gtf"
+        self.annotation_path = "/".join(__file__.split("/")[:-3]) + "/Resources/SIRV_isoforms_multi-fasta-annotation_190418a.gtf"
         self.load_annotation(self.annotation_path)
 
         self.experiment_name = experiment_name

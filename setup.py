@@ -28,7 +28,7 @@ test_requirements = ['pytest>=3','pytest-cov','coverage']
 setup(
     author="Tomas Drozd, Andreas Tuerk",
     author_email='tomas.drozd@lexogen.com, andreas.tuerk@lexogen.com',
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Science/Research',
