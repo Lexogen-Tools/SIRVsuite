@@ -45,6 +45,10 @@ docker run -v DATA_DIR_PATH:/data SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [
 
 However, you need to fill sample sheet alignment and counting paths which correspond to the mapped directory.
 
+```
+SIRVsuite -i /data/examples/sample_sheet_test_SIRVset4_docker.tsv -o /data/out --coverage
+```
+
 ### b) PyPI
 
 Currently being implemented...

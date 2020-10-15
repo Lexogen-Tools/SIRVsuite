@@ -64,7 +64,7 @@ class SIRVsuiteCoverage():
         starts = np.append(np.array([start_pos]), np.where(tmp)[0] + start_pos + 1)
         ends = np.append(starts[1:], start_pos + len(data))
         values = data[starts - start_pos]
-        return (list(starts), list(ends), list(values))
+        return (starts, ends, values)
 
     def __strand2text__(self, text):
         """
@@ -94,14 +94,12 @@ class SIRVsuiteCoverage():
                             header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys()) if strand in cov_dict[sample][gene].keys()]
                             if (len(header) == 0):
                                 continue
+                            print (header)
                             bw.addHeader(header)
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
-                                chroms = np.array([gene] * len(values))
-                                print (chroms)
-                                print (starts)
-                                print (ends)
-                                print (values)
+                                chroms = np.array([str(gene)] * len(values))
+                                
                                 # if trimmed, need to use + self.gene_coords[gene][0] to start & end
                                 bw.addEntries(chroms, starts, ends=ends, values=values)
 

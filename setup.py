@@ -11,14 +11,14 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 requirements = [
-'numpy>=1.13.3',
-'pycairo>=1.16.0',
-'scipy>=1.0.0',
-'pysam>=0.15.0',
-'pandas>=0.24.0',
+'numpy==1.19.2',
+'pycairo==1.20.0',
+'scipy==1.5.2',
+'pysam==0.16.0.1',
+'pandas==1.1.3',
 'matplotlib==3.0.0',
-'gtfparse>=1.2.0',
-'pyBigWig>=0.3.17'
+'gtfparse==1.2.1',
+'pyBigWig==0.3.17'
 ]
 
 setup_requirements = ['pytest-runner', 'setuptools>=30.3.0', 'wheel', 'setuptools_scm', "Cython"]

@@ -92,6 +92,7 @@ class SIRVsuiteCoverage():
                             header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys()) if strand in cov_dict[sample][gene].keys()]
                             if (len(header) == 0):
                                     continue
+                            print (header)
                             bw.addHeader(header)
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
