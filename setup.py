@@ -15,7 +15,7 @@ requirements = [
 'gtfparse==1.2.1',
 'kiwisolver==1.2.0',
 'matplotlib==3.0.0',
-'numpy==1.19.2',
+'numpy==1.19.1',
 'pandas==1.1.3',
 'pyBigWig==0.3.17',
 'pycairo==1.20.0',
