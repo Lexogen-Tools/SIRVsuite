@@ -2,6 +2,7 @@ import pysam as ps
 import numpy as np
 import pyBigWig as bwig
 import gtfparse
+import pandas as pd
 from scipy.stats import norm
 import os
 import copy
@@ -94,14 +95,14 @@ class SIRVsuiteCoverage():
                             header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys()) if strand in cov_dict[sample][gene].keys()]
                             if (len(header) == 0):
                                 continue
-                            print (header)
+
                             bw.addHeader(header)
                             for gene in sorted(cov_dict[sample].keys()):
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
                                 chroms = np.array([str(gene)] * len(values))
-                                
+
                                 # if trimmed, need to use + self.gene_coords[gene][0] to start & end
-                                bw.addEntries(chroms, starts, ends=ends, values=values)
+                                bw.addEntries(chroms, starts=starts, ends=ends, values=values)
 
                     elif (output_type.lower() == "cov"):
                         for gene in sorted(cov_dict[sample].keys()):
