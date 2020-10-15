@@ -61,7 +61,7 @@ class SIRVsuiteCoverage():
         A method to convert data array (coverage) into intervals specified by starts, ends and values
         """
         tmp = np.logical_and(data[1:] != data[:-1], np.logical_or(np.isnan(data[1:]) is False, np.isnan(data[:-1]) is False))
-        starts = np.append(np.array([start_pos]), np.where(tmp)[0] + start_pos + 1)
+        starts = np.append(np.array([start_pos]), np.where(tmp)[0] + start_pos + 1) + 1
         ends = np.append(starts[1:], start_pos + len(data))
         values = data[starts - start_pos]
         return (starts, ends, values)
