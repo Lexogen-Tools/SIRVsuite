@@ -11,3 +11,4 @@ RUN pip3 install --upgrade pip \
 && pip3 install pyBigWig>=0.3.17
 
 # TODO: ADD github repo to install the package after switching to public
+RUN pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git@SIRVsuite_v0.1
