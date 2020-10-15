@@ -13,8 +13,15 @@ SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ER
 
 ## 1. Installation
 
-### a) docker image
+### Requirements
+Non-python requirements:
+- cairo >= 1.15.10
+- zlib
+- libcurl (and the curl-config config)
 
+### a) docker
+
+<!--
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
 ```
 conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
@@ -23,6 +30,13 @@ conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
 to create a virtual conda environment, from which SIRVsuite.py can run. Conda is installed to the home directory by default. In this case CONDA_PATH would refer to /home/user_name/anaconda3 or /home/user_name/miniconda3. See more info about conda enironments: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html. 
 
 Another option is to install python packages directly, which is not recommended due to possible dependency conflicts.
+-->
+
+You can build a docker image by running from a project directory:
+```
+docker build . -t 'sirvsuite:latest'
+```
+
 
 ### b) PyPI
 
@@ -33,10 +47,20 @@ Soon available via:
 pip install SIRVsuite
 ```
 
-Non-python requirements:
-- cairo >= 1.15.10
-- zlib
-- libcurl (and the curl-config config)
+### c) github
+
+Valid after publishing on github
+
+### d) gitlab
+
+You can install sirv-suite using gitlab repo for internal testing purposes.
+
+It is recommended to create a virtual python environment or conda environment with python version 3.6-3.8 first. Next, 
+after env activation you can run:
+
+```
+pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git@SIRVsuite_v0.1
+```
 
 ## 2. Preparing sample sheet
 The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
