@@ -15,12 +15,13 @@ SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ER
 
 ### Requirements
 Non-python requirements:
-- cairo >= 1.15.10
+- cairo >= 1.15.10 (e.g. in ubuntu: libcairo2-dev)
 - zlib
-- libcurl (and the curl-config config)
+- libcurl (and the curl-config config) (e.g. in ubuntu: libcurl4-openssl-dev)
 
 Python requirements prior to SIRVsuite installation
 - numpy - 1.19.2 (recommended & tested)
+- maybe python3-tk (as a matplotlib dependency)
 
 ### a) Docker
 
