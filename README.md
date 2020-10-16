@@ -11,6 +11,12 @@ SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ER
 
 ## Getting started
 
+To get started with SIRVsuite analysis, you need to:
+
+1. Install SIRVsuite
+2. Prepare data + sample sheet
+3. Run SIRVsuite
+
 ## 1. Installation
 
 ### Requirements
@@ -19,10 +25,43 @@ Non-python requirements:
 - zlib
 - libcurl (and the curl-config config)
 
-Python requirements prior to SIRVsuite installation
-- numpy - 1.19.2 (recommended & tested)
+Python requirements prior to SIRVsuite (relevant for non-docker installation)
+- numpy = 1.19.2 (recommended & tested)
 
-### a) Docker
+### Installation method
+
+#### a) gitlab
+
+You can install sirv-suite using gitlab repo for internal testing purposes by executing command:
+
+```
+pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git
+```
+
+It is recommended to create a python virtual environment or conda environment with python version 3.6-3.8 first. To create a python virtual environment, you can execute:
+
+```
+python3.6 -m venv sirvsuite
+source sirvsuite/bin/activate
+```
+
+Once the sirvsuite env was created and activated, run following commands:
+
+```
+pip3 install --upgrade pip
+pip3 install numpy==1.19.2
+pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git
+```
+
+#### b) github
+
+Valid after publishing on github
+
+#### c) PyPI
+
+Currently being implemented...
+
+#### d) Docker
 
 <!--
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
@@ -58,30 +97,6 @@ docker run -it -v $(pwd):/data sirvsuite SIRVsuite -i /data/examples/sample_shee
 ```
 
 To make local files visible inside of docker container, the current working directory is mapped into /data directory inside of docker container. Therefore, -i and -o arguments and sample sheet path information need to be changed accordingly. The command will create out/ folder in the project root directory containing output data of all modules.
-
-### b) PyPI
-
-Currently being implemented...
-
-Soon available via: 
-```
-pip install SIRVsuite
-```
-
-### c) github
-
-Valid after publishing on github
-
-### d) gitlab
-
-You can install sirv-suite using gitlab repo for internal testing purposes.
-
-It is recommended to create a virtual python environment or conda environment with python version 3.6-3.8 first. Next, 
-after env activation you need to make sure, that all requirement libraries are installed. Then, you can simply run
-
-```
-pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git@SIRVsuite_v0.1
-```
 
 ## 2. Preparing sample sheet
 The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
