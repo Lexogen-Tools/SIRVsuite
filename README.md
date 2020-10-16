@@ -169,7 +169,7 @@ SIRV-concentration & ERCC-correlation:
 Coverage:
 
 - alignment_path: valid path to a .bam file.
-- read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries.
+- read_orientation: fwd or rev. It is necessary to specify strandeness of the library.
 
 Any other column will be ignored.
 
