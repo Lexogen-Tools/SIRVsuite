@@ -2,7 +2,7 @@
 
 SIRVsuite is a command line tool to analyze performance of SIRV set 3 and 4 spike-ins based on alignment and transcript count data. For more specific details about SIRV sets visit: https://www.lexogen.com/sirvs/sirv-sets/.
 
-SIRVsuite is permitted under the following licence xxx.
+SIRVsuite is permitted under the following [licence](LICENCE).
 
 **General usage**
 ```
@@ -21,15 +21,17 @@ To get started with SIRVsuite analysis, you need to:
 
 ### Requirements
 Non-python requirements:
-- cairo >= 1.15.10
+- cairo >= 1.15.10 (e.g. in ubuntu: libcairo2-dev)
 - zlib
-- libcurl (and the curl-config config)
+- libcurl (and the curl-config config) (e.g. in ubuntu: libcurl4-openssl-dev)
 
 Python requirements prior to SIRVsuite (relevant for non-docker installation)
 - numpy = 1.19.2 (recommended & tested)
+- maybe python3-tk (as a matplotlib dependency)
 
 ### Installation method
 
+<!--
 #### a) gitlab
 
 You can install sirv-suite using gitlab repo for internal testing purposes by executing command:
@@ -52,16 +54,46 @@ pip3 install --upgrade pip
 pip3 install numpy==1.19.2
 pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git
 ```
+-->
 
-#### b) github
+#### a) PyPI
 
-Valid after publishing on github
+You can install SIRVsuite from GitHub by executing:
 
-#### c) PyPI
+```
+pip3 install git+https://github.com/Lexogen-Tools/SIRVsuite
+```
 
-Currently being implemented...
+It is recommended to create a python virtual environment or conda environment with python version 3.6-3.8 first. To create a python virtual environment, you can execute:
 
-#### d) Docker
+```
+python3.6 -m venv sirvsuite
+source sirvsuite/bin/activate
+```
+
+Once the sirvsuite env was created and activated, run following commands to prepare the virtual env for installation:
+
+```
+pip3 install --upgrade pip
+pip3 install numpy==1.19.2
+```
+
+From there, you can install SIRVsuite via:
+
+```
+pip3 install SIRVsuite
+```
+
+#### b) GitHub
+
+First, all dependencies have to be installed or an environment needs to be created as in previous example. Next, SIRVsuite can be installed directly from GitHub:
+
+```
+git clone https://github.com/Lexogen-Tools/SIRVsuite.git
+python setup.py install
+```
+
+#### c) Docker
 
 <!--
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
@@ -86,7 +118,7 @@ Then, you can run the SIRVsuite via command
 docker run -v DATA_DIR_PATH:/data SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
 ```
 
-Please note that yous need to fill into the sample sheet alignment and counting paths which correspond to the mapped directory. 
+Please note that you need to fill into the sample sheet alignment and counting paths which correspond to the mapped directory. 
 
 Example usage:
 
@@ -99,7 +131,7 @@ docker run -it -v $(pwd):/data sirvsuite SIRVsuite -i /data/examples/sample_shee
 To make local files visible inside of docker container, the current working directory is mapped into /data directory inside of docker container. Therefore, -i and -o arguments and sample sheet path information need to be changed accordingly. The command will create out/ folder in the project root directory containing output data of all modules.
 
 ## 2. Preparing sample sheet
-The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
+The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and parameters. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
 
 ```
 sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
@@ -125,19 +157,19 @@ Columns in the sample sheet can be divided into different categories. General co
 
 General columns:
 - sample_name: any set of characters to identify samples (this will be printed in the final graphics).
-- library_prep_type: whole (whole transcriptome library prep) or qs (QuantSeq library preparation)
+- library_prep_type: whole (currently only whole transcriptome libraries supported)
 
 SIRV-concentration & ERCC-correlation:
 
 - counting_path: valid path to count files.
-- counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
+- counting_method: mix2. Defines, how the count file should be read. (currenly only mix2 output supported)
 - counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
-- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
+- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
 
 - alignment_path: valid path to a .bam file.
-- read_orientation: fwd, rev or none. Use "fwd" or "rev" for strand-specific libraries, "none" for non-strand specific libraries.
+- read_orientation: fwd or rev. It is necessary to specify strandeness of the library.
 
 Any other column will be ignored.
 
@@ -151,9 +183,9 @@ SIRVsuite accepts the following arguments:
 
     selectively required arguments* (at least one is required):
       -a, --all-modules        triggers all available modules
-      --ERCC-correlation        triggers processing of ERCCs ratios
-      --SIRV-concentration      triggers processing of SIRVs relative concentration
-      --coverage                triggers coverage processing
+      --ERCC-correlation       triggers processing of ERCCs ratios
+      --SIRV-concentration     triggers processing of SIRVs relative concentration
+      --coverage               triggers coverage processing
 
       * Note that using "-a" is the same as "--ERCC-correlation --SIRV-concentration --coverage".
        A valid usage is to specify at least one of the modules or to use -a argument.
@@ -178,13 +210,13 @@ The pipeline will create subfolder for every specified module with module-specif
 
 The module processes .bam files + SIRV-set 3-4 annotation, calculates coverage (expected + measured) and creates 3 types of output:
 
-- CoD table,
+- Coefficient of Deviation (CoD) table,
 - coverage data in bigwig format,
 - coverage plot.
 
 The CoD metrics allows to measure the resemblence between expected (theoretical) and measured (real) coverage. The theoretical coverage is calculated based on annotated distribution of exons, whilst the measured coverage is quantified from the reads obtained from the sequencer.
 
-CoD value is given as follows:
+CoD value is computed as follows:
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;CoD=\frac{\sum_{i=1}^{n}(cov_{theory}-cov_{real,scaled})^2}{\sum_{i=1}^{n}cov_{theory,i}}"\></p>
 
@@ -192,7 +224,7 @@ CoD value is given as follows:
  CoD >= 0
  , where values around 0 indicate an ideal match between expected and measured coverage.
 
-Measured coverage in bigwig (.bw) format can be used, for example, in an IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
+The spike-in coverage can be inspected interactively, by loading the measured coverage (stored in bigwig (.bw) format) in a genome browser (e.g. the IGV browser). See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
 
 Coverage plot can serve as an overview of exon distribution for different transcript variants, the corresponding expected coverage based on annotation and the measured read distribution fits into these regions. In addition, it provides a basic statistics along with a CoD value.
 
@@ -204,8 +236,8 @@ An example of a coverage plot:
 
 The module processes transcript or gene counts and input concentration of ERCCs. It creates two types of output:
 
-- correlation table,
-- correlation plot.
+- correlation table
+- correlation plot
 
 The correlation table consist of Pearson correlation R values, the correlation plot is a scatterplot revealing dependency between theoretical and measured concentration for ERCC genes based on concentration table: https://assets.thermofisher.com/TFS-Assets/LSG/manuals/cms_095046.txt.
 
@@ -221,7 +253,7 @@ The module processes transcript FPKM values for SIRVs and creates 3 types of out
 - boxplot of SIRV relative transcript concentration (concentration/SIRV_boxplot.png),
 - heatmap of Log<sub>2</sub> Fold Change SIRV transcript relative concentrations (concentration/SIRV_heatmap.png).
 
-The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcripts. This enables the folowing calculation procedure. Consider SIRV transcript i of n SIRV transcripts present in a sample. Given a measured FPKM concentration FPKM<sub>i</sub>,  FPKM<sub>expected</sub> for each transcript is quantified as follows:
+The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcripts. This enables the following calculation procedure. Consider SIRV transcript i of n SIRV transcripts present in a sample. Given a measured FPKM concentration FPKM<sub>i</sub>,  FPKM<sub>expected</sub> for each transcript is quantified as follows:
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,expected}=\frac{\sum_{i=1}^{n}FPKM_i}{n}"\></p>
 
@@ -231,13 +263,14 @@ and we can define relative FPKM value as a ratio of estimated and expected relat
 
 The FPKM<sub>i,rel</sub> values can be found in relative concentration/relative_concentration.tsv in the output directory.
 
-Log<sub>2</sub> Fold Change of FPKM<sub>i,rel</sub> is displayed in a heatmap, showing the difference between expected and calculated values. The green signalizes match between concentrations, blue transcript underexpression and red overexpression.
-
 The distribution of FPKM<sub>i,rel</sub> is summarized into a boxplot.
 
 An example of a SIRV concentration boxplot (mean - read circle, median - white strip):
 
 <p align="center"><img src="./docs/output_preview/SIRV_boxplot_preview.png" width=800></p>
+
+Log<sub>2</sub> Fold Change of FPKM<sub>i,rel</sub> is displayed in a heatmap, showing the difference between expected and calculated values.
+The values are highlighted in the colors green, blue and red, which corresponds to a 'match between concentrations', 'transcript underexpression' and 'overexpression', respectively.
 
 An example of a SIRV concentration heatmap for SIRV1 and SIRV2:
 <p align="center"><img src="./docs/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>
