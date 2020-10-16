@@ -2,7 +2,7 @@
 
 SIRVsuite is a command line tool to analyze performance of SIRV set 3 and 4 spike-ins based on alignment and transcript count data. For more specific details about SIRV sets visit: https://www.lexogen.com/sirvs/sirv-sets/.
 
-SIRVsuite is permitted under the following licence xxx.
+SIRVsuite is permitted under the following [licence](LICENCE).
 
 **General usage**
 ```
@@ -72,19 +72,8 @@ pip install SIRVsuite
 
 Valid after publishing on github
 
-### d) gitlab
-
-You can install sirv-suite using gitlab repo for internal testing purposes.
-
-It is recommended to create a virtual python environment or conda environment with python version 3.6-3.8 first. Next, 
-after env activation you need to make sure, that all requirement libraries are installed. Then, you can simply run
-
-```
-pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git@SIRVsuite_v0.1
-```
-
 ## 2. Preparing sample sheet
-The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and necessary parameters for ther processing. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
+The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and parameters. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
 
 ```
 sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
@@ -117,7 +106,7 @@ SIRV-concentration & ERCC-correlation:
 - counting_path: valid path to count files.
 - counting_method: mix2, cufflinks or htseq. Defines, how the count file should be read.
 - counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
-- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
+- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
 
@@ -163,13 +152,13 @@ The pipeline will create subfolder for every specified module with module-specif
 
 The module processes .bam files + SIRV-set 3-4 annotation, calculates coverage (expected + measured) and creates 3 types of output:
 
-- CoD table,
+- Coefficients of Deviation (CoD) table,
 - coverage data in bigwig format,
 - coverage plot.
 
 The CoD metrics allows to measure the resemblence between expected (theoretical) and measured (real) coverage. The theoretical coverage is calculated based on annotated distribution of exons, whilst the measured coverage is quantified from the reads obtained from the sequencer.
 
-CoD value is given as follows:
+CoD value is computed as follows:
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;CoD=\frac{\sum_{i=1}^{n}(cov_{theory}-cov_{real,scaled})^2}{\sum_{i=1}^{n}cov_{theory,i}}"\></p>
 
@@ -177,7 +166,7 @@ CoD value is given as follows:
  CoD >= 0
  , where values around 0 indicate an ideal match between expected and measured coverage.
 
-Measured coverage in bigwig (.bw) format can be used, for example, in a IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
+The spike-in coverage can be inspected interactively, by loading the measured coverage (stored in bigwig (.bw) format) in a genome browser (e.g. the IGV browser). See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
 
 Coverage plot can serve as an overview of exon distribution for different transcript variants, the corresponding expected coverage based on annotation and the measured read distribution fits into these regions. In addition, it provides a basic statistics along with a CoD value.
 
@@ -189,8 +178,8 @@ An example of a coverage plot:
 
 The module processes transcript or gene counts and input concentration of ERCCs. It creates two types of output:
 
-- correlation table,
-- correlation plot.
+- correlation table
+- correlation plot
 
 The correlation table consist of Pearson correlation R values, the correlation plot is a scatterplot revealing dependency between theoretical and measured concentration for ERCC genes based on concentration table: https://assets.thermofisher.com/TFS-Assets/LSG/manuals/cms_095046.txt.
 
@@ -206,7 +195,7 @@ The module processes transcript FPKM values for SIRVs and creates 3 types of out
 - boxplot of SIRV relative transcript concentration (concentration/SIRV_boxplot.png),
 - heatmap of Log<sub>2</sub> Fold Change SIRV transcript relative concentrations (concentration/SIRV_heatmap.png).
 
-The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcripts. This enables the folowing calculation procedure. Consider SIRV transcript i of n SIRV transcripts present in a sample. Given a measured FPKM concentration FPKM<sub>i</sub>,  FPKM<sub>expected</sub> for each transcript is quantified as follows:
+The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcripts. This enables the following calculation procedure. Consider SIRV transcript i of n SIRV transcripts present in a sample. Given a measured FPKM concentration FPKM<sub>i</sub>,  FPKM<sub>expected</sub> for each transcript is quantified as follows:
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,expected}=\frac{\sum_{i=1}^{n}FPKM_i}{n}"\></p>
 
@@ -215,14 +204,14 @@ and we can define relative FPKM value as a ratio of estimated and expected relat
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,rel}=\frac{FPKM_i}{FPKM_{expected}}=\frac{FPKM_i}{\sum_{i=1}^{n}FPKM_i} \ \frac{1}{n}"\></p>
 
 The FPKM<sub>i,rel</sub> values can be found in relative concentration/relative_concentration.tsv in the output directory.
-
-Log<sub>2</sub> Fold Change of FPKM<sub>i,rel</sub> is displayed in a heatmap, showing the difference between expected and calculated values. The green signalizes match between concentrations, blue transcript underexpression and red overexpression.
-
 The distribution of FPKM<sub>i,rel</sub> is summarized into a boxplot.
 
 An example of a SIRV concentration boxplot (mean - read circle, median - white strip):
 
 <p align="center"><img src="./docs/output_preview/SIRV_boxplot_preview.png" width=800></p>
+
+Log<sub>2</sub> Fold Change of FPKM<sub>i,rel</sub> is displayed in a heatmap, showing the difference between expected and calculated values.
+The values are highlighted in the colors green, blue and red, which corresponds to a 'match between concentrations', 'transcript underexpression' and 'overexpression', respectively.
 
 An example of a SIRV concentration heatmap for SIRV1 and SIRV2:
 <p align="center"><img src="./docs/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>
