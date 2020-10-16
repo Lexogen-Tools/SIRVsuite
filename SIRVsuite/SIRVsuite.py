@@ -2,6 +2,7 @@ import argparse as ap
 import os
 import sys
 import logging
+from SIRVsuite import __version__
 
 from SIRVsuite.Pipeline.Coverage.SIRVset_coverage import SIRVsuiteCoverage
 from SIRVsuite.Pipeline.Concentration.SIRV_concentration import (
@@ -9,6 +10,7 @@ from SIRVsuite.Pipeline.Concentration.SIRV_concentration import (
 from SIRVsuite.Pipeline.Correlation.ERCC_correlation import ERCCcorrelation
 from SIRVsuite.Pipeline.helper import *
 
+# set logging
 logging.root.setLevel(logging.INFO)
 log = logging.getLogger()
 hndl = log.handlers[0]
@@ -38,6 +40,7 @@ def main():
     parser.add_argument('--experiment-name', action='store', default="", required=False, nargs=1,
                         help="specify name of an experiment")
     parser.add_argument('--verbose', action='store_true', required=False)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     args = parser.parse_args()
 
     # determine which modules should run
@@ -77,6 +80,7 @@ def main():
                 del b
                 del cnts
             del a
+
     if "coverage" in modules_to_execute:
         c = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name="")
         c.expected_coverage()

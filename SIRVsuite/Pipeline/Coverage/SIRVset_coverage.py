@@ -327,7 +327,7 @@ class SIRVsuiteCoverage():
 
         for mode in self.annotation_df.keys():
             with open(CoD_table_path+"CoD_table"+experiment_name+"_"+mode+".tsv", "w") as CoD_table:
-                header = ";" + ";".join(list(sorted(self.bam_coverage.keys()))) + "\n"
+                header = "gene_id\t" + "\t".join(list(sorted(self.bam_coverage.keys()))) + "\n"
                 CoD_table.write(header)
 
                 rows = dict()
@@ -345,10 +345,10 @@ class SIRVsuiteCoverage():
                             if row_key not in rows.keys():
                                 rows[row_key] = str(self.cov_stats[sample][gene][strand]["CoD"])
                             else:
-                                rows[row_key] += ";" + str(self.cov_stats[sample][gene][strand]["CoD"])
+                                rows[row_key] += "\t" + str(self.cov_stats[sample][gene][strand]["CoD"])
 
                 for row_idx in rows.keys():
-                    CoD_table.write(row_idx + ";" + rows[row_idx]+"\n")
+                    CoD_table.write(row_idx + "\t" + rows[row_idx]+"\n")
 
     def CoD(self, real_cov, expect_cov):
         """

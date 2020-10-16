@@ -171,7 +171,7 @@ class SIRVsuiteConcentration():
             os.makedirs(path)
 
         with open(os.path.join(path,"relative_concentration.tsv"), "w") as out_file:
-            out_file.write("\t"+"\t".join(groups)+"\n")
+            out_file.write("transcript_id\t"+"\t".join(groups)+"\n")
             transcript_ids = sorted(norm_abund_dict[groups[0]].keys())
             for transcript in transcript_ids:
                 out_file.write(transcript+"\t"+"\t".join([str(norm_abund_dict[group][transcript]) for group in groups])+"\n")

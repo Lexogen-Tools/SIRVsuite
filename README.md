@@ -192,7 +192,7 @@ CoD value is given as follows:
  CoD >= 0
  , where values around 0 indicate an ideal match between expected and measured coverage.
 
-Measured coverage in bigwig (.bw) format can be used, for example, in a IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
+Measured coverage in bigwig (.bw) format can be used, for example, in an IGV browser to inspect spike-in coverage interactively. See more info about bigwig: http://genome.ucsc.edu/goldenPath/help/bigWig.html and IGV: http://software.broadinstitute.org/software/igv/UserGuide.
 
 Coverage plot can serve as an overview of exon distribution for different transcript variants, the corresponding expected coverage based on annotation and the measured read distribution fits into these regions. In addition, it provides a basic statistics along with a CoD value.
 

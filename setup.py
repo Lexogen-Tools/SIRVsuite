@@ -15,7 +15,7 @@ requirements = [
 'gtfparse==1.2.1',
 'kiwisolver==1.2.0',
 'matplotlib==3.0.0',
-'numpy==1.19.1',
+'numpy==1.19.2',
 'pandas==1.1.3',
 'pyBigWig==0.3.17',
 'pycairo==1.20.0',
@@ -61,6 +61,9 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/TomasDrozd/SIRVsuite',
-    version="0.0.dev4",
+    use_scm_version={
+    	"write_to": "SIRVsuite/_version.py",
+    	"version_scheme": "post-release",
+    },
     zip_safe=False,
 )
