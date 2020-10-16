@@ -1,8 +1,8 @@
 # SIRVsuite
 
-SIRVsuite is a command line tool to analyze performance of SIRV set 3 and 4 spike-ins based on alignment and transcript count data. For more specific details about SIRV sets visit: https://www.lexogen.com/sirvs/sirv-sets/.
+SIRVsuite is a command line tool to QC an RNA-Seq workflow using Lexogen's SIRV spike-in controls. For more specific details about Lexogen's SIRV spike-in controls visit: https://www.lexogen.com/sirvs/sirv-sets/.
 
-SIRVsuite is permitted under the following [licence](LICENCE).
+SIRVsuite is published under the following licence xxx.
 
 **General usage**
 ```
@@ -20,21 +20,25 @@ To get started with SIRVsuite analysis, you need to:
 ## 1. Installation
 
 ### Requirements
-Non-python requirements:
-- cairo >= 1.15.10 (e.g. in ubuntu: libcairo2-dev)
-- zlib
-- libcurl (and the curl-config config) (e.g. in ubuntu: libcurl4-openssl-dev)
 
-Python requirements prior to SIRVsuite (relevant for non-docker installation)
+The following requirements have to be fulfilled prior to installation of SIRVsuite. When installing via docker these requirements are taken care of in Dockerfile.
+
+Non-python requirements:
+- cairo >= 1.15.10 (e.g. in ubuntu <!--which version of ubuntu, 16.04, 18.04, ...?-->: libcairo2-dev)
+- zlib
+- libcurl (and the curl-config config <!--where do you obtain curl-config config, is this a package?-->) (e.g. in ubuntu: libcurl4-openssl-dev)
+
+Python requirements:
 - numpy = 1.19.2 (recommended & tested)
-- maybe python3-tk (as a matplotlib dependency)
+- maybe python3-tk (as a matplotlib dependency) <!--What do you mean by maybe? The user does not want to try this out themseleves. You could say somehting like "For proper operation of matplotlib, on some platforms installation of ... is required". Looking at the PyPI section below and the installation in the virtual environment this appears not be necessary.-->
 
 ### Installation method
 
 <!--
+
 #### a) gitlab
 
-You can install sirv-suite using gitlab repo for internal testing purposes by executing command:
+You can install SIRVsuite using gitlab repo for internal testing purposes by executing command:
 
 ```
 pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git
@@ -71,14 +75,14 @@ python3.6 -m venv sirvsuite
 source sirvsuite/bin/activate
 ```
 
-Once the sirvsuite env was created and activated, run following commands to prepare the virtual env for installation:
+Once the sirvsuite env has been created and activated, run the following commands to prepare the virtual env for installation:
 
 ```
 pip3 install --upgrade pip
 pip3 install numpy==1.19.2
 ```
 
-From there, you can install SIRVsuite via:
+Now, you can install SIRVsuite via:
 
 ```
 pip3 install SIRVsuite
@@ -86,7 +90,7 @@ pip3 install SIRVsuite
 
 #### b) GitHub
 
-First, all dependencies have to be installed or an environment needs to be created as in previous example. Next, SIRVsuite can be installed directly from GitHub:
+First, all requirements mentioned above have to be installed or an environment needs to be created as in the previous example. Next, SIRVsuite can be installed directly from GitHub:
 
 ```
 git clone https://github.com/Lexogen-Tools/SIRVsuite.git
@@ -97,6 +101,7 @@ python setup.py install
 
 <!--
 To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
+
 ```
 conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
 ```
@@ -106,13 +111,13 @@ to create a virtual conda environment, from which SIRVsuite.py can run. Conda is
 Another option is to install python packages directly, which is not recommended due to possible dependency conflicts.
 -->
 
-You can build a docker image by running from a project directory:
+You can build a docker image from the cloned or downloaded SIRVsuite GitHub project. From inside the root directory of your local SIRVsuite project workspace execute the following command:
 
 ```
 docker build . -t 'sirvsuite:latest'
 ```
 
-Then, you can run the SIRVsuite via command
+Now, you can run SIRVsuite via the following command line
 
 ```
 docker run -v DATA_DIR_PATH:/data SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
@@ -122,16 +127,22 @@ Please note that you need to fill into the sample sheet alignment and counting p
 
 Example usage:
 
-First, locate to the cloned repository root location. You can then invoke SIRVsuite via:
+From inside the root directory of your lcoal SIRVsuite project workspace you can invoke SIRVsuite on the included example data via:
 
 ```
 docker run -it -v $(pwd):/data sirvsuite SIRVsuite -i /data/examples/sample_sheet_test_SIRVset4_docker.tsv -o /data/out -a
 ```
 
-To make local files visible inside of docker container, the current working directory is mapped into /data directory inside of docker container. Therefore, -i and -o arguments and sample sheet path information need to be changed accordingly. The command will create out/ folder in the project root directory containing output data of all modules.
+To make local files visible inside the docker container, the current working directory is mapped into the /data directory inside the docker container. Therefore, the -i and -o arguments and sample sheet path information need to be changed accordingly. The command will create out/ folder in the project root directory containing output data of all modules.
 
-## 2. Preparing sample sheet
-The SIRVsuite consists of the following modules: coverage, SIRV concentration and ERCC correlation. The modules have different requirements in terms of input files and parameters. Therefore, a .csv file comprised of such information needs to be created. We call this type of file a sample sheet. An example of a valid sample sheet:
+## 2. Preparing the sample sheet
+The SIRVsuite consists of the following modules
+
+* SIRV coverage
+* SIRV concentration
+* ERCC correlation
+
+The input for these modules is specified via a sample sheet, which is a csv file with the following format.
 
 ```
 sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
@@ -139,37 +150,35 @@ sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_c
 sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
 ```
 
-The SIRVsuite tool will automatically check whether specified module can be invoked based on the sample sheet specification.
-
 ### Sample sheet content description
 
-Sample sheet is required to have a following format:
-- used ";" separator
+Sample sheets have the following format:
+- ";" is the field separator
 - trailing whitespace or tab is allowed (trimmed during reading process)
 - UTF-8 encoding
 - every column must have a name which is predefined (see more info below)
 - column values are case insensitive
-- the order of columns can be arbitrary
+- columns can be specified in arbitrary order
 
 **Allowed columns**:
 
 Columns in the sample sheet can be divided into different categories. General columns are always required, the other columns relate to the module of interest.
 
 General columns:
-- sample_name: any set of characters to identify samples (this will be printed in the final graphics).
-- library_prep_type: whole (currently only whole transcriptome libraries supported)
+- sample_name: any set of characters to identify samples (this name will be printed in the final graphics).
+- library_prep_type: this must be set to "whole" (currently only whole transcriptome libraries supported)
 
 SIRV-concentration & ERCC-correlation:
 
-- counting_path: valid path to count files.
-- counting_method: mix2. Defines, how the count file should be read. (currenly only mix2 output supported)
-- counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts).
-- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names if the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" value to treat samples separately and use sample_names in the graphics instead.
+- counting_path: valid path to count files
+- counting_method: this must be set to "mix2". Defines, how the count file should be read. (currently only the output of Mix2 is supported)
+- counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts). <!--What do you mean by this sentence?-->
+- replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names in the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
 
 - alignment_path: valid path to a .bam file.
-- read_orientation: fwd or rev. It is necessary to specify strandeness of the library.
+- read_orientation: fwd or rev. It is necessary to specify library strandeness.
 
 Any other column will be ignored.
 
@@ -180,16 +189,16 @@ SIRVsuite accepts the following arguments:
     required arguments:
       -i, --sample-sheet       path to the sample sheet
       -o, --output-dir         directory for output files
-
+    
     selectively required arguments* (at least one is required):
       -a, --all-modules        triggers all available modules
       --ERCC-correlation       triggers processing of ERCCs ratios
       --SIRV-concentration     triggers processing of SIRVs relative concentration
       --coverage               triggers coverage processing
-
+    
       * Note that using "-a" is the same as "--ERCC-correlation --SIRV-concentration --coverage".
        A valid usage is to specify at least one of the modules or to use -a argument.
-
+    
     optional arguments:
       --experiment-name         name of the experiment to displayed in the final graphics (if empty, general title will be used)
       -h, --help                show help message and exit
@@ -204,7 +213,7 @@ Example commands:
 ```
 
 ## 4. Output data
-The pipeline will create subfolder for every specified module with module-specific output data.
+The pipeline will create a subfolder for every specified module containing output data of the module.
 
 **Coverage module**
 
