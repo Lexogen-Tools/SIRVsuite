@@ -86,7 +86,7 @@ pip3 install SIRVsuite
 
 #### b) GitHub
 
-First, all dependencies or environments need to be created as in previous example. Next, SIRVsuite can be installed directly from GitHub:
+First, all dependencies have to be installed or an environment needs to be created as in previous example. Next, SIRVsuite can be installed directly from GitHub:
 
 ```
 git clone https://github.com/Lexogen-Tools/SIRVsuite.git
