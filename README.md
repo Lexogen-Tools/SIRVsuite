@@ -31,37 +31,7 @@ Non-python requirements:
 Python requirements:
 - numpy = 1.19.2 (recommended & tested)
 
-On some platforms (tested on Ubuntu 18.04), prior installation of python3-tk might be required as a matplotlib dependency when installing SIRVsuite outside of virtual environment.
-
- <!--What do you mean by maybe? The user does not want to try this out themseleves. You could say somehting like "For proper operation of matplotlib, on some platforms installation of ... is required". Looking at the PyPI section below and the installation in the virtual environment this appears not be necessary.-->
-
 ### Installation method
-
-<!--
-
-#### a) gitlab
-
-You can install SIRVsuite using gitlab repo for internal testing purposes by executing command:
-
-```
-pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git
-```
-
-It is recommended to create a python virtual environment or conda environment with python version 3.6-3.8 first. To create a python virtual environment, you can execute:
-
-```
-python3.6 -m venv sirvsuite
-source sirvsuite/bin/activate
-```
-
-Once the sirvsuite env was created and activated, run following commands:
-
-```
-pip3 install --upgrade pip
-pip3 install numpy==1.19.2
-pip3 install git+http://my_token:sZtLBXmrwFFzmvLiyp-c@10.90.1.56:10080/Bioinfo/sirv-suite.git
-```
--->
 
 #### a) PyPI
 
@@ -102,18 +72,6 @@ python setup.py install
 
 #### c) Docker
 
-<!--
-To install SIRVsuite, an environment for all depedent packages needs to be created. Thus, install/sirvsuite_env.yml can be used via conda command
-
-```
-conda env create -p CONDA_PATH/envs/sirvsuite -f install/sirvsuite_env.yml
-```
-
-to create a virtual conda environment, from which SIRVsuite.py can run. Conda is installed to the home directory by default. In this case CONDA_PATH would refer to /home/user_name/anaconda3 or /home/user_name/miniconda3. See more info about conda enironments: https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html. 
-
-Another option is to install python packages directly, which is not recommended due to possible dependency conflicts.
--->
-
 You can build a docker image from the cloned or downloaded SIRVsuite GitHub project. From inside the root directory of your local SIRVsuite project workspace execute the following command:
 
 ```
@@ -138,7 +96,7 @@ docker run -it -v $(pwd):/data sirvsuite SIRVsuite -i /data/examples/sample_shee
 
 To make local files visible inside the docker container, the current working directory is mapped into the /data directory inside the docker container. Therefore, the -i and -o arguments and sample sheet path information need to be changed accordingly. The command will create out/ folder in the project root directory containing output data of all modules.
 
-## 2. Preparing the sample sheet
+## 2. Preparing data + the sample sheet
 The SIRVsuite consists of the following modules
 
 * SIRV coverage
@@ -152,6 +110,26 @@ sample_name;alignment_path;counting_path;read_orientation;counting_method;counti
 sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole
 sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
 ```
+
+### Alignment input
+
+A sorted BAM file is a requirement for SIRVsuite coverage module. The SIRVsuite has been tested on BAM files computed by <a href=https://github.com/alexdobin/STAR>STAR aligner</a>. 
+
+### Count input
+
+A transcript count file is a requirement for SIRV concentration and ERCC correlation module.
+
+As we tested and thus recommend to use <a href=https://www.lexogen.com/store/mix2-analysis-software>Mix<sup>2</sup></a> for transcript estimation, its typical tab-separated output table is expected by the SIRVsuite. However, only three columns are relevant for the SIRVsuite as shown below:
+
+
+| Field name | Example |                          Description                          |
+| :--------- | :------ | :------------------------------------------------------------ |
+| gene_ID | SIRV1 | A globally unique identifier for the genomic locus of the transcript. |
+| tracking_ID | SIRV101 | A unique identifier for the transcript. |
+| FPKM_CHN | 4158.42 | FPKM compatible hits norm. FPKM_CHN is calculated counting only the fragments,<br> which are compatible with a reference transcript. |
+
+
+If a different transcript count estimation tool is used, the output has to be converted into the format specified in the table above.
 
 ### Sample sheet content description
 
@@ -169,12 +147,12 @@ Columns in the sample sheet can be divided into different categories. General co
 
 General columns:
 - sample_name: any set of characters to identify samples (this name will be printed in the final graphics).
-- library_prep_type: this must be set to "whole" (currently only whole transcriptome libraries supported)
+<!-- - library_prep_type: this must be set to "whole" (currently only whole transcriptome libraries supported) -->
 
 SIRV-concentration & ERCC-correlation:
 
 - counting_path: valid path to count files
-- counting_method: this must be set to "mix2". Defines, how the count file should be read. (currently only the output of Mix2 is supported)
+<!-- - counting_method: this must be set to "mix2". Defines, how the count file should be read. (currently only the output of Mix2 is supported) -->
 - counting_feature: gene or transcript. Please note the transcript counts are required to run all the modules. Specifying "gene" allows to run only the coverage and ERCC correlation module. 
 - replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names in the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" to treat samples separately and use sample_names in the graphics instead.
 
@@ -205,6 +183,7 @@ SIRVsuite accepts the following arguments:
     optional arguments:
       --experiment-name         name of the experiment to displayed in the final graphics (if empty, general title will be used)
       -h, --help                show help message and exit
+      -v, --version             show version and exit
 
 Example commands:
 ```
@@ -222,9 +201,9 @@ The pipeline creates a subfolder for each specified module, which contains the o
 
 The module processes .bam files + SIRV-set 3-4 annotation, calculates coverage (expected + measured) and creates 3 types of output:
 
-- Coefficient of Deviation (CoD) table,
-- coverage data in bigwig format,
-- coverage plot.
+- coverage/CoD_table_whole.tsv: Coefficient of Deviation (CoD) table,
+- coverage/bigwig/SAMPLE_NAME_STRAND.bw coverage data in bigwig format,
+- coverage/coverage_plots/SAMPLE_NAME/GENE_ID/coverage.png: coverage plot.
 
 The CoD metric allows to measure the similarity between expected and measured coverage. For the exon of a SIRV transcript the expected coverage is assumed to be a constant value. For overlapping exons from different SIRVs the expected coverage is the constant value times the number of overlapping exons. The CoD value is calculated from the expected coverage and the measured coverage multiplied by a scaling factor s as follows.
 
@@ -242,14 +221,14 @@ An example of a coverage plot is given below.
 
 <p align="center"><img src="./docs/output_preview/coverage_preview.png" width=1280></p>
 
-The spike-in coverage can also be inspected interactively, by loading the measured coverage (stored in bigwig (.bw) format) in a genome browser (e.g. the IGV browser). For more info please refer to http://genome.ucsc.edu/goldenPath/help/bigWig.html and http://software.broadinstitute.org/software/igv/UserGuide.
+The spike-in coverage can also be inspected interactively, by loading the measured coverage (stored in <a href=http://genome.ucsc.edu/goldenPath/help/bigWig.html>bigwig</a> (.bw) format) in a genome browser (e.g. the <a href=http://software.broadinstitute.org/software/igv/UserGuide>IGV</a> browser).
 
 **ERCC correlation module**
 
 The module processes transcript or gene counts and input concentration of ERCCs. It creates two types of output:
 
-- correlation table
-- correlation plot
+- correlation/ERCC_correlation.tsv: correlation table
+- correlation/SAMPLE_NAME/ERCC_correlation.png: correlation plot
 
 The correlation table consist of Pearson correlation R values between true and measured ERCC concentrations.  The measured ERCC concentrations are obtained from https://assets.thermofisher.com/TFS-Assets/LSG/manuals/cms_095046.txt. The correlation plot, generated by the ERCC correlation module, is a scatterplot showing the true concentration of the ERCCs on the x-axis and the measured concentration on the y-axis concentration. An example of such a correlation plot is given below.
 
