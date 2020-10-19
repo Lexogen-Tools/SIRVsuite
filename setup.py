@@ -14,7 +14,7 @@ requirements = [
 'cycler==0.10.0',
 'gtfparse==1.2.1',
 'kiwisolver==1.2.0',
-'matplotlib==3.0.0',
+'matplotlib==3.3.1',
 'numpy==1.19.2',
 'pandas==1.1.3',
 'pyBigWig==0.3.17',
@@ -44,7 +44,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="SIRVsuite - a tool for spike-in analysis in NGS data",
+    description="SIRVsuite - a tool for SIRV set spike-in analysis",
     entry_points={
         'console_scripts': [
             'SIRVsuite=SIRVsuite.__main__:main',

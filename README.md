@@ -259,7 +259,7 @@ The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcri
 
 and we can define relative FPKM value as a ratio of estimated and expected relative abundance using formula
 
-<p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,rel}=\frac{FPKM_i}{FPKM_{expected}}=\frac{FPKM_i}{\sum_{i=1}^{n}FPKM_i} \ \frac{1}{n}"\></p>
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,rel}=\frac{FPKM_i}{FPKM_{expected}}=\frac{FPKM_i \cdot n}{\sum_{i=1}^{n}FPKM_i}"\></p>
 
 The FPKM<sub>i,rel</sub> values can be found in relative concentration/relative_concentration.tsv in the output directory.
 
