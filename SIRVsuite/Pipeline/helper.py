@@ -25,7 +25,7 @@ def __entry_check__(valid_dict, colname, value):
             else:
                 return value.lower()
         else:
-            raise ValueError("%s column not defined.. please define it and insert one of the possible values: %s"%(colname,", ".join(valid_dict[colname])))
+            raise ValueError("%s column not defined for all rows.. please define it and insert one of the possible values: %s"%(colname,", ".join(valid_dict[colname])))
     else:
         raise ValueError("colname not in valid_dict")
 
@@ -126,6 +126,9 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                 if None in row.values():
                     raise ValueError("It seems there is a value missing in a column..")
 
+                if None in row.keys():
+                    raise ValueError("More columns than values in the row detected")
+
                 # remove tabs
                 row = {a:row[a].strip("\t ") for a in row.keys()}  
                 
@@ -144,7 +147,7 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                             if col in header:
                                 sample_sheet_dict[module][row.get("sample_name")][col] = row.get(col)  
                     else:
-                        raise ValueError("Cannot proceed with module: %s"%(module))
+                        raise ValueError("Cannot proceed with module: %s.. Please check required columns for the module in the sample sheet."%(module))
                     
                     if module == "concentration":
                         # c_methods = set([sample_sheet_dict[module][i]["counting_method"] for i in sample_sheet_dict[module].keys()])

@@ -36,7 +36,7 @@ setup(
     author_email='tomas.drozd@lexogen.com, andreas.tuerk@lexogen.com',
     python_requires='>=3.6',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
 	    'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Natural Language :: English',
@@ -44,7 +44,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="SIRVsuite - a tool for SIRV set spike-in analysis",
+    description="SIRVsuite - a command line tool to QC an RNA-Seq workflow using Lexogen's SIRV spike-in controls",
     entry_points={
         'console_scripts': [
             'SIRVsuite=SIRVsuite.__main__:main',
