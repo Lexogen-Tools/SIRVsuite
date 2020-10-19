@@ -2,7 +2,7 @@
 
 SIRVsuite is a command line tool to QC an RNA-Seq workflow using Lexogen's SIRV spike-in controls. For more specific details about Lexogen's SIRV spike-in controls visit: https://www.lexogen.com/sirvs/sirv-sets/.
 
-SIRVsuite is published under the following licence xxx.
+SIRVsuite is published under the following licence [licence](LICENCE).
 
 **General usage**
 ```
@@ -24,13 +24,16 @@ To get started with SIRVsuite analysis, you need to:
 The following requirements have to be fulfilled prior to installation of SIRVsuite. When installing via docker these requirements are taken care of in Dockerfile.
 
 Non-python requirements:
-- cairo >= 1.15.10 (e.g. in ubuntu <!--which version of ubuntu, 16.04, 18.04, ...?-->: libcairo2-dev)
+- cairo >= 1.15.10 (e.g. in ubuntu 16.04 and higher: libcairo2-dev)
 - zlib
-- libcurl (and the curl-config config <!--where do you obtain curl-config config, is this a package?-->) (e.g. in ubuntu: libcurl4-openssl-dev)
+- libcurl (and the curl-config config) (e.g. in ubuntu: libcurl4-openssl-dev (this package combines both libcurl and curl-config))
 
 Python requirements:
 - numpy = 1.19.2 (recommended & tested)
-- maybe python3-tk (as a matplotlib dependency) <!--What do you mean by maybe? The user does not want to try this out themseleves. You could say somehting like "For proper operation of matplotlib, on some platforms installation of ... is required". Looking at the PyPI section below and the installation in the virtual environment this appears not be necessary.-->
+
+On some platforms (tested on Ubuntu 18.04), prior installation of python3-tk might be required as a matplotlib dependency when installing SIRVsuite outside of virtual environment.
+
+ <!--What do you mean by maybe? The user does not want to try this out themseleves. You could say somehting like "For proper operation of matplotlib, on some platforms installation of ... is required". Looking at the PyPI section below and the installation in the virtual environment this appears not be necessary.-->
 
 ### Installation method
 
@@ -172,7 +175,7 @@ SIRV-concentration & ERCC-correlation:
 
 - counting_path: valid path to count files
 - counting_method: this must be set to "mix2". Defines, how the count file should be read. (currently only the output of Mix2 is supported)
-- counting_feature: gene or transcript. Defines, whether ERCC correlation plots and tables are quantified (gene counts) or ERCC correlation + SIRV heatmap and boxplot are quantified (transcript counts). <!--What do you mean by this sentence?-->
+- counting_feature: gene or transcript. Please note the transcript counts are required to run all the modules. Specifying "gene" allows to run only the coverage and ERCC correlation module. 
 - replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names in the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
