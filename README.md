@@ -106,18 +106,20 @@ The SIRVsuite consists of the following modules
 The input for these modules is specified via a sample sheet, which is a csv file with the following format.
 
 ```
-sample_name;alignment_path;counting_path;read_orientation;counting_method;counting_feature;library_prep_type;replication_group
-sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;mix2;transcript;whole
-sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;mix2;transcript;whole
+sample_name;alignment_path;counting_path;read_orientation;counting_feature;replication_group
+sample_name_1;/home/user/alignment_data/sample_name_1.bam;/home/user/transcipt_count_data/sample_name_1.tsv;FWD;transcript;none
+sample_name_2;/home/user/alignment_data/sample_name_2.bam;/home/user/transcipt_count_data/sample_name_2.tsv;FWD;transcript;rgroup_1
+sample_name_3;/home/user/alignment_data/sample_name_3.bam;/home/user/transcipt_count_data/sample_name_3.tsv;FWD;transcript;rgroup_1
+sample_name_4;/home/user/alignment_data/sample_name_4.bam;/home/user/transcipt_count_data/sample_name_4.tsv;FWD;transcript;none
 ```
 
 ### Alignment input
 
-A sorted BAM file is a requirement for SIRVsuite coverage module. The SIRVsuite has been tested on BAM files computed by <a href=https://github.com/alexdobin/STAR>STAR aligner</a>. 
+A sorted BAM file is a requirement for the SIRVsuite coverage module. The SIRVsuite has been tested on BAM files computed by <a href=https://github.com/alexdobin/STAR>STAR aligner</a>. 
 
 ### Count input
 
-A transcript count file is a requirement for SIRV concentration and ERCC correlation module.
+A transcript count file is a requirement for the SIRV concentration and ERCC correlation module.
 
 As we tested and thus recommend to use <a href=https://www.lexogen.com/store/mix2-analysis-software>Mix<sup>2</sup></a> for transcript estimation, its typical tab-separated output table is expected by the SIRVsuite. However, only three columns are relevant for the SIRVsuite as shown below:
 
@@ -209,7 +211,7 @@ The CoD metric allows to measure the similarity between expected and measured co
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;CoD=\frac{\sum_{i=1}^{n}(cov_{expected,i}-s\cdot cov_{measured,i})^2}{\sum_{i=1}^{n}cov_{expected,i}}"\></p>
 
-Here, i ranges from the start to the end of the SIRV  gene and s is chosen as follows.
+Here, it ranges from the start to the end of the SIRV gene and s is chosen as follows.
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;s = \frac{\sum_i cov_{expected,i}}{\sum_i cov_{measured,i}}"\></p>
 
