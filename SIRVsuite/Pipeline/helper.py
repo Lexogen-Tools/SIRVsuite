@@ -68,8 +68,8 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
 
     # name required columns
     required_cols = dict()
-    required_cols["concentration"] = ["sample_name","counting_path","counting_method","counting_feature","library_prep_type"]
-    required_cols["coverage"] = ["sample_name","alignment_path","read_orientation","library_prep_type"]
+    required_cols["concentration"] = ["sample_name", "counting_path", "counting_feature"]
+    required_cols["coverage"] = ["sample_name", "alignment_path", "read_orientation"]
     
     # name optional columns
     optional_cols = dict()
@@ -81,9 +81,9 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
     ## RESTRICTIONS FOR THE COLUMNS CAN BE DEFINED HERE ##
     
     value_restriction = dict()
-    value_restriction["library_prep_type"] = ["whole","qs"]
-    value_restriction["read_orientation"] = ["fwd","rev","none"]
-    value_restriction["counting_method"] = ["mix2","cufflinks","htseq"]
+    # value_restriction["library_prep_type"] = ["whole"]
+    value_restriction["read_orientation"] = ["fwd","rev"]
+    # value_restriction["counting_method"] = ["mix2"]
     value_restriction["counting_feature"] = ["gene","transcript"]
 
     ## ------------------------------------------------ ##
@@ -122,11 +122,12 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                 # delete first or last semicolon in the header
                 if "" in row.keys():
                     del row['']
-                # remove tabs
-                row = {a:row[a].strip("\t ") for a in row.keys()}
 
                 if None in row.values():
-                    raise ValueError("Incorrect number of rows in a sample sheet..")
+                    raise ValueError("It seems there is a value missing in a column..")
+
+                # remove tabs
+                row = {a:row[a].strip("\t ") for a in row.keys()}  
                 
                 # check for valid values for general columns (all modules)
                 for common_col in common_restricted_cols:
@@ -146,18 +147,18 @@ def read_sample_sheet(sheet_path, modules_to_execute = ["concentration", "covera
                         raise ValueError("Cannot proceed with module: %s"%(module))
                     
                     if module == "concentration":
-                        c_methods = set([sample_sheet_dict[module][i]["counting_method"] for i in sample_sheet_dict[module].keys()])
+                        # c_methods = set([sample_sheet_dict[module][i]["counting_method"] for i in sample_sheet_dict[module].keys()])
                         c_features = set([sample_sheet_dict[module][i]["counting_feature"] for i in sample_sheet_dict[module].keys()])
-                        c_library_prep = set([sample_sheet_dict[module][i]["library_prep_type"] for i in sample_sheet_dict[module].keys()])
+                        # c_library_prep = set([sample_sheet_dict[module][i]["library_prep_type"] for i in sample_sheet_dict[module].keys()])
                         
-                        if len(c_methods) > 1:
-                            raise ValueError("Cannot proceed with different counting_methods..")
+                        # if len(c_methods) > 1:
+                        #     raise ValueError("Cannot proceed with different counting_methods..")
 
                         if len(c_features) > 1:
                             raise ValueError("Cannot proceed with different counting_features..")
 
-                        if len(c_library_prep) > 1:
-                            raise ValueError("Cannot proceed with different library_preps..")
+                        # if len(c_library_prep) > 1:
+                        #     raise ValueError("Cannot proceed with different library_preps..")
         
     except Exception as e:
         log.error(str(e)+"\n"+sample_sheet_info)

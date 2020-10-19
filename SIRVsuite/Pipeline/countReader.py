@@ -35,7 +35,7 @@ class countReader():
                         for row in MIX2_reader:
                             row = np.array(row)
                             if init:
-                                required_cols = np.array(["tracking_ID","gene_ID","abundance","comp_frags_locus","FPKM_CHN","FPKM_THN"]) # trim to necessary info
+                                required_cols = np.array(["tracking_ID", "gene_ID", "FPKM_CHN"]) # trim to necessary info
                                 
                                 if (not set(required_cols) <= set(row)):
                                     raise ValueError("Cannot load mix2 table format..")
@@ -57,13 +57,7 @@ class countReader():
                             selected_columns = row[indices]
 
                             if quantity_unit.lower() == 'fpkm_chn':
-                                value = float(selected_columns[4])  
-                            elif quantity_unit.lower() == 'counts':
-                                value = float(selected_columns[2] * selected_columns[3]) # multiplying abundance and comp_frag_locus result in counts for transcripts  
-                            elif quantity_unit.lower() == 'abundance':
                                 value = float(selected_columns[2])
-                            elif quantity_unit.lower() == 'fpkm_thn':
-                                value = float(selected_columns[5])
                             else:
                                 log.warning("unknown quantity unit specified.. supported options are fpkm_chn or abundance")
                                 break
@@ -72,10 +66,13 @@ class countReader():
                                 counting_dict[spike_in][selected_columns[identifier_idx]] = [value]
                             else:
                                 counting_dict[spike_in][selected_columns[identifier_idx]].append(value)
-
                 except:
                     raise ValueError("An error occured during loading file: %s"%(path))
+                    
+        else:
+            raise ValueError("Unsupported counting method format")
 
+        """
         elif counting_method == "htseq":
             for path in files:
                 try:
@@ -98,7 +95,6 @@ class countReader():
                                             counting_dict["SIRV"][id].append(float(count))
                 except:
                     raise ValueError("An error occured during loading file: %s"%(path))
-        else:
-            raise ValueError("Unsupported counting method format")
+        """
 
         return counting_dict

@@ -37,7 +37,7 @@ class SIRVsuiteConcentration():
             if not replicate_group in grouped_samples.keys():
                 grouped_samples[replicate_group] = dict()
                 grouped_samples[replicate_group]["path"] = [sample_sheet[sample]["counting_path"]]
-                method = sample_sheet[sample]["counting_method"]
+                method = "mix2"
             else:
                 grouped_samples[replicate_group]["path"].append(sample_sheet[sample]["counting_path"])
         
