@@ -257,32 +257,26 @@ An example of a correlation plot:
 
 <p align="center"><img src="./docs/output_preview/ERCC_correlation_preview.png" width=800></p>
 
-**SIRV-concentration module**
+**SIRV concentration module**
 
-The module processes transcript FPKM values for SIRVs and creates 3 types of output:
-
-- relative concentration table (concentration/relative_concentration.tsv),
-- boxplot of SIRV relative transcript concentration (concentration/SIRV_boxplot.png),
-- heatmap of Log<sub>2</sub> Fold Change SIRV transcript relative concentrations (concentration/SIRV_heatmap.png).
-
-The SIRV E0 mix (present in SIRV set 3 and 4) is comprised of equimolar transcripts. This enables the following calculation procedure. Consider SIRV transcript i of n SIRV transcripts present in a sample. Given a measured FPKM concentration FPKM<sub>i</sub>,  FPKM<sub>expected</sub> for each transcript is quantified as follows:
+SIRV transcripts in the SIRV E0 mix (present in SIRV set 3 and 4) are equimolar. Hence, assuming the sum of the FPKM values of all SIRV transcripts correctly quantifies the overall concentration of the SIRVs, the expected FPKM value of each SIRV is given by
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,expected}=\frac{\sum_{i=1}^{n}FPKM_i}{n}"\></p>
 
-and we can define relative FPKM value as a ratio of estimated and expected relative abundance using formula
+The observed FPKM value relative to the expected FPKM value can then be calculated as follows
 
 <p align="center"><img src="https://latex.codecogs.com/svg.latex?\Large&space;FPKM_{i,rel}=\frac{FPKM_i}{FPKM_{expected}}=\frac{FPKM_i \cdot n}{\sum_{i=1}^{n}FPKM_i}"\></p>
 
-The FPKM<sub>i,rel</sub> values can be found in relative concentration/relative_concentration.tsv in the output directory.
+The SIRV concentration module calculates these relative FPKM values and generates the following 3 output files in the output directory. The latter two files visualize the data in the first.
 
-The distribution of FPKM<sub>i,rel</sub> is summarized into a boxplot.
+- concentration/relative_concentration.tsv: table of relative SIRV concentrations
+- concentration/SIRV_boxplot.png: boxplot of relative SIRV concentrations
+- concentration/SIRV_heatmap.png: heatmap of Log<sub>2</sub> relative SIRV concentrations
 
-An example of a SIRV concentration boxplot (mean - read circle, median - white strip):
+The FPKM<sub>i,rel</sub> values can be found in concentration/relative_concentration.tsv. The relative FPKM values of all SIRV transcripts are visualized as a boxplot in concentration/SIRV_boxplot.png. An example of such a boxplot is given below. The mean and median are visualized by the red circle and white strip, respectively.
 
 <p align="center"><img src="./docs/output_preview/SIRV_boxplot_preview.png" width=800></p>
 
-Log<sub>2</sub> Fold Change of FPKM<sub>i,rel</sub> is displayed in a heatmap, showing the difference between expected and calculated values.
-The values are highlighted in the colors green, blue and red, which corresponds to a 'match between concentrations', 'transcript underexpression' and 'overexpression', respectively.
+The output file concentration/SIRV_heatmap.png displays a heatmap of the log<sub>2</sub> relative concentrations for each SIRV transcript grouped by SIRV gene. The values are visualized on a red/green/blue color map, with green indicating log<sub>2</sub> values close to 0, red and blue indicating values close to 1 and -1, respectively. Values above 1 and below -1 are visualized by red and green. An example of a SIRV concentration heatmap for SIRV1 and SIRV2 is given below.
 
-An example of a SIRV concentration heatmap for SIRV1 and SIRV2:
 <p align="center"><img src="./docs/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>
