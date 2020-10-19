@@ -115,13 +115,11 @@ sample_name_4;/home/user/alignment_data/sample_name_4.bam;/home/user/transcipt_c
 
 ### Alignment input
 
-A sorted BAM file is a requirement for the SIRVsuite coverage module. The SIRVsuite has been tested on BAM files computed by <a href=https://github.com/alexdobin/STAR>STAR aligner</a>. 
+A sorted BAM file is required as input for the SIRVsuite coverage module. The SIRVsuite has been tested on BAM files computed by <a href=https://github.com/alexdobin/STAR>STAR aligner</a>. 
 
 ### Count input
 
-A transcript count file is a requirement for the SIRV concentration and ERCC correlation module.
-
-As we tested and thus recommend to use <a href=https://www.lexogen.com/store/mix2-analysis-software>Mix<sup>2</sup></a> for transcript estimation, its typical tab-separated output table is expected by the SIRVsuite. However, only three columns are relevant for the SIRVsuite as shown below:
+A transcript quantification file is required as input for the SIRV concentration and ERCC correlation module. Since SIRVsuite was tested with <a href=https://www.lexogen.com/store/mix2-analysis-software>Mix<sup>2</sup></a> for transcript quantification, we assume that three columns of the  <a href=https://www.lexogen.com/store/mix2-analysis-software>Mix<sup>2</sup></a>  output format are present. These columns are given as follows.
 
 
 | Field name | Example |                          Description                          |
@@ -130,32 +128,29 @@ As we tested and thus recommend to use <a href=https://www.lexogen.com/store/mix
 | tracking_ID | SIRV101 | A unique identifier for the transcript. |
 | FPKM_CHN | 4158.42 | FPKM compatible hits norm. FPKM_CHN is calculated counting only the fragments,<br> which are compatible with a reference transcript. |
 
-
-If a different transcript count estimation tool is used, the output has to be converted into the format specified in the table above.
+To use SIRVsuite in conjunction with another transcript quantification method than <a href=https://www.lexogen.com/store/mix2-analysis-software>Mix<sup>2</sup></a>, the relevant output of this transcript quantification has to be extracted into the format specified in the table above.
 
 ### Sample sheet content description
 
 Sample sheets have the following format:
 - ";" is the field separator
-- trailing whitespace or tab is allowed (trimmed during reading process)
+- trailing whitespace or tab is allowed
 - UTF-8 encoding
-- every column must have a name which is predefined (see more info below)
+- column names must be chosen from a predefined set (see info below)
 - column values are case insensitive
 - columns can be specified in arbitrary order
 
-**Allowed columns**:
+**Allowed columns**
 
 Columns in the sample sheet can be divided into different categories. General columns are always required, the other columns relate to the module of interest.
 
 General columns:
 - sample_name: any set of characters to identify samples (this name will be printed in the final graphics).
-<!-- - library_prep_type: this must be set to "whole" (currently only whole transcriptome libraries supported) -->
 
 SIRV-concentration & ERCC-correlation:
 
-- counting_path: valid path to count files
-<!-- - counting_method: this must be set to "mix2". Defines, how the count file should be read. (currently only the output of Mix2 is supported) -->
-- counting_feature: gene or transcript. Please note the transcript counts are required to run all the modules. Specifying "gene" allows to run only the coverage and ERCC correlation module. 
+- counting_path: valid path to transcript quantification files
+- counting_feature: gene or transcript. Please note the transcript quantification files are required to run all the modules. Specifying "gene" allows to run only the coverage and ERCC correlation module. 
 - replicate_group(optional): replicate groups definition, the same value assigned to multiple samples, their mean value will be used for quantification and will be used instead of sample names in the final graphics visualization. If a replicate group is to be defined for a subset of samples, use "none" to treat samples separately and use sample_names in the graphics instead.
 
 Coverage:
