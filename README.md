@@ -81,7 +81,7 @@ docker build . -t 'sirvsuite:latest'
 Now, you can run SIRVsuite via the following command line:
 
 ```
-docker run -v DATA_DIR_PATH:/data SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
+docker run -v DATA_DIR_PATH:/data sirvsuite SIRVsuite [-h] -i SAMPLE_SHEET -o OUTPUT_DIR [-a|--all-modules] [--coverage|--ERCC-correlation|--SIRV-concentration] [--experiment-name EXPERIMENT_NAME]
 ```
 
 Please note that you need to fill into the sample sheet alignment and counting paths which correspond to the mapped directory. 
