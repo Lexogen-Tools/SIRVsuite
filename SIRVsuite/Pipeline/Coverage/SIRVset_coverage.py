@@ -197,8 +197,8 @@ class SIRVsuiteCoverage():
 
                     elif(strandeness in ["rev", "fwd"]):
                         # inferring strandeness of a read
-                        if ((fragmentRead.is_paired and fragmentRead.is_read1 and fragmentRead.is_reverse) or
-                            (fragmentRead.is_paired and fragmentRead.is_read2 and not fragmentRead.is_reverse) or
+                        if ((fragmentRead.is_paired and fragmentRead.is_read1 and not fragmentRead.is_reverse) or
+                            (fragmentRead.is_paired and fragmentRead.is_read2 and fragmentRead.is_reverse) or
                                 (not fragmentRead.is_paired and not fragmentRead.is_reverse)):
 
                             strand = "+"
