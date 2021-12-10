@@ -1,0 +1,10 @@
+test_run:
+  image: fkrull/multi-python:latest
+  before_script:
+    - apt-get update
+    - pip3 install cython
+    - pip3 install pyBigWig tox-travis coveralls
+  script:
+    tox
+  coverage:
+    '/^TOTAL\s+\d+\s+\d+\s+(\d+\%)$/'

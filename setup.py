@@ -17,7 +17,7 @@ requirements = [
 'matplotlib==3.3.1',
 'numpy==1.19.2',
 'pandas==1.1.3',
-'pyBigWig==0.3.17',
+'pyBigWig==0.3.18',
 'pycairo==1.20.0',
 'pyparsing==2.4.7',
 'pysam==0.16.0.1',
@@ -38,7 +38,7 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
-	    'Topic :: Scientific/Engineering :: Bio-Informatics',
+	'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

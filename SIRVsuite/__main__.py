@@ -1,5 +1,5 @@
-import sys
-from SIRVsuite.SIRVsuite import main
+import sys # pragma: no cover
+from SIRVsuite.SIRVsuite import main # pragma: no cover
 
-if __name__ == 'main':
-    sys.exit(main())
+if __name__ == 'main': # pragma: no cover
+    sys.exit(main()) # pragma: no cover
