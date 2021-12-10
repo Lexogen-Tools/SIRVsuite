@@ -12,7 +12,7 @@ class CairoDrawer():
     Here, different graphic shapes can be defined within separate methods.
     """
 
-    def __init__(self, out_path=None, width=1980, height=1224, bg_color=(1, 1, 1)):
+    def __init__(self, out_path=None, width=2000, height=1324, bg_color=(1, 1, 1)):
         """
         During the initilization, define surface format, dimensions and background color (manifested by a rectangle of the surface size)
         """
@@ -306,7 +306,8 @@ class CairoDrawer():
             ctx.scale(1, -1)
 
         signal = np.array(signal)
-        steps = np.linspace(0, width, len(signal)+1)
+        steps = np.linspace(0, width, len(signal))
+        steps = np.append(steps, steps[-1])
 
         rel_x = 0
         rel_y = 0

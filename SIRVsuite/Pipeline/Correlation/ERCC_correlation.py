@@ -19,7 +19,7 @@ class ERCCcorrelation():
             c = countReader()
             cnts = dict()
             for sample in sample_sheet.keys():    
-                cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method=sample_sheet[sample]["counting_method"],counting_type=sample_sheet[sample]["counting_feature"],spike_in_type=["ERCC"])
+                cnts[sample] = c.read_counting_file(files=[sample_sheet[sample]["counting_path"]],counting_method="mix2",spike_in_type=["ERCC"])
         
             self.ERCC_correlation(cnts, output_dir=os.path.join(output_dir,"correlation/"), experiment_name = experiment_name)
 
@@ -95,6 +95,6 @@ class ERCCcorrelation():
         
         # write summary file for all given samples
         with open(data_path,"w") as summary_file:
-            summary_file.write("Alias\tERCC\n")
+            summary_file.write("Alias\tERCC Pearson R\n")
             for sample_name in data.keys():
                 summary_file.write("%s\t%f\n"%(sample_name, corr_per_sample[sample_name]))

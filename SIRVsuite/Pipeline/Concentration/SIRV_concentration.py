@@ -46,7 +46,7 @@ class SIRVsuiteConcentration():
         cnts = dict()
         for group in grouped_samples.keys():
             c = countReader()
-            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV","ERCC"], counting_method=method, counting_type = "transcript")
+            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV","ERCC"], counting_method=method)
         
         self.cnts = cnts
         self.data = self.get_relative_abundance(cnts)
@@ -216,16 +216,14 @@ class SIRVsuiteConcentration():
                     showmeans = True,
                     patch_artist = True,
                     showfliers = False)
-
+        
         ax1.plot([1,1],[0,len(relative_abundance) + 1], color = 'darkblue', alpha = .6)
         ax1.set_ylim([0,len(relative_abundance)+1])
 
-        if (heatmap_matrix.max() > 10):
-            limit_x = heatmap_matrix.max()
-        else:
-            limit_x = 10
 
-        ax1.set_xlim([0.01,limit_x])
+        limit_x = heatmap_matrix.max()
+
+        ax1.set_xlim([np.min(relative_conc)-np.min(relative_conc)*0.8,limit_x])
         
         ax1.set_yticklabels(relative_abundance.keys())
         plt.xlabel("relative SIRV transcript concentration")
