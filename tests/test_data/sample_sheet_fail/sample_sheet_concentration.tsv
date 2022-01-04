@@ -1,0 +1,2 @@
+sample_name;alignment_path;read_orientation;counting_feature
+sname1;/data/path/file1.bam;fwd;transcript

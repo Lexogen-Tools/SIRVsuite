@@ -2,6 +2,7 @@ import argparse as ap
 import os
 import sys
 import logging
+from SIRVsuite import __version__
 
 from SIRVsuite.Pipeline.Coverage.SIRVset_coverage import SIRVsuiteCoverage
 from SIRVsuite.Pipeline.Concentration.SIRV_concentration import (
@@ -9,6 +10,7 @@ from SIRVsuite.Pipeline.Concentration.SIRV_concentration import (
 from SIRVsuite.Pipeline.Correlation.ERCC_correlation import ERCCcorrelation
 from SIRVsuite.Pipeline.helper import *
 
+# set logging
 logging.root.setLevel(logging.INFO)
 log = logging.getLogger()
 hndl = log.handlers[0]
@@ -38,14 +40,16 @@ def main():
     parser.add_argument('--experiment-name', action='store', default="", required=False, nargs=1,
                         help="specify name of an experiment")
     parser.add_argument('--verbose', action='store_true', required=False)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     args = parser.parse_args()
 
     # determine which modules should run
-    if (args.all_modules or args.ERCC_correlation or args.SIRV_concentration):
-        modules_to_execute.append("concentration")
-
-    if (args.coverage or args.all_modules):
+    if (args.all_modules or args.SIRV_concentration):
+        modules_to_execute.append("SIRV-concentration")
+    if (args.all_modules or args.coverage):
         modules_to_execute.append("coverage")
+    if (args.all_modules or args.ERCC_correlation):
+        modules_to_execute.append("ERCC-correlation")
 
     if (len(modules_to_execute) == 0):
         raise ValueError("a module has to be specified.. use -h or --help arg for more information")
@@ -59,32 +63,35 @@ def main():
     input_dict = read_sample_sheet(input_path, modules_to_execute=modules_to_execute)
 
     # run modules
-    if "concentration" in modules_to_execute:
+    if "ERCC-correlation" in modules_to_execute or "SIRV-concentration" in modules_to_execute:
 
         if (args.all_modules or args.SIRV_concentration):
-            b = SIRVsuiteConcentration(sample_sheet=input_dict["concentration"], output_dir=out)
-            b.create_sirvsuite_boxplot(b.data)
-            b.create_sirvsuite_heatmap(b.data)
+            module_concentration = SIRVsuiteConcentration(sample_sheet=input_dict["SIRV-concentration"], output_dir=out)
+            module_concentration.create_sirvsuite_boxplot(module_concentration.data)
+            module_concentration.create_sirvsuite_heatmap(module_concentration.data)
 
         if (args.all_modules or args.ERCC_correlation):
             if (args.SIRV_concentration):
-                a = ERCCcorrelation(sample_sheet=input_dict["concentration"], output_dir=out)
-            else:
-                cnts = b.cnts
-                a = ERCCcorrelation()
-                a.ERCC_correlation(cnts, output_dir=os.path.join(out, "correlation/"))
+                # If counts have been loaded already for previous module, save computation time
+                cnts = module_concentration.cnts
+                module_correlation = ERCCcorrelation()
+                module_correlation.ERCC_correlation(cnts, output_dir=os.path.join(out, "correlation/"))
 
-                del b
+                del module_concentration
                 del cnts
-            del a
-    if "coverage" in modules_to_execute:
-        c = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name="")
-        c.expected_coverage()
-        c.bam_to_coverage()
-        c.calc_statistics()
-        c.coverage_plot()
+            else:
+                module_correlation = ERCCcorrelation(sample_sheet=input_dict["ERCC-correlation"], output_dir=out)
+            
+            del module_correlation
 
-        del c
+    if "coverage" in modules_to_execute:
+        module_coverage = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name="")
+        module_coverage.expected_coverage()
+        module_coverage.bam_to_coverage()
+        module_coverage.calc_statistics()
+        module_coverage.coverage_plot()
+
+        del module_coverage
 
 
 if __name__ == '__main__':

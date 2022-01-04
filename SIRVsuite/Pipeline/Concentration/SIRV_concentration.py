@@ -37,7 +37,7 @@ class SIRVsuiteConcentration():
             if not replicate_group in grouped_samples.keys():
                 grouped_samples[replicate_group] = dict()
                 grouped_samples[replicate_group]["path"] = [sample_sheet[sample]["counting_path"]]
-                method = sample_sheet[sample]["counting_method"]
+                method = "mix2"
             else:
                 grouped_samples[replicate_group]["path"].append(sample_sheet[sample]["counting_path"])
         
@@ -46,7 +46,7 @@ class SIRVsuiteConcentration():
         cnts = dict()
         for group in grouped_samples.keys():
             c = countReader()
-            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV","ERCC"], counting_method=method, counting_type = "transcript")
+            cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV","ERCC"], counting_method=method)
         
         self.cnts = cnts
         self.data = self.get_relative_abundance(cnts)
@@ -171,7 +171,7 @@ class SIRVsuiteConcentration():
             os.makedirs(path)
 
         with open(os.path.join(path,"relative_concentration.tsv"), "w") as out_file:
-            out_file.write("\t"+"\t".join(groups)+"\n")
+            out_file.write("transcript_id\t"+"\t".join(groups)+"\n")
             transcript_ids = sorted(norm_abund_dict[groups[0]].keys())
             for transcript in transcript_ids:
                 out_file.write(transcript+"\t"+"\t".join([str(norm_abund_dict[group][transcript]) for group in groups])+"\n")
@@ -216,16 +216,14 @@ class SIRVsuiteConcentration():
                     showmeans = True,
                     patch_artist = True,
                     showfliers = False)
-
+        
         ax1.plot([1,1],[0,len(relative_abundance) + 1], color = 'darkblue', alpha = .6)
         ax1.set_ylim([0,len(relative_abundance)+1])
 
-        if (heatmap_matrix.max() > 10):
-            limit_x = heatmap_matrix.max()
-        else:
-            limit_x = 10
 
-        ax1.set_xlim([0.01,limit_x])
+        limit_x = heatmap_matrix.max()
+
+        ax1.set_xlim([np.min(relative_conc)-np.min(relative_conc)*0.8,limit_x])
         
         ax1.set_yticklabels(relative_abundance.keys())
         plt.xlabel("relative SIRV transcript concentration")

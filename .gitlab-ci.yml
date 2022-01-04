@@ -1,11 +1,9 @@
 test_run:
-  image: python:3.6-buster
+  image: fkrull/multi-python:latest
   before_script:
     - apt-get update
     - pip3 install cython
-    - pip3 install pyBigWig
-    - pip3 install SIRVsuite --extra-index-url=https://test.pypi.org/simple/
+    - pip3 install pyBigWig tox-travis coveralls
   script:
-    - python -m tests.test_parse -v
+    tox
   when: manual
-  

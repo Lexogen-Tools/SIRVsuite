@@ -103,7 +103,7 @@ class SIRVsuiteCoverage():
                                 chroms = np.array([gene] * len(values))
 
                                 # if trimmed, need to use + self.gene_coords[gene][0] to start & end
-                                bw.addEntries(chroms, starts, ends=ends, values=values)
+                                bw.addEntries(chroms.tolist(), starts.tolist(), ends=ends.tolist(), values=values.tolist())
 
                     elif (output_type.lower() == "cov"):
                         for gene in sorted(cov_dict[sample].keys()):
@@ -158,9 +158,9 @@ class SIRVsuiteCoverage():
                     contig_id = gene
 
                 if contig_id not in bamFile.references:
+                    #del self.expected_coverage["whole"][contig_id]
+                    #del self.cov_stats[contig_id]
                     continue
-                    del self.expected_coverage["whole"][contig_id]
-                    del self.cov_stats[contig_id]
 
                 bam_coverage[sample][gene] = dict()
                 stat_dict[sample][gene] = dict()
@@ -197,8 +197,8 @@ class SIRVsuiteCoverage():
 
                     elif(strandeness in ["rev", "fwd"]):
                         # inferring strandeness of a read
-                        if ((fragmentRead.is_paired and fragmentRead.is_read1 and fragmentRead.is_reverse) or
-                            (fragmentRead.is_paired and fragmentRead.is_read2 and not fragmentRead.is_reverse) or
+                        if ((fragmentRead.is_paired and fragmentRead.is_read1 and not fragmentRead.is_reverse) or
+                            (fragmentRead.is_paired and fragmentRead.is_read2 and fragmentRead.is_reverse) or
                                 (not fragmentRead.is_paired and not fragmentRead.is_reverse)):
 
                             strand = "+"
@@ -327,7 +327,7 @@ class SIRVsuiteCoverage():
 
         for mode in self.annotation_df.keys():
             with open(CoD_table_path+"CoD_table"+experiment_name+"_"+mode+".tsv", "w") as CoD_table:
-                header = ";" + ";".join(list(sorted(self.bam_coverage.keys()))) + "\n"
+                header = "gene_id\t" + "\t".join(list(sorted(self.bam_coverage.keys()))) + "\n"
                 CoD_table.write(header)
 
                 rows = dict()
@@ -345,10 +345,10 @@ class SIRVsuiteCoverage():
                             if row_key not in rows.keys():
                                 rows[row_key] = str(self.cov_stats[sample][gene][strand]["CoD"])
                             else:
-                                rows[row_key] += ";" + str(self.cov_stats[sample][gene][strand]["CoD"])
+                                rows[row_key] += "\t" + str(self.cov_stats[sample][gene][strand]["CoD"])
 
                 for row_idx in rows.keys():
-                    CoD_table.write(row_idx + ";" + rows[row_idx]+"\n")
+                    CoD_table.write(row_idx + "\t" + rows[row_idx]+"\n")
 
     def CoD(self, real_cov, expect_cov):
         """
@@ -395,7 +395,7 @@ class SIRVsuiteCoverage():
         UTR_annotation = annotation_df[0:0]  # Creating an empty data frame with the same structure as annotation data frame
 
         for strand in self._strands:
-            transcripts = np.unique(annotation_df[annotation_df["Strand"] == strand]["transcript_id"])
+            transcripts = np.unique(annotation_df[annotation_df["strand"] == strand]["transcript_id"])
             for transcript in transcripts:
                 annot_transcript = annotation_df[annotation_df["transcript_id"] == transcript]
 
