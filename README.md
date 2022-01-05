@@ -1,3 +1,5 @@
+[![coverage report](http://10.90.1.56:10080/Bioinfo/SIRVsuite/badges/master/coverage.svg)](http://10.90.1.56:10080/Bioinfo/SIRVsuite/commits/master)
+
 # SIRVsuite
 
 SIRVsuite is a command line tool to QC an RNA-Seq workflow using Lexogen's SIRV spike-in controls. For more specific details about Lexogen's SIRV spike-in controls visit: https://www.lexogen.com/sirvs/sirv-sets/.
