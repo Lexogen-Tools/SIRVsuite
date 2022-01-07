@@ -6,6 +6,5 @@ test_run:
     - pip3 install pyBigWig tox-travis coveralls
   script:
     tox
-  artifacts:
-    reports:
-      cobertura: coverage.xml
+  coverage:
+    '/^TOTAL\s+\d+\s+\d+\s+(\d+\%)$/'
