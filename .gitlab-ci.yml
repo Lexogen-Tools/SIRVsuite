@@ -6,3 +6,6 @@ test_run:
     - pip3 install pyBigWig tox-travis coveralls
   script:
     tox
+  artifacts:
+    reports:
+      cobertura: coverage.xml
