@@ -36,10 +36,7 @@ class SIRVsuiteCoverage():
         """
         """
 
-        if output_dir is None:
-            self.output_path = "/".join(__file__.split("/")[:-6]) + "/coverage"
-        else:
-            self.output_path = output_dir
+        self.output_path = output_dir
 
         log.info("calculating spike-in gene coverage")
         log.debug("SIRVsuite coverage creator initialized")
@@ -129,6 +126,8 @@ class SIRVsuiteCoverage():
         bam_coverage = dict()
         stat_dict = dict()
 
+        index_created = False
+
         for sample in sample_dict.keys():
 
             strandeness = sample_dict[sample]["read_orientation"]
@@ -141,6 +140,7 @@ class SIRVsuiteCoverage():
 
                 if (not os.path.exists(index_path)):
                     ps.index(bam_path)
+                    index_created = True
                     log.info(".bai index file not detected.. creating index file..")
 
             bamFile = ps.AlignmentFile(bam_path, "rb")
@@ -158,7 +158,7 @@ class SIRVsuiteCoverage():
                     contig_id = gene
 
                 if contig_id not in bamFile.references:
-                    #del self.expected_coverage["whole"][contig_id]
+                    #del self._expected_coverage["whole"][contig_id]
                     #del self.cov_stats[contig_id]
                     continue
 
@@ -180,11 +180,7 @@ class SIRVsuiteCoverage():
                 else:
                     raise ValueError("expected coverage attribute not detected")
 
-                if (strandeness == "none"):
-                    bam_coverage[sample][gene]["none"] = np.zeros(length)
-                    stat_dict[sample][gene]["none"] = copy.deepcopy(stats)
-
-                elif (strandeness in ["rev", "fwd"]):
+                if strandeness in ["rev", "fwd"]:
                     bam_coverage[sample][gene]["+"] = np.zeros(length)
                     bam_coverage[sample][gene]["-"] = np.zeros(length)
                     stat_dict[sample][gene]["+"] = copy.deepcopy(stats)
@@ -192,10 +188,7 @@ class SIRVsuiteCoverage():
 
                 for fragmentRead in bamFile.fetch(contig_id, bam_gene_start, bam_gene_end):
 
-                    if (strandeness == "none"):
-                        strand = strandeness
-
-                    elif(strandeness in ["rev", "fwd"]):
+                    if(strandeness in ["rev", "fwd"]):
                         # inferring strandeness of a read
                         if ((fragmentRead.is_paired and fragmentRead.is_read1 and not fragmentRead.is_reverse) or
                             (fragmentRead.is_paired and fragmentRead.is_read2 and fragmentRead.is_reverse) or
@@ -216,15 +209,18 @@ class SIRVsuiteCoverage():
                     positions = positions[(positions < bam_gene_end) & (positions > bam_gene_start)] - bam_gene_start
                     bam_coverage[sample][gene][strand][positions] += 1
 
+            if index_created:
+                os.remove(index_path)
+
         self.cov_stats = stat_dict
         self.bam_coverage = bam_coverage
 
         # export coverage to .bw format
-        bigwig_path = os.path.join(self.output_path, "coverage/bigwig")
-        if (not os.path.exists(bigwig_path)):
-            os.makedirs(bigwig_path)
+        cov_track_path = os.path.join(self.output_path, "coverage", output_type)
+        if (not os.path.exists(cov_track_path)):
+            os.makedirs(cov_track_path)
 
-        self.__cov_data_export__(bigwig_path, output_type="bigWig")
+        self.__cov_data_export__(cov_track_path, output_type=output_type)
 
     def load_annotation(self, annotation_path):
         """
@@ -311,11 +307,12 @@ class SIRVsuiteCoverage():
 
         log.debug("Calculating statistics")
 
+        if (not hasattr(self, "expected_coverage")):
+            raise ValueError("Expected coverage not detected")
+
         # check if all attributes present
         if (not hasattr(self, "cov_stats") or not hasattr(self, "bam_coverage")):
             raise ValueError("Measured coverage not detected")
-        elif (not hasattr(self, "expected_coverage")):
-            raise ValueError("Expected coverage not detected")
 
         CoD_table_path = os.path.join(self.output_path, "coverage/")
         if not os.path.exists(CoD_table_path):
@@ -334,8 +331,8 @@ class SIRVsuiteCoverage():
 
                 for sample in sorted(self.bam_coverage.keys()):
                     for gene in self.bam_coverage[sample].keys():
-                        for strand in self.expected_coverage[mode][gene].keys():
-                            expected_cov = self.expected_coverage[mode][gene][strand]
+                        for strand in self._expected_coverage[mode][gene].keys():
+                            expected_cov = self._expected_coverage[mode][gene][strand]
                             measured_cov = self.bam_coverage[sample][gene][strand]
                             
                             # calculate CoD and scaling factor and assign them to the cov_stats dictionary
@@ -516,7 +513,7 @@ class SIRVsuiteCoverage():
 
                             weight_idx += exon_lengths[row_idx]
 
-        self.expected_coverage = expected_coverage
+        self._expected_coverage = expected_coverage
 
     def coverage_plot(self):
 
@@ -561,14 +558,15 @@ class SIRVsuiteCoverage():
 
         if self.experiment_name != "":
             tab = {"Experiment": self.experiment_name}
+            page_height = 1400
         else:
             tab = {}
             header_height = header_height*3/4
 
-        for gene in self.expected_coverage["whole"].keys():
+        for gene in self._expected_coverage["whole"].keys():
 
-            max_expect_covs = max([max(self.expected_coverage["whole"][gene][s])
-                for s in self.expected_coverage["whole"][gene].keys()])
+            max_expect_covs = max([max(self._expected_coverage["whole"][gene][s])
+                for s in self._expected_coverage["whole"][gene].keys()])
 
             gene_annot = self.annotation_df["whole"][self.annotation_df["whole"]["gene_id"] == gene]
             transcripts = sorted(set(gene_annot["transcript_id"]))
@@ -581,7 +579,7 @@ class SIRVsuiteCoverage():
             coverage_panel_height = coverage_panel_height_orig
             exon_panel_y = header_y + header_height + panel_gap_y
 
-            existing_strands = list(self.expected_coverage["whole"][gene].keys())
+            existing_strands = list(self._expected_coverage["whole"][gene].keys())
 
             if (len(transcripts) < 3):
                 exon_panel_height = 60*len(transcripts)
@@ -691,7 +689,7 @@ class SIRVsuiteCoverage():
                     stats_table["CoD("+strand+")"] = "%.4f" % (self.cov_stats[sample][gene][strand]["CoD"])
                     stats_table["total reads("+strand+")"] = "%d" % (self.cov_stats[sample][gene][strand]["num_reads"])
 
-                    expected_cov = self.expected_coverage["whole"][gene][strand]
+                    expected_cov = self._expected_coverage["whole"][gene][strand]
                     real_cov_scaled = self.bam_coverage[sample][gene][strand] / scale_coef
                     max_e = max(expected_cov)
 

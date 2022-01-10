@@ -2,6 +2,7 @@ from _pytest.fixtures import fixture
 import pytest
 from SIRVsuite.Pipeline.helper import read_sample_sheet
 from SIRVsuite.Pipeline.countReader import countReader
+from SIRVsuite.Pipeline.Coverage.SIRVset_coverage import SIRVsuiteCoverage as cov_module
 import os
 import shutil
 
@@ -37,6 +38,7 @@ def test_count_read_fail(count_tables_fail):
     assert pytest_wrapped_e.type == ValueError
 
 # Test the whole pipeline
+
 @pytest.mark.parametrize("module_params", 
 [
     "--ERCC-correlation",
@@ -44,6 +46,7 @@ def test_count_read_fail(count_tables_fail):
     "--ERCC-correlation --SIRV-concentration",
     "--coverage"
 ])
+
 
 def test_entrypoint(module_params):
     exit_status = os.system("PYTHONPATH=../ python -m SIRVsuite.SIRVsuite -i ./tests/test_data/sample_sheet_pass/sample_sheet_test_SIRVset3.tsv -o ./tests/test_data/temp/ %s"%(module_params))

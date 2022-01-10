@@ -85,7 +85,7 @@ def main():
             del module_correlation
 
     if "coverage" in modules_to_execute:
-        module_coverage = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name="")
+        module_coverage = SIRVsuiteCoverage(sample_sheet=input_dict["coverage"], output_dir=out, experiment_name=args.experiment_name)
         module_coverage.expected_coverage()
         module_coverage.bam_to_coverage()
         module_coverage.calc_statistics()
