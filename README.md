@@ -251,6 +251,6 @@ The FPKM<sub>i,rel</sub> values can be found in concentration/relative_concentra
 
 <p align="center"><img src="./docs/output_preview/SIRV_boxplot_preview.png" width=800></p>
 
-The output file concentration/SIRV_heatmap.png displays a heatmap of the log<sub>2</sub> relative concentrations for each SIRV transcript grouped by SIRV gene. The values are visualized on a red/green/blue color map, with green indicating log<sub>2</sub> values close to 0, red and blue indicating values close to 1 and -1, respectively. Values above 1 and below -1 are visualized by red and green. An example of a SIRV concentration heatmap for SIRV1 and SIRV2 is given below.
+The output file concentration/SIRV_heatmap.png displays a heatmap of the log<sub>2</sub> relative concentrations for each SIRV transcript grouped by SIRV gene. The values are visualized on a red/green/blue color map, with green indicating log<sub>2</sub> values close to 0, red and blue indicating values close to 1 and -1, respectively. Values above 1 and below -1 are visualized by red and blue, respectively. An example of a SIRV concentration heatmap for SIRV1 and SIRV2 is given below.
 
 <p align="center"><img src="./docs/output_preview/SIRV_heatmap_preview_SIRV12.png" width=350></p>
