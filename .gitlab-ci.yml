@@ -1,10 +1,44 @@
-test_run:
-  image: fkrull/multi-python:latest
-  before_script:
-    - apt-get update
-    - pip3 install cython
-    - pip3 install pyBigWig tox-travis coveralls
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  image:
+    name: python:3.11.9-bullseye
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
   script:
-    tox
+    - apt update -y && apt install -y python3-pip libcairo2-dev zlib1g libcurl4-openssl-dev
+    - apt install -y git
+    - python3.11 -m pip install --upgrade pip
+    - python3.11 -m pip install .
+
+test_max_python:
+  stage: test
+  image:
+    name: python:3.11.9-bullseye
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  needs: ["build"]
+  script:
+    - apt update -y && apt install -y python3-pip libcairo2-dev zlib1g libcurl4-openssl-dev git
+    - python3.11 -m pip install --upgrade pip
+    - python3.11 -m pip install .
+    - python3.11 -m coverage run -m pytest tests
+    - python3.11 -m coverage report
+  coverage:
+    '/^TOTAL\s+\d+\s+\d+\s+(\d+\%)$/'
+
+test_min_python:
+  stage: test
+  image:
+    name: python:3.8-buster
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+  needs: ["build"]
+  script:
+    - apt update -y && apt install -y python3-pip libcairo2-dev zlib1g libcurl4-openssl-dev git
+    - python3.8 -m pip install --upgrade pip
+    - python3.8 -m pip install .
+    - python3.8 -m coverage run -m pytest tests
+    - python3.8 -m coverage report
   coverage:
     '/^TOTAL\s+\d+\s+\d+\s+(\d+\%)$/'
