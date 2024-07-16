@@ -5,6 +5,9 @@ from SIRVsuite.Pipeline.countReader import countReader
 from SIRVsuite.Pipeline.Coverage.SIRVset_coverage import SIRVsuiteCoverage as cov_module
 import os
 import shutil
+import sys
+
+PYTHON_EXE = sys.executable
 
 # Check intented PASS when providing wrong transcript count table
 @pytest.mark.parametrize("count_tables_pass", 
@@ -49,7 +52,7 @@ def test_count_read_fail(count_tables_fail):
 
 
 def test_entrypoint(module_params):
-    exit_status = os.system("PYTHONPATH=../ python -m SIRVsuite.SIRVsuite -i ./tests/test_data/sample_sheet_pass/sample_sheet_test_SIRVset3.tsv -o ./tests/test_data/temp/ %s"%(module_params))
+    exit_status = os.system(f"{PYTHON_EXE} -m SIRVsuite.SIRVsuite -i ./tests/test_data/sample_sheet_pass/sample_sheet_test_SIRVset3.tsv -o ./tests/test_data/temp/ %s"%(module_params))
     if os.path.exists("./tests/test_data/temp"):
         shutil.rmtree("./tests/test_data/temp")
     assert exit_status == 0
