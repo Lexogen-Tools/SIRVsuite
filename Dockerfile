@@ -1,4 +1,4 @@
-FROM python:3.6-buster
+FROM python:3.8-buster
 
 # install numpy prior to pyBigWig (otherwise it causes problems)
 RUN pip3 install numpy==1.19.2
