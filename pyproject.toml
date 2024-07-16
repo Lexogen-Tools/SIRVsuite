@@ -1,0 +1,46 @@
+title = "SIRVsuite"
+
+[owner]
+name = "Lexogen GmbH"
+
+[build-system]
+requires = ["setuptools >=61.0.0,<69.3.0", "setuptools_scm>=6"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SIRVsuite"
+description = "SIRVsuite - a command line tool to QC an RNA-Seq workflow using Lexogen's SIRV spike-in controls"
+readme = "README.md"
+license = {file = "LICENCE"}
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.8"
+authors = [ {name = "Tomas Drozd", email = "tomas.drozd@lexogen.com"}, 
+           {name = "Andreas Tuerk", email = "andreas.tuerk@lexogen.com"},
+         ]
+classifiers = [
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Science/Research',
+	'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'License :: Other/Proprietary License',
+    ]
+
+[tool.setuptools.packages.find]
+include = ["SIRVsuite", "SIRVsuite.*"]
+
+[project.urls]
+Source = "https://github.com/Lexogen-Tools/SIRVsuite/"
+Documentation = "https://github.com/Lexogen-Tools/SIRVsuite/blob/master/README.md"
+
+[tool.setuptools_scm]
+version_file = "SIRVsuite/_version.py"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.scripts]
+SIRVsuite = "SIRVsuite.__main__:main"
