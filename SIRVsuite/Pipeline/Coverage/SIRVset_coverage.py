@@ -1,7 +1,6 @@
 import pysam as ps
 import numpy as np
 import pyBigWig as bwig
-import gtfparse
 import pandas as pd
 from scipy.stats import norm
 import os
@@ -11,9 +10,9 @@ from ..helper import path_features
 from . import cairoDrawer as draw
 import logging
 
+from SIRVsuite.Pipeline.countReader import gtfparse_read_gtf
 
 log = logging.getLogger(__name__.split(".")[-1])
-
 
 class SIRVsuiteCoverage():
     """
@@ -236,7 +235,7 @@ class SIRVsuiteCoverage():
                 log_root = logging.getLogger("")
                 log_root.disabled = True
                 # read gtf
-                annotation_df = gtfparse.read_gtf(annotation_path)
+                annotation_df = gtfparse_read_gtf(annotation_path)
                 # enable root log
                 log_root.disabled = False
 

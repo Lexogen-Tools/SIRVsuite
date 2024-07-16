@@ -4,8 +4,16 @@ import re
 import logging
 import os
 import gtfparse
+from packaging.version import Version
+from functools import partial
 
 log = logging.getLogger(__name__.split(".")[-1])
+
+if Version(gtfparse.__version__) >= Version("2.0"):
+    gtfparse_read_gtf = partial(gtfparse.read_gtf, result_type='pandas')
+else:
+    gtfparse_read_gtf = gtfparse.read_gtf
+
 
 class countReader():
     # A class to read the count files for SIRVs and ERCC transcripts
@@ -78,7 +86,7 @@ class countReader():
             for path in files:
                 try:
                     if "ERCC" in spike_in_type and counting_type=='transcript':
-                        gtf_dict = gtfparse.read_gtf(self._annotation_path)
+                        gtf_dict = gtfparse_read_gtf(self._annotation_path)
                         gtf_dict = gtf_dict[gtf_dict['seqname'].str.startswith("ERCC")][["gene_id", "transcript_id"]]
 
                     with open(path, "r") as f:
