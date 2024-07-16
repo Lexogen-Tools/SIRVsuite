@@ -1,8 +1,3 @@
-# test requirements
-pytest
-pytest-cov
-coverage
-
 # run time requirements
 contourpy
 cycler>=0.10.0,
