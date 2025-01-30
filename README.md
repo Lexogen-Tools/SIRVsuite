@@ -116,6 +116,8 @@ sample_name_4;/home/user/alignment_data/sample_name_4.bam;/home/user/transcipt_c
 ### Alignment input
 
 A sorted BAM file is required as input for the SIRVsuite coverage module. The SIRVsuite has been tested on BAM files computed by <a href=https://github.com/alexdobin/STAR>STAR aligner</a>. 
+Before computing the alignment and the counts, you must merge the <a href=https://github.com/Lexogen-Tools/SIRVsuite/blob/master/SIRVsuite/Resources/SIRV_isoforms_multi-fasta-annotation_190418a.gtf>SIRV .gtf file</a>
+with the one for your annotation and the <a href=https://github.com/Lexogen-Tools/SIRVsuite/blob/master/SIRVsuite/Resources/SIRV_isoforms_multi-fasta_190418a.fasta>SIRV .fasta file<a> with the fasta file for your organism.
 
 ### Count input
 
