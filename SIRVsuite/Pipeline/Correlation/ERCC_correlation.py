@@ -62,7 +62,15 @@ class ERCCcorrelation():
 
             cnt_data = data[sample_name]["ERCC"]
 
-            y = [cnt_data[ctrl][0] for ctrl in sorted(ERCC_conc.keys())]
+            y = list()
+            for ctrl in sorted(ERCC_conc.keys()):
+                if ctrl in cnt_data:
+                    count_for_ercc = cnt_data[ctrl]
+                    y.append(count_for_ercc[0])
+                else:
+                    y.append(0)
+            if (sum(y) == 0):
+                raise Exception(f"Error: sample '{sample_name}' does not contain any ERCCs! Please check if you counts file has a corresponding entry for ERCCs greater than 0!")
             cnt = float(sum(y))
             y = [y_i/cnt if cnt>0 else 1e-100 for y_i in y]
 

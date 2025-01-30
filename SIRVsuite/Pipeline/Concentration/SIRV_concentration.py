@@ -13,6 +13,13 @@ log = logging.getLogger(__name__.split(".")[-1])
 
 ## This module relevant to full-trancriptome libraries, i.e. CORALL
 
+def log2_or_nan(matrix):
+    output = np.array(matrix)
+    for i,row in enumerate(matrix):
+        for j, value in enumerate(row):
+            output[i,j] = np.log2(value) if value != 0 else np.NAN
+    return output
+
 class SIRVsuiteConcentration():
 
     def __init__(self, sample_sheet = None, output_dir = "./", experiment_name = ""):
@@ -48,6 +55,9 @@ class SIRVsuiteConcentration():
             c = countReader()
             cnts[group] = c.read_counting_file(files = grouped_samples[group]["path"], spike_in_type=["SIRV","ERCC"], counting_method=method)
         
+            for spike_in_type in ["SIRV",]:
+                if(len(cnts[group]) == 0 or len(cnts[group][spike_in_type]) == 0):
+                    raise Exception(f"Error: input data for sampe group '{group}' is empty! Please make sure that input count files contain some values greater than 0 for SIRV transcripts!")
         self.cnts = cnts
         self.data = self.get_relative_abundance(cnts)
         self.export_data(self.data)
@@ -220,7 +230,6 @@ class SIRVsuiteConcentration():
         ax1.plot([1,1],[0,len(relative_abundance) + 1], color = 'darkblue', alpha = .6)
         ax1.set_ylim([0,len(relative_abundance)+1])
 
-
         limit_x = heatmap_matrix.max()
 
         ax1.set_xlim([np.min(relative_conc)-np.min(relative_conc)*0.8,limit_x])
@@ -285,7 +294,7 @@ class SIRVsuiteConcentration():
             heatmap_matrix = heatmap_matrix[filtered,:]
             t_filtered = transcript_names[filtered]
 
-            LFC = np.log2(heatmap_matrix)
+            LFC = log2_or_nan(heatmap_matrix)
 
             ax = fig.add_subplot(spec[idx])
 

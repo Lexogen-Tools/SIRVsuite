@@ -37,7 +37,7 @@ def main():
                         for SIRV E0 relative concentration""")
     parser.add_argument('--coverage', action='store_true',
                         help="create coverages for all spike-in genes")
-    parser.add_argument('--experiment-name', action='store', default="", required=False, nargs=1,
+    parser.add_argument('--experiment-name', action='store', default="", required=False,
                         help="specify name of an experiment")
     parser.add_argument('--verbose', action='store_true', required=False)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
