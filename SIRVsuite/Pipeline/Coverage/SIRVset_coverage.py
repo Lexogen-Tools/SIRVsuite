@@ -84,25 +84,29 @@ class SIRVsuiteCoverage():
         if (hasattr(self, "bam_coverage")):
             cov_dict = self.bam_coverage
 
-            for strand in self._strands:
-                for sample in cov_dict.keys():
+            for sample in cov_dict.keys():
+                sorted_genes = sorted(cov_dict[sample].keys())
+                if(len(sorted_genes) == 0):
+                    log.warning(f"Could not find any coverage for ERCCs or SIRVs for sample '{sample}'! Please check your alignment file! Coverage file will not be created!")
+                    continue
 
+                for strand in self._strands:
                     if (output_type.lower() == "bigwig"):
-                        with bwig.open(os.path.join(output_path, sample+"_"+self.__strand2text__(strand)+".bw"), "w") as bw:
-                            header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted(cov_dict[sample].keys()) if strand in cov_dict[sample][gene].keys()]
-                            if (len(header) == 0):
-                                continue
+                        header = [(gene, len(cov_dict[sample][gene][strand])) for gene in sorted_genes if strand in cov_dict[sample][gene].keys()]
+                        if (len(header) == 0):
+                            log.warning(f"Could not find any coverage for ERCCs or SIRVs for sample '{sample}' on strand '{strand}'! BigWig file will not be created for this strand!")
+                            continue
 
+                        with bwig.open(os.path.join(output_path, sample+"_"+self.__strand2text__(strand)+".bw"), "w") as bw:
                             bw.addHeader(header)
-                            for gene in sorted(cov_dict[sample].keys()):
+                            for gene in sorted_genes:
                                 (starts, ends, values) = self.__values2intervals__(cov_dict[sample][gene][strand])
                                 chroms = np.array([gene] * len(values))
 
                                 # if trimmed, need to use + self.gene_coords[gene][0] to start & end
                                 bw.addEntries(chroms.tolist(), starts.tolist(), ends=ends.tolist(), values=values.tolist())
-
                     elif (output_type.lower() == "cov"):
-                        for gene in sorted(cov_dict[sample].keys()):
+                        for gene in sorted_genes:
                             with open(os.path.join(output_path, sample+"_"+gene+"_"+self.__strand2text__(strand)), "w") as cov:
                                 cov.write("position"+"\t"+"coverage"+"\n")
                                 coverage = cov_dict[sample][gene][strand]
