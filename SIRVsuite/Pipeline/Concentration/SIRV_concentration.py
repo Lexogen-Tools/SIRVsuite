@@ -232,7 +232,16 @@ class SIRVsuiteConcentration():
 
         limit_x = heatmap_matrix.max()
 
-        ax1.set_xlim([np.min(relative_conc)-np.min(relative_conc)*0.8,limit_x])
+        # The relative concentration can be zero, which is not allowed in log scale plot.
+        # Thus, we determine a non-zero minimum, with margin to make all non-zero counts visible.
+        relative_conc_margin = relative_conc * 0.8
+        relative_conc_wo_zero = np.delete(relative_conc_margin, np.where(relative_conc_margin == 0.0))
+        if len(relative_conc_wo_zero) > 0:
+            min_relative_conc = np.min(relative_conc_wo_zero)
+        else:
+            min_relative_conc = 10**(-6)
+        x_limits = [min_relative_conc, limit_x]
+        ax1.set_xlim(x_limits)
         
         ax1.set_yticklabels(relative_abundance.keys())
         plt.xlabel("relative SIRV transcript concentration")
