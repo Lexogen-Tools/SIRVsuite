@@ -17,7 +17,7 @@ def log2_or_nan(matrix):
     output = np.array(matrix)
     for i,row in enumerate(matrix):
         for j, value in enumerate(row):
-            output[i,j] = np.log2(value) if value != 0 else np.NAN
+            output[i,j] = np.log2(value) if value != 0 else np.nan
     return output
 
 class SIRVsuiteConcentration():

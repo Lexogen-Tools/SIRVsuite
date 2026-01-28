@@ -9,7 +9,14 @@ from functools import partial
 
 log = logging.getLogger(__name__.split(".")[-1])
 
-if Version(gtfparse.__version__) >= Version("2.0"):
+from packaging.version import Version
+
+try:
+    gtf_version = Version(gtfparse.__version__)
+except AttributeError:
+    gtf_version = Version("2.0")  # assume 2.0 if __version__ not present
+
+if gtf_version >= Version("2.0"):
     gtfparse_read_gtf = partial(gtfparse.read_gtf, result_type='pandas')
 else:
     gtfparse_read_gtf = gtfparse.read_gtf
@@ -31,7 +38,8 @@ class countReader():
 
 
     def read_counting_file(self, files=[], counting_method="mix2", spike_in_type=["ERCC","SIRV"], counting_type="transcript", q_unit="fpkm_chn"):
-        
+        log.info(f"read_counting_file called: counting_method={counting_method}, counting_type={counting_type}, q_unit={q_unit}, files={files}")
+
         counting_dict = {s:dict() for s in spike_in_type}
         # For now we support mix2 table format only. Additional format support can be added in later versions.
         if counting_method.lower() == "mix2":

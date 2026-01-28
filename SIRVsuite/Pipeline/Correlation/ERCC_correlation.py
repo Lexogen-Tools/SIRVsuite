@@ -71,12 +71,28 @@ class ERCCcorrelation():
                     y.append(0)
             if (sum(y) == 0):
                 raise Exception(f"Error: sample '{sample_name}' does not contain any ERCCs! Please check if you counts file has a corresponding entry for ERCCs greater than 0!")
+            orig_y = y[:]
             cnt = float(sum(y))
             y = [y_i/cnt if cnt>0 else 1e-100 for y_i in y]
 
             x = [float(ERCC_conc[ctrl][ercc_spike_in]) for ctrl in sorted(ERCC_conc.keys())]
+            orig_x = x[:]
             cnt = float(sum(x))
             x = [x_i/cnt for x_i in x]
+
+            nested_dir = os.path.join(output_dir, sample_name)
+
+            if ( not os.path.exists(nested_dir)):
+                os.makedirs(nested_dir)
+
+            # write datapoints to a TSV so users can inspect / reuse them
+            points_path = os.path.join(nested_dir, "ERCC_correlation_points.tsv")
+            with open(points_path, "w") as points_file:
+                points_file.write("ERCC_ID\ttheoretical_concentration\tnormalized_theoretical\tmeasured_count\tnormalized_measured\n")
+                controls = sorted(ERCC_conc.keys())
+                for i, ctrl in enumerate(controls):
+                    points_file.write("%s\t%g\t%g\t%g\t%g\n" % (ctrl, orig_x[i], x[i], orig_y[i], y[i]))
+
             fig = plt.figure()
             fig.gca().loglog(x,y, "rx")
             x = np.array(x)
@@ -91,11 +107,6 @@ class ERCCcorrelation():
                                     [math.log10(y[i]) for i in range(len(y)) if x[i]!=0 and y[i]!=0])[0]
             corr_per_sample[sample_name] = corr
             fig.gca().title.set_text("%s %s (R=%.3f)"%(experiment_name,sample_name,corr))
-
-            nested_dir = os.path.join(output_dir, sample_name)
-
-            if ( not os.path.exists(nested_dir)):
-                os.makedirs(nested_dir)
 
             plot_path = os.path.join(nested_dir, "ERCC_correlation.png")
             fig.savefig(plot_path, dpi = 200)
