@@ -9,7 +9,14 @@ from functools import partial
 
 log = logging.getLogger(__name__.split(".")[-1])
 
-if Version(gtfparse.__version__) >= Version("2.0"):
+from packaging.version import Version
+
+try:
+    gtf_version = Version(gtfparse.__version__)
+except AttributeError:
+    gtf_version = Version("2.0")  # assume 2.0 if __version__ not present
+
+if gtf_version >= Version("2.0"):
     gtfparse_read_gtf = partial(gtfparse.read_gtf, result_type='pandas')
 else:
     gtfparse_read_gtf = gtfparse.read_gtf

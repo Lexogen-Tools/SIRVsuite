@@ -17,7 +17,7 @@ def log2_or_nan(matrix):
     output = np.array(matrix)
     for i,row in enumerate(matrix):
         for j, value in enumerate(row):
-            output[i,j] = np.log2(value) if value != 0 else np.NAN
+            output[i,j] = np.log2(value) if value != 0 else np.nan
     return output
 
 class SIRVsuiteConcentration():
@@ -181,10 +181,15 @@ class SIRVsuiteConcentration():
             os.makedirs(path)
 
         with open(os.path.join(path,"relative_concentration.tsv"), "w") as out_file:
-            out_file.write("transcript_id\t"+"\t".join(groups)+"\n")
-            transcript_ids = sorted(norm_abund_dict[groups[0]].keys())
+            sorted_groups = sorted(groups)
+            out_file.write("transcript_id\t" + "\t".join(sorted_groups) + "\n")
+            transcript_ids = sorted(norm_abund_dict[sorted_groups[0]].keys())
             for transcript in transcript_ids:
-                out_file.write(transcript+"\t"+"\t".join([str(norm_abund_dict[group][transcript]) for group in groups])+"\n")
+                out_file.write(
+                    transcript + "\t" +
+                    "\t".join(str(norm_abund_dict[group][transcript]) for group in sorted_groups) +
+                    "\n"
+                )
 
     def create_sirvsuite_boxplot(self, relative_abundance):
         """
